@@ -1,34 +1,59 @@
 package com.pijul.hack;
 
+import com.pijul.hack.commands.McpCommand;
+import com.pijul.aider.llm.LLMChain;
+import com.pijul.hack.commands.QueryCommand;
+import com.pijul.hack.commands.ReasonCommand;
 import com.pijul.hack.commands.WorkspaceCommand;
-//import com.example.mcr.core.MCR;
+import dev.langchain4j.mcp.McpToolProvider;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Container {
     private final Workspace workspace;
     private final CommandManager commandManager;
-    //private final MCR mcr;
+    private final McpConfig mcpConfig;
+    private McpToolProvider mcpToolProvider;
     private MessageHandler messageHandler;
+    private LLMChain llmChain;
 
     public Container() {
         this.workspace = new Workspace();
         this.commandManager = new CommandManager(this);
-        //this.mcr = new MCR(null); // Passing null for config, assuming it's handled internally
+        this.mcpConfig = new McpConfig();
         // The message handler will be set by the TUI
     }
 
     public void init() {
         commandManager.registerCommand("/workspace", new WorkspaceCommand(workspace, messageHandler));
-        //commandManager.registerCommand("/query", new com.pijul.hack.commands.QueryCommand(workspace, messageHandler));
-        //commandManager.registerCommand("/reason", new com.pijul.hack.commands.ReasonCommand(workspace, messageHandler));
+        commandManager.registerCommand("/mcp", new McpCommand(mcpConfig, messageHandler));
+        commandManager.registerCommand("/query", new QueryCommand(this));
+        commandManager.registerCommand("/reason", new ReasonCommand(this));
+        List<Object> toolProviders = new ArrayList<>();
+        toolProviders.add(getMcpToolProvider());
+        this.llmChain = new LLMChain("ollama", "llama2", "", new com.pijul.aider.Container(new String[0]), toolProviders);
+    }
+
+    public LLMChain getLlmChain() {
+        return llmChain;
     }
 
     public Workspace getWorkspace() {
         return workspace;
     }
 
-    // public MCR getMcr() {
-    //     return mcr;
-    // }
+    public McpConfig getMcpConfig() {
+        return mcpConfig;
+    }
+
+    public McpToolProvider getMcpToolProvider() {
+        if (this.mcpToolProvider == null) {
+            this.mcpToolProvider = McpProviderFactory.create(mcpConfig);
+        }
+        return this.mcpToolProvider;
+    }
 
     public CommandManager getCommandManager() {
         return commandManager;

@@ -61,4 +61,8 @@ public class LLMClient {
         }
         return llmResponse;
     }
+
+    public ChatModel getChatModel() {
+        return model;
+    }
 }

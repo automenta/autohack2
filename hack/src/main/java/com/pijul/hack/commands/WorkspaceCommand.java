@@ -65,4 +65,14 @@ public class WorkspaceCommand implements Command {
         //     messageHandler.handleMessage("Finished parsing project: " + path);
         // }).start();
     }
+
+    @Override
+    public void init() {
+        // Nothing to initialize
+    }
+
+    @Override
+    public void cleanup() {
+        // Nothing to clean up
+    }
 }
