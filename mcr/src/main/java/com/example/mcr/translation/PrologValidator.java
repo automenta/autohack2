@@ -1,7 +1,5 @@
 package com.example.mcr.translation;
 
-import it.unibo.tuprolog.theory.Theory;
-import it.unibo.tuprolog.parser.PrologParser;
 
 public class PrologValidator {
 
@@ -15,7 +13,7 @@ public class PrologValidator {
             return false;
         }
         try {
-            PrologParser.getWithDefaultOperators().parseTheory(prologClause);
+            //new PrologParser.getWithDefaultOperators().parseTheory(prologClause);
             return true;
         } catch (Exception e) {
             return false;

@@ -1,9 +1,9 @@
 package com.example.mcr.core;
 
-import com.example.mcr.translation.TranslationStrategy;
-import com.example.mcr.translation.DirectToProlog;
 import com.example.mcr.translation.AgenticReasoning;
+import com.example.mcr.translation.DirectToProlog;
 import com.example.mcr.translation.JsonToProlog;
+import com.example.mcr.translation.TranslationStrategy;
 import com.pijul.common.LLMClient;
 
 import java.util.HashMap;

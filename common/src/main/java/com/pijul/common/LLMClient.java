@@ -3,9 +3,9 @@ package com.pijul.common;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
-import dev.langchain4j.model.vertexai.VertexAiChatModel;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,9 +29,7 @@ public class LLMClient {
                         .build();
                 break;
             case "google":
-                this.model = VertexAiChatModel.builder()
-                        .project("mcr-llm")
-                        .location("us-central1")
+                this.model = GoogleAiGeminiChatModel.builder()
                         .modelName(modelName)
                         .build();
                 break;

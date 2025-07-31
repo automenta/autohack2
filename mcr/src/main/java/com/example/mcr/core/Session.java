@@ -1,5 +1,6 @@
 package com.example.mcr.core;
 
+import alice.tuprolog.*;
 import com.example.mcr.ontology.OntologyManager;
 import com.example.mcr.translation.PrologValidator;
 import com.example.mcr.translation.TranslationStrategy;
@@ -7,17 +8,12 @@ import com.google.gson.Gson;
 import com.pijul.common.LLMClient;
 import com.pijul.common.LLMResponse;
 import com.pijul.common.LLMUsage;
-import it.unibo.tuprolog.core.Struct;
-import it.unibo.tuprolog.core.Term;
-import it.unibo.tuprolog.core.Var;
-import it.unibo.tuprolog.parser.PrologParser;
-import it.unibo.tuprolog.solve.SolveInfo;
-import it.unibo.tuprolog.solve.Solver;
-import it.unibo.tuprolog.solve.classic.ClassicSolverFactory;
-import it.unibo.tuprolog.theory.InvalidTheoryException;
-import it.unibo.tuprolog.theory.Theory;
 
-import java.util.*;
+import java.lang.Long;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -35,7 +31,7 @@ public class Session {
     private final PrologValidator prologValidator = new PrologValidator();
     private String sessionId;
     private OntologyManager ontology;
-    private Solver prologSession = ClassicSolverFactory.get().createSolver();
+    private MutableSolver prologSession = ClassicSolverFactory.INSTANCE.newBuilder().buildMutable();
 
     public Session(MCR mcr, SessionOptions options) {
         this.mcr = mcr;
@@ -65,7 +61,9 @@ public class Session {
 
     private void consultProgram() {
         try {
-            prologSession.setStaticKb(Theory.of(program.stream().map(PrologParser.getWithDefaultOperators()::parseClause).collect(Collectors.toList())));
+            var ops = PrologParser.getWithDefaultOperators();
+            var t = new Theory(program.stream().map(ops::parseClause).collect(Collectors.toList()));
+            prologSession.appendStaticKb(t);
         } catch (InvalidTheoryException e) {
             logger.severe("Error consulting program: " + e.getMessage());
         }
@@ -128,7 +126,7 @@ public class Session {
         this.sessionId = (String) data.get("sessionId");
         this.ontology = new OntologyManager(new OntologyManager.Ontology((Map<String, Object>) data.get("ontology")));
         this.program.clear();
-        this.prologSession = ClassicSolverFactory.get().createSolver();
+        this.prologSession = ClassicSolverFactory.INSTANCE.newBuilder().buildMutable();
 
         List<String> savedProgram = (List<String>) data.get("program");
         for (String clause : savedProgram) {

@@ -43,61 +43,11 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- TuProlog dependencies -->
         <dependency>
-            <groupId>it.unibo.tuprolog</groupId>
-            <artifactId>core-jvm</artifactId>
-            <version>0.30.5</version>
-        </dependency>
-        <dependency>
-            <groupId>it.unibo.tuprolog</groupId>
-            <artifactId>solve-classic-jvm</artifactId>
-            <version>0.30.5</version>
-        </dependency>
-        <dependency>
-            <groupId>it.unibo.tuprolog</groupId>
-            <artifactId>theory-jvm</artifactId>
-            <version>0.30.5</version>
-        </dependency>
-        <dependency>
-            <groupId>it.unibo.tuprolog</groupId>
-            <artifactId>parser-jvm</artifactId>
-            <version>0.30.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <groupId>it.unibo.alice.tuprolog</groupId>
+            <artifactId>tuprolog</artifactId>
+            <version>3.3.0</version>
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-maven-plugin</artifactId>
-                <version>1.8.0</version>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>
