@@ -1,9 +1,8 @@
 package com.pijul.hack.commands;
 
-import com.example.mcr.core.Session;
 import com.pijul.hack.Container;
-
-import java.util.concurrent.ExecutionException;
+import com.pijul.mcr.ReasoningResult;
+import com.pijul.mcr.Session;
 
 public class ReasonCommand implements Command {
 
@@ -20,19 +19,24 @@ public class ReasonCommand implements Command {
             return;
         }
 
-        String task = String.join(" ", args);
-        container.getMessageHandler().handleMessage("Reasoning about: " + task);
-
-        Session.SessionOptions options = new Session.SessionOptions();
-        options.setStrategy("direct"); // Or any other strategy
-
-        Session session = container.getMcr().createSession(options);
-        try {
-            String result = session.reason(task, null).toCompletableFuture().get();
-            container.getMessageHandler().handleMessage("Result: " + result);
-        } catch (InterruptedException | ExecutionException e) {
-            container.getMessageHandler().handleMessage("Error during reasoning: " + e.getMessage());
+        Session mcrSession = container.getMcrSession();
+        if (mcrSession == null) {
+            container.getMessageHandler().handleMessage("MCR Session not initialized.");
+            return;
         }
+
+        String task = String.join(" ", args);
+        container.getMessageHandler().handleMessage("Reasoning about task: " + task);
+
+        ReasoningResult result = mcrSession.reason(task);
+
+        container.getMessageHandler().handleMessage("\n--- Reasoning History ---");
+        for (String step : result.getHistory()) {
+            container.getMessageHandler().handleMessage(step);
+        }
+        container.getMessageHandler().handleMessage("--- End of History ---\n");
+
+        container.getMessageHandler().handleMessage("Final Answer: " + result.getAnswer());
     }
 
     @Override
