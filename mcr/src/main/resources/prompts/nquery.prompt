@@ -1,0 +1,16 @@
+Translate the following natural language question into a Prolog query.
+You can use the following types and relationships defined in the ontology:
+Types: {{ontology_types}}
+Relationships: {{ontology_relationships}}
+
+Example 1:
+Question: Is tweety a bird?
+Prolog: bird(tweety).
+
+Example 2:
+Question: What does tweety like?
+Prolog: likes(tweety, X).
+
+Now, translate this question:
+Question: {{natural_language_query}}
+Prolog:

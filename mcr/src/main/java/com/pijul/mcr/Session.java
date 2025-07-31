@@ -9,9 +9,13 @@ import com.pijul.mcr.prolog.Variable;
 import com.pijul.mcr.tools.Tool;
 import com.pijul.mcr.tools.ToolProvider;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Session {
 
@@ -28,6 +32,21 @@ public class Session {
         this.toolProvider = toolProvider;
         resetSolver();
         assertToolFacts();
+    }
+
+    private String loadPrompt(String name) {
+        String resourcePath = "/prompts/" + name;
+        try (InputStream inputStream = Session.class.getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new IllegalArgumentException("Resource not found: " + resourcePath);
+            }
+            try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
+                return scanner.useDelimiter("\\A").next();
+            }
+        } catch (Exception e) {
+            // Consider a more robust error handling strategy
+            throw new RuntimeException("Failed to load prompt: " + name, e);
+        }
     }
 
     private void resetSolver() {
@@ -125,21 +144,11 @@ public class Session {
     }
 
     private String buildNQueryPrompt(String naturalLanguageQuery) {
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Translate the following natural language question into a Prolog query.\n");
-        prompt.append("You can use the following types and relationships defined in the ontology:\n");
-        prompt.append("Types: ").append(ontology.getTypes()).append("\n");
-        prompt.append("Relationships: ").append(ontology.getRelationships()).append("\n\n");
-        prompt.append("Example 1:\n");
-        prompt.append("Question: Is tweety a bird?\n");
-        prompt.append("Prolog: bird(tweety).\n\n");
-        prompt.append("Example 2:\n");
-        prompt.append("Question: What does tweety like?\n");
-        prompt.append("Prolog: likes(tweety, X).\n\n");
-        prompt.append("Now, translate this question:\n");
-        prompt.append("Question: ").append(naturalLanguageQuery).append("\n");
-        prompt.append("Prolog: ");
-        return prompt.toString();
+        String promptTemplate = loadPrompt("nquery.prompt");
+        return promptTemplate
+                .replace("{{ontology_types}}", ontology.getTypes().toString())
+                .replace("{{ontology_relationships}}", ontology.getRelationships().toString())
+                .replace("{{natural_language_query}}", naturalLanguageQuery);
     }
 
     public ReasoningResult reason(String taskDescription, int maxSteps) {
@@ -178,16 +187,11 @@ public class Session {
     }
 
     private String buildReasoningPrompt(List<String> history) {
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("You are a reasoning agent. Your goal is to solve a task by issuing a series of Prolog goals.\n");
-        prompt.append("You can use the `use_tool/4` predicate to call tools.\n");
-        prompt.append("To conclude the task, issue a `conclude/1` goal with your final answer.\n\n");
-
-        prompt.append("Here is the history of the reasoning process so far:\n");
-        for (String item : history) {
-            prompt.append(item).append("\n");
-        }
-        prompt.append("\nBased on the history, what is the next Prolog goal you should issue? Provide only the Prolog goal.\n");
-        return prompt.toString();
+        String promptTemplate = loadPrompt("reason.prompt");
+        String historyString = history.stream().collect(Collectors.joining("\n"));
+        return promptTemplate
+                .replace("{{ontology_types}}", ontology.getTypes().toString())
+                .replace("{{ontology_relationships}}", ontology.getRelationships().toString())
+                .replace("{{history}}", historyString);
     }
 }

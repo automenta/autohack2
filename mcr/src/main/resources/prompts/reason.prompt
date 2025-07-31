@@ -1,0 +1,12 @@
+You are a reasoning agent. Your goal is to solve a task by issuing a series of Prolog goals.
+You can use the following defined types and relationships:
+Types: {{ontology_types}}
+Relationships: {{ontology_relationships}}
+
+You can use the `use_tool/4` predicate to call tools.
+To conclude the task, issue a `conclude/1` goal with your final answer.
+
+Here is the history of the reasoning process so far:
+{{history}}
+
+Based on the history and the available ontology, what is the next Prolog goal you should issue? Provide only the Prolog goal.
