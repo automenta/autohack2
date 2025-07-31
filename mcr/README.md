@@ -13,6 +13,16 @@ MCR is built on a foundation designed for limitless growth.
 3.  **Dynamic Knowledge Graph:** The knowledge base is not a static set of facts but a living, dynamic graph that is continuously updated and refined through interaction.
 4.  **Ontology-Aware:** Define a schema for your knowledge using ontologies. The system can validate new facts against the ontology to maintain semantic consistency.
 
+## 🔭 Vision: The Neurosymbolic Brain
+
+The `mcr` (Model Context Reasoner) module is the **brain** of the operation. Its ultimate purpose is to provide the intelligence, reasoning, and planning capabilities that will make the agent truly autonomous.
+
+*   **Hybrid Intelligence:** Combine the strengths of Large Language Models (LLMs) and symbolic reasoning:
+    *   **LLMs for Creativity and Fluency:** Use LLMs for their powerful natural language understanding, code generation, and ability to handle ambiguity.
+    *   **Symbolic Reasoning for Logic and Correctness:** Use symbolic reasoning for formal verification, logical inference, and ensuring that the generated code is not just plausible, but provably correct and free of vulnerabilities.
+*   **Deep Code Understanding:** Build a rich, semantic "world model" of the codebase. This model would go far beyond a simple syntax tree, understanding the architecture, the intent behind the code, and the complex relationships between different components.
+*   **Strategic Planning:** Use the world model to perform long-term strategic planning, breaking down complex software development goals into a series of well-defined steps for the `autohack` agent to execute.
+
 ## ✨ Features
 
 *   **Library-First API**: A clean, straightforward Java API for integration into any Java application.

@@ -51,6 +51,17 @@ via modular abstraction for easy backend swaps.
 
 ----
 
+## Vision: The Hands-On Coder
+
+The `autohack` module is currently a terminal-based AI pair programmer. Its ultimate purpose is to become the **hands** of the autonomous agent, interacting with the codebase and the development environment.
+
+*   **From Assistant to Agent:** Evolve from a tool that responds to user commands to an agent that can work autonomously on a set of goals.
+*   **Full Development Lifecycle Integration:** The agent would not just write code, but also handle the entire development lifecycle:
+    *   **Task Management:** Decompose high-level goals into specific, actionable tasks.
+    *   **Version Control Mastery:** Seamlessly work with version control systems like Git and Pijul, including branching, merging, and writing descriptive commit messages.
+    *   **CI/CD Integration:** Create and manage pull requests, respond to code review feedback, and work with CI/CD pipelines to ensure code quality.
+*   **Self-Healing and Self-Improving:** The agent could proactively identify and fix bugs, refactor code for better performance and readability, and even update its own source code to improve its capabilities over time.
+
 ## Building and Running
 
 ### Building
