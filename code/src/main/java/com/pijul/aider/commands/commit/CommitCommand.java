@@ -1,12 +1,12 @@
 package com.pijul.aider.commands.commit;
 
-import com.pijul.aider.commands.Command;
-import com.pijul.aider.Container;
 import com.pijul.aider.Backend;
+import com.pijul.aider.Container;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 public class CommitCommand implements Command {
-    private Container container;
+    private final Container container;
 
     public CommitCommand(Container container) {
         this.container = container;
@@ -28,11 +28,11 @@ public class CommitCommand implements Command {
         }
 
         backend.record(message)
-            .thenAccept(v -> messageHandler.addMessage("system", "Changes committed."))
-            .exceptionally(e -> {
-                messageHandler.addMessage("system", "Error: " + e.getMessage());
-                return null;
-            });
+                .thenAccept(v -> messageHandler.addMessage("system", "Changes committed."))
+                .exceptionally(e -> {
+                    messageHandler.addMessage("system", "Error: " + e.getMessage());
+                    return null;
+                });
     }
 
     @Override

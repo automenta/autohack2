@@ -1,22 +1,21 @@
 package com.pijul.aider.tui;
 
+import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
-import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
-import com.googlecode.lanterna.graphics.TextGraphics;
 import com.pijul.aider.CommandManager;
-import java.io.IOException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Terminal {
-    private TerminalScreen screen;
-    private CommandManager commandManager;
-    private boolean running = true;
-    private StringBuilder inputBuffer = new StringBuilder();
     private final List<String> messages = Collections.synchronizedList(new ArrayList<>());
+    private final TerminalScreen screen;
+    private final CommandManager commandManager;
+    private final StringBuilder inputBuffer = new StringBuilder();
+    private boolean running = true;
 
     public Terminal(Screen screen, CommandManager commandManager) throws IOException {
         this.screen = (TerminalScreen) screen;
@@ -31,7 +30,7 @@ public class Terminal {
     public void run() {
         // Start command input loop
         commandManager.startListening();
-        
+
         while (running) {
             // Handle terminal input and rendering
             screen.clear();
@@ -46,7 +45,7 @@ public class Terminal {
                 }
             }
 
-            tg.putString(0, row, "> " + inputBuffer.toString()); // Display current input
+            tg.putString(0, row, "> " + inputBuffer); // Display current input
             try {
                 screen.refresh();
             } catch (IOException e) {
@@ -71,7 +70,7 @@ public class Terminal {
                         inputBuffer.setLength(0); // Clear buffer after processing
                         break;
                     case Backspace:
-                        if (inputBuffer.length() > 0) {
+                        if (!inputBuffer.isEmpty()) {
                             inputBuffer.setLength(inputBuffer.length() - 1);
                         }
                         break;
@@ -91,7 +90,7 @@ public class Terminal {
                 e.printStackTrace();
             }
         }
-        
+
         // Cleanup
         try {
             screen.stopScreen();

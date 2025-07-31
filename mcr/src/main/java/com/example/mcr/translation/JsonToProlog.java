@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pijul.common.LLMClient;
 import com.pijul.common.LLMResponse;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -92,13 +93,13 @@ public class JsonToProlog implements TranslationStrategy {
     private String convertJsonToProlog(String type, JsonNode head, JsonNode body) {
         String predicate = head.get("predicate").asText();
         List<String> args = parseArgs(head.get("args"));
-        
+
         StringBuilder prolog = new StringBuilder();
         prolog.append(predicate);
         prolog.append("(");
         prolog.append(String.join(", ", args));
         prolog.append(")");
-        
+
         if (type.equals("rule") && body != null && body.isArray()) {
             prolog.append(" :- ");
             List<String> bodyClauses = new ArrayList<>();
@@ -109,7 +110,7 @@ public class JsonToProlog implements TranslationStrategy {
             }
             prolog.append(String.join(", ", bodyClauses));
         }
-        
+
         prolog.append(".");
         return prolog.toString();
     }

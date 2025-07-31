@@ -1,8 +1,9 @@
 package com.pijul.aider.commands.status;
 
+import com.pijul.aider.Backend;
 import com.pijul.aider.Container;
 import com.pijul.aider.commands.Command;
-import com.pijul.aider.Backend;
+
 import java.util.concurrent.CompletableFuture;
 
 public class StatusCommand implements Command {
@@ -20,10 +21,8 @@ public class StatusCommand implements Command {
     public void execute(String[] args) {
         Backend backend = container.getBackend();
         CompletableFuture<String> statusFuture = backend.status();
-        
-        statusFuture.thenAccept(status -> {
-            container.getMessageHandler().addMessage("system", status);
-        }).exceptionally(error -> {
+
+        statusFuture.thenAccept(status -> container.getMessageHandler().addMessage("system", status)).exceptionally(error -> {
             container.getMessageHandler().addMessage("system", "Error: " + error.getMessage());
             return null;
         });

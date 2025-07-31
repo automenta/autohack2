@@ -2,6 +2,7 @@ package com.example.mcr.translation;
 
 import com.pijul.common.LLMClient;
 import com.pijul.common.LLMResponse;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -25,7 +26,7 @@ public class DirectToProlog implements TranslationStrategy {
             if (llmClient == null) {
                 throw new IllegalStateException("LLM client not configured for direct translation");
             }
-            
+
             String prompt = "Translate the following English text to Prolog: \"" + input + "\"";
             if (feedback != null) {
                 prompt += "\n\nPrevious error: " + feedback;
@@ -33,7 +34,7 @@ public class DirectToProlog implements TranslationStrategy {
             if (ontologyTerms != null && !ontologyTerms.isEmpty()) {
                 prompt += "\n\nUse these ontology terms: " + String.join(", ", ontologyTerms);
             }
-            
+
             LLMResponse response = llmClient.generate(prompt);
             TranslationResult result = new TranslationResult();
             result.setContent(response.getContent());

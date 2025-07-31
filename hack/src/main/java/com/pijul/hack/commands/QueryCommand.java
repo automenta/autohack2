@@ -1,8 +1,8 @@
 package com.pijul.hack.commands;
 
-import com.pijul.hack.Container;
 import com.pijul.aider.llm.LLMChain;
-import java.util.Arrays;
+import com.pijul.hack.Container;
+
 import java.util.concurrent.ExecutionException;
 
 public class QueryCommand implements Command {

@@ -1,12 +1,12 @@
 package com.pijul.aider.commands.drop;
 
-import com.pijul.aider.commands.Command;
-import com.pijul.aider.Container;
 import com.pijul.aider.CodebaseManager;
+import com.pijul.aider.Container;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 public class DropCommand implements Command {
-    private Container container;
+    private final Container container;
 
     public DropCommand(Container container) {
         this.container = container;
@@ -22,7 +22,7 @@ public class DropCommand implements Command {
         CodebaseManager codebaseManager = container.getCodebaseManager();
         MessageHandler messageHandler = container.getMessageHandler();
         String codebase = codebaseManager.getCodebase();
-        
+
         for (String file : args) {
             String fileRegex = "--- " + file + " ---\\n[\\s\\S]*?\\n\\n";
             if (codebase.contains("--- " + file + " ---")) {

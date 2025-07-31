@@ -1,9 +1,9 @@
 package com.pijul.aider.commands.record;
 
-import com.pijul.aider.Container;
-import com.pijul.aider.commands.Command;
-import com.pijul.aider.MessageHandler;
 import com.pijul.aider.Backend;
+import com.pijul.aider.Container;
+import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 public class RecordCommand implements Command {
     private final Container container;
@@ -29,11 +29,11 @@ public class RecordCommand implements Command {
         }
 
         backend.record(message)
-            .thenAccept(v -> messageHandler.addMessage("system", "Changes recorded."))
-            .exceptionally(e -> {
-                messageHandler.addMessage("system", "Error: " + e.getMessage());
-                return null;
-            });
+                .thenAccept(v -> messageHandler.addMessage("system", "Changes recorded."))
+                .exceptionally(e -> {
+                    messageHandler.addMessage("system", "Error: " + e.getMessage());
+                    return null;
+                });
     }
 
     @Override

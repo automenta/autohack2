@@ -1,9 +1,9 @@
 package com.pijul.aider.commands.apply;
 
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.Container;
 import com.pijul.aider.DiffUtils;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,7 +39,7 @@ public class ApplyCommand implements Command {
 
             String filePath = args[0];
             String fileContent = new String(Files.readAllBytes(Paths.get(filePath)));
-            
+
             try {
                 String result = DiffUtils.applyPatch(fileContent, currentDiff);
                 Files.write(Paths.get(filePath), result.getBytes());

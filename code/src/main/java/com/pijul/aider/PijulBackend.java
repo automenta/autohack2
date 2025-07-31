@@ -1,11 +1,10 @@
 package com.pijul.aider;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class PijulBackend implements Backend {
     @Override
@@ -100,7 +99,7 @@ public class PijulBackend implements Backend {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 ProcessBuilder pb = new ProcessBuilder(commands)
-                    .redirectErrorStream(true);
+                        .redirectErrorStream(true);
                 Process process = pb.start();
                 int exitCode = process.waitFor();
                 if (exitCode != 0) {
@@ -117,9 +116,9 @@ public class PijulBackend implements Backend {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 ProcessBuilder pb = new ProcessBuilder(commands)
-                    .redirectErrorStream(true);
+                        .redirectErrorStream(true);
                 Process process = pb.start();
-                
+
                 // Read output
                 InputStream inputStream = process.getInputStream();
                 ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -129,7 +128,7 @@ public class PijulBackend implements Backend {
                     result.write(buffer, 0, bytesRead);
                 }
                 String output = result.toString().trim();
-                
+
                 int exitCode = process.waitFor();
                 if (exitCode != 0) {
                     throw new RuntimeException("Command failed: " + String.join(" ", commands));

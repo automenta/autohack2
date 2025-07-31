@@ -1,10 +1,8 @@
 package com.pijul.hack.commands;
 
-import com.pijul.hack.Workspace;
 import com.pijul.hack.MessageHandler;
-//import com.pijul.hack.analysis.CodebaseParser;
-//import com.example.mcr.core.MCR;
-//import com.example.mcr.core.Session;
+import com.pijul.hack.Workspace;
+
 import java.nio.file.Paths;
 
 public class WorkspaceCommand implements Command {

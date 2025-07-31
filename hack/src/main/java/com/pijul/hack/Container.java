@@ -1,15 +1,14 @@
 package com.pijul.hack;
 
-import com.pijul.hack.commands.McpCommand;
 import com.pijul.aider.llm.LLMChain;
+import com.pijul.hack.commands.McpCommand;
 import com.pijul.hack.commands.QueryCommand;
 import com.pijul.hack.commands.ReasonCommand;
 import com.pijul.hack.commands.WorkspaceCommand;
 import dev.langchain4j.mcp.McpToolProvider;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Container {
     private final Workspace workspace;

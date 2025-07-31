@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pijul.common.LLMClient;
 import com.pijul.common.LLMResponse;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class AgenticReasoning implements TranslationStrategy {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private LLMClient llmClient;
     private String model;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public AgenticReasoning() {
     }

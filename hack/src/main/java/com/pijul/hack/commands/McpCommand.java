@@ -1,9 +1,9 @@
 package com.pijul.hack.commands;
 
-import com.pijul.hack.McpConfig;
-import com.pijul.hack.MessageHandler;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.pijul.hack.McpConfig;
+import com.pijul.hack.MessageHandler;
 
 import java.util.Arrays;
 

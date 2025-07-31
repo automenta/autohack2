@@ -4,6 +4,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.pijul.aider.tui.Terminal;
+
 import java.io.IOException;
 
 public class PijulAider {

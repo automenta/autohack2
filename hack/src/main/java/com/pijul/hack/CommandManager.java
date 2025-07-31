@@ -1,6 +1,7 @@
 package com.pijul.hack;
 
 import com.pijul.hack.commands.Command;
+
 import java.util.HashMap;
 import java.util.Map;
 

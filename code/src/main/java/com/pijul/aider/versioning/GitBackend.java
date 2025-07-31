@@ -1,6 +1,7 @@
 package com.pijul.aider.versioning;
 
 import com.pijul.aider.Backend;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +23,7 @@ public class GitBackend implements Backend {
                 ProcessBuilder processBuilder = new ProcessBuilder(command);
                 processBuilder.redirectErrorStream(true);
                 Process process = processBuilder.start();
-                
+
                 StringBuilder output = new StringBuilder();
                 try (InputStream inputStream = process.getInputStream();
                      BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
@@ -31,12 +32,12 @@ public class GitBackend implements Backend {
                         output.append(line).append("\n");
                     }
                 }
-                
+
                 int exitCode = process.waitFor();
                 if (exitCode != 0) {
                     throw new RuntimeException("Command failed with exit code: " + exitCode);
                 }
-                
+
                 return output.toString();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException("Error executing command: " + String.join(" ", command), e);

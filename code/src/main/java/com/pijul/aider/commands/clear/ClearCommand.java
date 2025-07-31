@@ -1,9 +1,9 @@
 package com.pijul.aider.commands.clear;
 
-import com.pijul.aider.commands.Command;
-import com.pijul.aider.Container;
 import com.pijul.aider.CodebaseManager;
+import com.pijul.aider.Container;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 public class ClearCommand implements Command {
     private final Container container;
@@ -22,7 +22,7 @@ public class ClearCommand implements Command {
         try {
             CodebaseManager codebaseManager = container.getCodebaseManager();
             MessageHandler messageHandler = container.getMessageHandler();
-            
+
             codebaseManager.setCodebase("");
             messageHandler.addMessage("system", "Codebase cleared.");
         } catch (Exception e) {

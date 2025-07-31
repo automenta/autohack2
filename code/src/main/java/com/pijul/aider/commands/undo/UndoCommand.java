@@ -1,8 +1,8 @@
 package com.pijul.aider.commands.undo;
 
 import com.pijul.aider.Container;
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 public class UndoCommand implements Command {
     private final Container container;

@@ -2,6 +2,7 @@ package com.example.mcr.ontology;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +61,7 @@ public class OntologyManagerTest {
         newOntologyData.put("synonyms", new HashMap<>());
 
         ontologyManager = new OntologyManager(new OntologyManager.Ontology(newOntologyData));
-        
+
         assertThrows(IllegalArgumentException.class, () -> ontologyManager.validateFact("bird", List.of("tweety")));
         assertDoesNotThrow(() -> ontologyManager.validateFact("mammal", List.of("dog")));
     }

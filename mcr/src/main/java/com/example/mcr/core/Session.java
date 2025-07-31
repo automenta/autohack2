@@ -16,6 +16,7 @@ import it.unibo.tuprolog.solve.Solver;
 import it.unibo.tuprolog.solve.classic.ClassicSolverFactory;
 import it.unibo.tuprolog.theory.InvalidTheoryException;
 import it.unibo.tuprolog.theory.Theory;
+
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -24,17 +25,17 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class Session {
+    private static final Pattern PREDICATE_PATTERN = Pattern.compile("^[a-z][a-zA-Z0-9_]*$");
     private final MCR mcr;
     private final SessionOptions options;
-    private String sessionId;
     private final LLMClient llmClient;
     private final List<String> program = new ArrayList<>();
     private final Logger logger;
-    private OntologyManager ontology;
     private final MCR.LLMUsageMetrics llmUsage = new MCR.LLMUsageMetrics();
-    private Solver prologSession = ClassicSolverFactory.get().createSolver();
-    private static final Pattern PREDICATE_PATTERN = Pattern.compile("^[a-z][a-zA-Z0-9_]*$");
     private final PrologValidator prologValidator = new PrologValidator();
+    private String sessionId;
+    private OntologyManager ontology;
+    private Solver prologSession = ClassicSolverFactory.get().createSolver();
 
     public Session(MCR mcr, SessionOptions options) {
         this.mcr = mcr;
@@ -42,13 +43,13 @@ public class Session {
         this.sessionId = options.sessionId != null ? options.sessionId : Long.toString(System.currentTimeMillis(), 36);
         this.logger = options.logger != null ? options.logger : Logger.getLogger(Session.class.getName());
         this.llmClient = mcr.getLlmClient();
-        
+
         if (options.ontology != null) {
             this.ontology = new OntologyManager(new OntologyManager.Ontology(options.ontology));
         } else {
             this.ontology = new OntologyManager(new OntologyManager.Ontology());
         }
-        
+
         if (options.program != null) {
             for (String clause : options.program) {
                 try {
@@ -78,17 +79,17 @@ public class Session {
         long endTime = System.currentTimeMillis();
         long latency = endTime - startTime;
         LLMUsage usage = response.getUsage();
-        
+
         if (usage != null) {
             llmUsage.promptTokens += usage.getPromptTokens();
             llmUsage.completionTokens += usage.getCompletionTokens();
             llmUsage.totalTokens += usage.getTotalTokens();
-            
+
             mcr.totalLlmUsage.promptTokens += usage.getPromptTokens();
             mcr.totalLlmUsage.completionTokens += usage.getCompletionTokens();
             mcr.totalLlmUsage.totalTokens += usage.getTotalTokens();
         }
-        
+
         llmUsage.calls++;
         llmUsage.totalLatencyMs += latency;
         mcr.totalLlmUsage.calls++;
@@ -128,7 +129,7 @@ public class Session {
         this.ontology = new OntologyManager(new OntologyManager.Ontology((Map<String, Object>) data.get("ontology")));
         this.program.clear();
         this.prologSession = ClassicSolverFactory.get().createSolver();
-        
+
         List<String> savedProgram = (List<String>) data.get("program");
         for (String clause : savedProgram) {
             try {
@@ -205,7 +206,7 @@ public class Session {
             result.setError("Invalid Prolog clause");
             return result;
         }
-        
+
         program.add(prologClause);
         consultProgram();
         result.setSuccess(true);
@@ -261,21 +262,21 @@ public class Session {
         if (fact == null || fact.trim().isEmpty()) {
             return new AssertionResult(false, "Fact cannot be null or empty");
         }
-        
+
         if (!fact.trim().endsWith(".")) {
             return new AssertionResult(false, "Invalid fact syntax - must end with '.'");
         }
-        
+
         return assertProlog(fact);
     }
 
     public AssertionResult addRelationship(String subject, String predicate, String object) {
         if (subject == null || subject.trim().isEmpty() ||
-            predicate == null || predicate.trim().isEmpty() ||
-            object == null || object.trim().isEmpty()) {
+                predicate == null || predicate.trim().isEmpty() ||
+                object == null || object.trim().isEmpty()) {
             return new AssertionResult(false, "All relationship components must be non-empty");
         }
-        
+
         String relationship = predicate + "(" + subject + ", " + object + ").";
         return assertProlog(relationship);
     }
@@ -331,7 +332,7 @@ public class Session {
         }
         return result;
     }
-    
+
     public static class SessionOptions {
         public long retryDelay = 500;
         public int maxTranslationAttempts = 2;
@@ -342,7 +343,7 @@ public class Session {
         public List<String> program;
         public String translator;
     }
-    
+
     public static class QueryOptions {
         public boolean allowSubSymbolicFallback = false;
         public int maxReasoningSteps = 5;
@@ -354,29 +355,54 @@ public class Session {
         private String error;
         private List<String> explanation;
 
-        public QueryResult() {}
+        public QueryResult() {
+        }
 
         public QueryResult(boolean success, String error) {
             this.success = success;
             this.error = error;
         }
 
-        public boolean isSuccess() { return success; }
-        public void setSuccess(boolean success) { this.success = success; }
-        public List<Map<String, String>> getBindings() { return bindings; }
-        public void setBindings(List<Map<String, String>> bindings) { this.bindings = bindings; }
-        public String getError() { return error; }
-        public void setError(String error) { this.error = error; }
-        public List<String> getExplanation() { return explanation; }
-        public void setExplanation(List<String> explanation) { this.explanation = explanation; }
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public void setSuccess(boolean success) {
+            this.success = success;
+        }
+
+        public List<Map<String, String>> getBindings() {
+            return bindings;
+        }
+
+        public void setBindings(List<Map<String, String>> bindings) {
+            this.bindings = bindings;
+        }
+
+        public String getError() {
+            return error;
+        }
+
+        public void setError(String error) {
+            this.error = error;
+        }
+
+        public List<String> getExplanation() {
+            return explanation;
+        }
+
+        public void setExplanation(List<String> explanation) {
+            this.explanation = explanation;
+        }
     }
-    
+
     public static class AssertionResult {
         private boolean success;
         private String symbolicRepresentation;
         private String error;
 
-        public AssertionResult() {}
+        public AssertionResult() {
+        }
 
         public AssertionResult(boolean success, String error) {
             this.success = success;

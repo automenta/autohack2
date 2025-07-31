@@ -1,12 +1,12 @@
 package com.pijul.aider.commands.diff;
 
-import com.pijul.aider.commands.Command;
-import com.pijul.aider.Container;
 import com.pijul.aider.Backend;
+import com.pijul.aider.Container;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 public class DiffCommand implements Command {
-    private Container container;
+    private final Container container;
 
     public DiffCommand(Container container) {
         this.container = container;
@@ -20,7 +20,7 @@ public class DiffCommand implements Command {
     public void execute(String[] args) {
         Backend backend = container.getBackend();
         MessageHandler messageHandler = container.getMessageHandler();
-        
+
         try {
             String diff = backend.diff().get();
             container.setDiff(diff);

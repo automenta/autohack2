@@ -1,11 +1,11 @@
 package com.pijul.aider.commands.exit;
 
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.Container;
+import com.pijul.aider.commands.Command;
 import com.pijul.aider.tui.Terminal;
 
 public class ExitCommand implements Command {
-    private Container container;
+    private final Container container;
 
     public ExitCommand(Container container) {
         this.container = container;

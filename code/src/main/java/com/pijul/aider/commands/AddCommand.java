@@ -1,10 +1,7 @@
 package com.pijul.aider.commands;
 
-import com.pijul.aider.Backend;
-import com.pijul.aider.CodebaseManager;
-import com.pijul.aider.Container;
-import com.pijul.aider.FileSystem;
-import com.pijul.aider.MessageHandler;
+import com.pijul.aider.*;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,8 +23,8 @@ public class AddCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        boolean hasDot = Arrays.stream(args).anyMatch(arg -> arg.equals("."));
-        boolean hasU = Arrays.stream(args).anyMatch(arg -> arg.equals("-u"));
+        boolean hasDot = Arrays.asList(args).contains(".");
+        boolean hasU = Arrays.asList(args).contains("-u");
 
         if (hasDot) {
             addAllTracked();
@@ -64,9 +61,9 @@ public class AddCommand implements Command {
             byte[] contentBytes = Files.readAllBytes(filePath);
             String content = new String(contentBytes, StandardCharsets.UTF_8);
             String currentCodebase = codebaseManager.getCodebase();
-            currentCodebase += "--- " + filePath.toString() + " ---\n" + content + "\n\n";
+            currentCodebase += "--- " + filePath + " ---\n" + content + "\n\n";
             codebaseManager.setCodebase(currentCodebase);
-            messageHandler.addMessage("system", "Added and staged " + filePath.toString());
+            messageHandler.addMessage("system", "Added and staged " + filePath);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,9 +72,7 @@ public class AddCommand implements Command {
     private void addAllTracked() {
         try {
             Backend backend = container.getBackend();
-            backend.listTrackedFiles().thenAccept(trackedFiles -> {
-                addFiles(trackedFiles.toArray(new String[0]));
-            }).exceptionally(e -> {
+            backend.listTrackedFiles().thenAccept(trackedFiles -> addFiles(trackedFiles.toArray(new String[0]))).exceptionally(e -> {
                 e.printStackTrace();
                 return null;
             });
@@ -89,9 +84,7 @@ public class AddCommand implements Command {
     private void addAllUntracked() {
         try {
             Backend backend = container.getBackend();
-            backend.listUntrackedFiles().thenAccept(untrackedFiles -> {
-                addFiles(untrackedFiles.toArray(new String[0]));
-            }).exceptionally(e -> {
+            backend.listUntrackedFiles().thenAccept(untrackedFiles -> addFiles(untrackedFiles.toArray(new String[0]))).exceptionally(e -> {
                 e.printStackTrace();
                 return null;
             });

@@ -1,8 +1,8 @@
 package com.pijul.aider.commands.unrecord;
 
 import com.pijul.aider.Container;
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 public class UnrecordCommand implements Command {
     private final Container container;

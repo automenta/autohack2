@@ -3,13 +3,14 @@ package com.pijul.hack;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dev.langchain4j.mcp.McpToolProvider;
-import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.DefaultMcpClient;
+import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.transport.McpTransport;
-import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import dev.langchain4j.mcp.client.transport.http.HttpMcpTransport;
-import java.util.Collections;
+import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
+
 import java.time.Duration;
+import java.util.Collections;
 
 public class McpProviderFactory {
 
@@ -18,26 +19,24 @@ public class McpProviderFactory {
         JsonObject json = gson.fromJson(config.getJsonConfig(), JsonObject.class);
         String type = json.get("type").getAsString();
 
-        McpTransport transport;
-        switch (type.toLowerCase()) {
-            case "stdio":
+        McpTransport transport = switch (type.toLowerCase()) {
+            case "stdio" -> {
                 String command = json.get("command").getAsString();
-                transport = new StdioMcpTransport.Builder()
+                yield new StdioMcpTransport.Builder()
                         .command(Collections.singletonList(command))
                         .logEvents(true)
                         .build();
-                break;
-            case "http":
+            }
+            case "http" -> {
                 String httpEndpoint = json.get("endpoint").getAsString();
-                transport = new HttpMcpTransport.Builder()
+                yield new HttpMcpTransport.Builder()
                         .sseUrl(httpEndpoint)
                         .logRequests(true)
                         .logResponses(true)
                         .build();
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown or unsupported MCP transport type: " + type);
-        }
+            }
+            default -> throw new IllegalArgumentException("Unknown or unsupported MCP transport type: " + type);
+        };
 
         McpClient client = new DefaultMcpClient.Builder()
                 .transport(transport)

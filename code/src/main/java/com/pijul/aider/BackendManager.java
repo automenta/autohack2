@@ -2,6 +2,7 @@ package com.pijul.aider;
 
 import com.pijul.aider.versioning.FileBackend;
 import com.pijul.aider.versioning.GitBackend;
+
 import java.io.IOException;
 
 public class BackendManager {
@@ -12,22 +13,6 @@ public class BackendManager {
         // which calls either setBackend or autodetectBackend.
         // We can leave the field null here initially.
         this.backend = null;
-    }
-
-    public void setBackend(String backendType) {
-        switch (backendType.toLowerCase()) {
-            case "file":
-                this.backend = new FileBackend();
-                break;
-            case "git":
-                this.backend = new GitBackend();
-                break;
-            case "pijul":
-                this.backend = new PijulBackend();
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported backend: " + backendType);
-        }
     }
 
     public void autodetectBackend() {
@@ -58,6 +43,22 @@ public class BackendManager {
             autodetectBackend();
         }
         return backend;
+    }
+
+    public void setBackend(String backendType) {
+        switch (backendType.toLowerCase()) {
+            case "file":
+                this.backend = new FileBackend();
+                break;
+            case "git":
+                this.backend = new GitBackend();
+                break;
+            case "pijul":
+                this.backend = new PijulBackend();
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported backend: " + backendType);
+        }
     }
 
     public void initialize() {

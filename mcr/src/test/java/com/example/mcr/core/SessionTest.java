@@ -29,7 +29,7 @@ public class SessionTest {
         llmConfig.provider = "openai";
         llmConfig.apiKey = "test-key";
         config.llm = llmConfig;
-        
+
         mcr = new MCR(config) {
             @Override
             protected LLMClient getLlmClient(MCR.LlmConfig llmConfig) {

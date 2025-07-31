@@ -3,8 +3,8 @@ package com.pijul.aider.commands.query;
 import com.pijul.aider.Container;
 import com.pijul.aider.commands.Command;
 import com.pijul.aider.llm.LLMChain;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 public class QueryCommand implements Command {

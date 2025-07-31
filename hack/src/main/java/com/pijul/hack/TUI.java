@@ -1,8 +1,8 @@
 package com.pijul.hack;
 
-import com.googlecode.lanterna.screen.Screen;
-import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.graphics.TextGraphics;
+import com.googlecode.lanterna.screen.Screen;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,9 +11,9 @@ import java.util.List;
 public class TUI implements Runnable {
     private final Screen screen;
     private final Container container;
-    private boolean running = true;
-    private StringBuilder inputBuffer = new StringBuilder();
     private final List<String> messages = Collections.synchronizedList(new ArrayList<>());
+    private final StringBuilder inputBuffer = new StringBuilder();
+    private boolean running = true;
 
     public TUI(Screen screen, Container container) {
         this.screen = screen;
@@ -42,7 +42,7 @@ public class TUI implements Runnable {
                     }
                 }
 
-                tg.putString(0, row, "> " + inputBuffer.toString());
+                tg.putString(0, row, "> " + inputBuffer);
                 screen.refresh();
 
                 com.googlecode.lanterna.input.KeyStroke keyStroke = screen.pollInput();
@@ -56,7 +56,7 @@ public class TUI implements Runnable {
                             inputBuffer.setLength(0);
                             break;
                         case Backspace:
-                            if (inputBuffer.length() > 0) {
+                            if (!inputBuffer.isEmpty()) {
                                 inputBuffer.setLength(inputBuffer.length() - 1);
                             }
                             break;

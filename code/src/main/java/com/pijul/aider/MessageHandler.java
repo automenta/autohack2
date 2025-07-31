@@ -3,7 +3,7 @@ package com.pijul.aider;
 import com.pijul.aider.tui.Terminal;
 
 public class MessageHandler {
-    private Container container;
+    private final Container container;
 
     public MessageHandler(Container container) {
         this.container = container;

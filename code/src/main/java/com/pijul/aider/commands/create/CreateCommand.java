@@ -1,14 +1,15 @@
 package com.pijul.aider.commands.create;
 
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.Container;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class CreateCommand implements Command {
-    private Container container;
+    private final Container container;
 
     public CreateCommand(Container container) {
         this.container = container;
@@ -25,7 +26,7 @@ public class CreateCommand implements Command {
             messageHandler.addMessage("system", "Usage: /create <file>");
             return;
         }
-        
+
         String file = args[0];
         try {
             Path path = Paths.get(file);

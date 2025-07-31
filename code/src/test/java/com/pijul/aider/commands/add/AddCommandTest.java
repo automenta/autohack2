@@ -1,19 +1,13 @@
 package com.pijul.aider.commands.add;
 
-import com.pijul.aider.Container;
-import com.pijul.aider.Backend;
-import com.pijul.aider.MessageHandler;
-import com.pijul.aider.CodebaseManager;
-import com.pijul.aider.FileSystem;
+import com.pijul.aider.*;
 import com.pijul.aider.commands.AddCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Mockito.*;
@@ -59,8 +53,8 @@ public class AddCommandTest {
 
         // Verify that the codebase manager was updated
         String codebase = codebaseManager.getCodebase();
-        assert(codebase.contains("hello world"));
-        assert(codebase.contains(tempFile.toString()));
+        assert (codebase.contains("hello world"));
+        assert (codebase.contains(tempFile.toString()));
 
         // Verify that a message was sent
         verify(messageHandler, times(1)).addMessage(eq("system"), anyString());

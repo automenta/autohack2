@@ -1,7 +1,5 @@
 package com.pijul.aider;
 
-import com.pijul.aider.Backend;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,9 +8,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class CodebaseManager {
+    private final Backend versioningBackend;
     private String codebasePath;
     private List<String> files = new ArrayList<>();
-    private Backend versioningBackend;
     private String codebaseContent = ""; // Added for temporary codebase string representation
 
     public CodebaseManager(Backend versioningBackend) {

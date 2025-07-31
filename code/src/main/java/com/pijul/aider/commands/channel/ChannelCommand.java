@@ -1,8 +1,7 @@
 package com.pijul.aider.commands.channel;
 
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.Container;
-import java.util.Arrays;
+import com.pijul.aider.commands.Command;
 
 public class ChannelCommand implements Command {
 

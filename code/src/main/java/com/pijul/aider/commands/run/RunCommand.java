@@ -1,11 +1,12 @@
 package com.pijul.aider.commands.run;
 
 import com.pijul.aider.Container;
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
+
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class RunCommand implements Command {
     private final Container container;
@@ -41,7 +42,7 @@ public class RunCommand implements Command {
             }
 
             int exitCode = process.waitFor();
-            messageHandler.addMessage("system", "Command finished with exit code " + exitCode + ":\n" + output.toString());
+            messageHandler.addMessage("system", "Command finished with exit code " + exitCode + ":\n" + output);
 
         } catch (IOException | InterruptedException e) {
             messageHandler.addMessage("system", "Error executing command: " + e.getMessage());

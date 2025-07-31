@@ -1,12 +1,13 @@
 package com.example.mcr.translation;
 
 import com.pijul.common.LLMClient;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface TranslationStrategy {
     CompletableFuture<TranslationResult> translate(String input, LLMClient llmClient, String model, List<String> ontologyTerms, String feedback, boolean returnFullResponse);
-    
+
     class TranslationResult {
         private String type;
         private String content;
@@ -15,8 +16,9 @@ public interface TranslationStrategy {
         private int promptTokens;
         private int completionTokens;
         private int totalTokens;
-        
-        public TranslationResult() {}
+
+        public TranslationResult() {
+        }
 
         public TranslationResult(String content, int promptTokens, int completionTokens, int totalTokens) {
             this.content = content;
@@ -25,25 +27,60 @@ public interface TranslationStrategy {
             this.totalTokens = totalTokens;
         }
 
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
+        public String getType() {
+            return type;
+        }
 
-        public String getContent() { return content; }
-        public void setContent(String content) { this.content = content; }
+        public void setType(String type) {
+            this.type = type;
+        }
 
-        public String getAnswer() { return answer; }
-        public void setAnswer(String answer) { this.answer = answer; }
+        public String getContent() {
+            return content;
+        }
 
-        public String getExplanation() { return explanation; }
-        public void setExplanation(String explanation) { this.explanation = explanation; }
+        public void setContent(String content) {
+            this.content = content;
+        }
 
-        public int getPromptTokens() { return promptTokens; }
-        public void setPromptTokens(int promptTokens) { this.promptTokens = promptTokens; }
+        public String getAnswer() {
+            return answer;
+        }
 
-        public int getCompletionTokens() { return completionTokens; }
-        public void setCompletionTokens(int completionTokens) { this.completionTokens = completionTokens; }
+        public void setAnswer(String answer) {
+            this.answer = answer;
+        }
 
-        public int getTotalTokens() { return totalTokens; }
-        public void setTotalTokens(int totalTokens) { this.totalTokens = totalTokens; }
+        public String getExplanation() {
+            return explanation;
+        }
+
+        public void setExplanation(String explanation) {
+            this.explanation = explanation;
+        }
+
+        public int getPromptTokens() {
+            return promptTokens;
+        }
+
+        public void setPromptTokens(int promptTokens) {
+            this.promptTokens = promptTokens;
+        }
+
+        public int getCompletionTokens() {
+            return completionTokens;
+        }
+
+        public void setCompletionTokens(int completionTokens) {
+            this.completionTokens = completionTokens;
+        }
+
+        public int getTotalTokens() {
+            return totalTokens;
+        }
+
+        public void setTotalTokens(int totalTokens) {
+            this.totalTokens = totalTokens;
+        }
     }
 }

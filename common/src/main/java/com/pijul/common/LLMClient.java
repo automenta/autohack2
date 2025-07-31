@@ -1,14 +1,11 @@
 package com.pijul.common;
 
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.vertexai.VertexAiChatModel;
-import dev.langchain4j.model.output.Response;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.response.ChatResponse;
-
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

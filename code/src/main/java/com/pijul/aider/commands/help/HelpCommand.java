@@ -1,8 +1,9 @@
 package com.pijul.aider.commands.help;
 
 import com.pijul.aider.Container;
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,27 +39,28 @@ public class HelpCommand implements Command {
         commandMap.put("test", "Run the test suite.");
         commandMap.put("undo", "Undo changes to a file or the entire project.");
     }
+
     @Override
     public void init() {
-    // No initialization needed for HelpCommand
-}
-
-@Override
-public void execute(String[] args) {
-    MessageHandler messageHandler = container.getMessageHandler();
-    StringBuilder helpMessage = new StringBuilder("Available commands:\n");
-    for (Map.Entry<String, String> entry : commandMap.entrySet()) {
-        helpMessage.append("  /")
-                  .append(entry.getKey())
-                  .append(" - ")
-                  .append(entry.getValue())
-                  .append("\n");
+        // No initialization needed for HelpCommand
     }
-    messageHandler.addMessage("system", helpMessage.toString());
-}
 
-@Override
-public void cleanup() {
-    // No cleanup needed for HelpCommand
-}
+    @Override
+    public void execute(String[] args) {
+        MessageHandler messageHandler = container.getMessageHandler();
+        StringBuilder helpMessage = new StringBuilder("Available commands:\n");
+        for (Map.Entry<String, String> entry : commandMap.entrySet()) {
+            helpMessage.append("  /")
+                    .append(entry.getKey())
+                    .append(" - ")
+                    .append(entry.getValue())
+                    .append("\n");
+        }
+        messageHandler.addMessage("system", helpMessage.toString());
     }
+
+    @Override
+    public void cleanup() {
+        // No cleanup needed for HelpCommand
+    }
+}

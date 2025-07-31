@@ -1,103 +1,103 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.pijul.project</groupId>
-    <artifactId>pijul-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>dumb</groupId>
+        <artifactId>autohack</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>mcr</artifactId>
+    <artifactId>mcr</artifactId>
 
-  <dependencies>
-    <!-- Common module dependency -->
-    <dependency>
-        <groupId>com.pijul.project</groupId>
-        <artifactId>common</artifactId>
-        <version>${project.version}</version>
-    </dependency>
+    <dependencies>
+        <!-- Common module dependency -->
+        <dependency>
+            <groupId>dumb</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-    <!-- Gson for JSON serialization -->
-    <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>2.10.1</version>
-    </dependency>
+        <!-- Gson for JSON serialization -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
 
-    <!-- JUnit Jupiter for testing -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
+        <!-- JUnit Jupiter for testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-    <!-- Mockito for mocking dependencies in tests -->
-    <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-junit-jupiter</artifactId>
-        <scope>test</scope>
-    </dependency>
-    
-    <!-- TuProlog dependencies -->
-    <dependency>
-        <groupId>it.unibo.tuprolog</groupId>
-        <artifactId>core-jvm</artifactId>
-        <version>0.30.5</version>
-    </dependency>
-    <dependency>
-        <groupId>it.unibo.tuprolog</groupId>
-        <artifactId>solve-classic-jvm</artifactId>
-        <version>0.30.5</version>
-    </dependency>
-    <dependency>
-        <groupId>it.unibo.tuprolog</groupId>
-        <artifactId>theory-jvm</artifactId>
-        <version>0.30.5</version>
-    </dependency>
-    <dependency>
-        <groupId>it.unibo.tuprolog</groupId>
-        <artifactId>parser-jvm</artifactId>
-        <version>0.30.5</version>
-    </dependency>
-    <dependency>
-        <groupId>org.jetbrains.kotlin</groupId>
-        <artifactId>kotlin-stdlib-jdk8</artifactId>
-    </dependency>
-  </dependencies>
+        <!-- Mockito for mocking dependencies in tests -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.jetbrains.kotlin</groupId>
-        <artifactId>kotlin-maven-plugin</artifactId>
-        <version>1.8.0</version>
-        <executions>
-            <execution>
-                <id>compile</id>
-                <phase>compile</phase>
-                <goals>
-                    <goal>compile</goal>
-                </goals>
-            </execution>
-            <execution>
-                <id>test-compile</id>
-                <phase>test-compile</phase>
-                <goals>
-                    <goal>test-compile</goal>
-                </goals>
-            </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+        <!-- TuProlog dependencies -->
+        <dependency>
+            <groupId>it.unibo.tuprolog</groupId>
+            <artifactId>core-jvm</artifactId>
+            <version>0.30.5</version>
+        </dependency>
+        <dependency>
+            <groupId>it.unibo.tuprolog</groupId>
+            <artifactId>solve-classic-jvm</artifactId>
+            <version>0.30.5</version>
+        </dependency>
+        <dependency>
+            <groupId>it.unibo.tuprolog</groupId>
+            <artifactId>theory-jvm</artifactId>
+            <version>0.30.5</version>
+        </dependency>
+        <dependency>
+            <groupId>it.unibo.tuprolog</groupId>
+            <artifactId>parser-jvm</artifactId>
+            <version>0.30.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>1.8.0</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

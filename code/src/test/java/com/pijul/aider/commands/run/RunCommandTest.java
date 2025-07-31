@@ -2,19 +2,11 @@ package com.pijul.aider.commands.run;
 
 import com.pijul.aider.Container;
 import com.pijul.aider.MessageHandler;
-import com.pijul.aider.commands.Command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class RunCommandTest {

@@ -1,9 +1,6 @@
 package com.pijul.hack.commands;
 
 import com.pijul.hack.Container;
-import com.pijul.aider.llm.LLMChain;
-import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
 
 public class ReasonCommand implements Command {
 

@@ -1,27 +1,24 @@
 package com.pijul.aider;
 
-import com.pijul.aider.CommandManager;
 import com.pijul.aider.tui.Terminal;
-import com.pijul.aider.versioning.FileBackend;
-import com.pijul.aider.Backend;
 import dev.langchain4j.service.tool.ToolProvider;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Container {
+    private final List<ToolProvider> toolProviders = new ArrayList<>();
+    private final BackendManager backendManager;
+    private final FileManager fileManager;
+    private final LLMManager llmManager;
+    private final UIManager uiManager;
+    private final CommandManager commandManager;
+    private final CodebaseManager codebaseManager;
+    private final FileSystem fileSystem;
+    private final MessageHandler messageHandler;
     private Backend backend;
-    private BackendManager backendManager;
-    private FileManager fileManager;
-    private LLMManager llmManager;
-    private UIManager uiManager;
-    private CommandManager commandManager;
-    private CodebaseManager codebaseManager;
-    private FileSystem fileSystem;
     private String diff;
     private Terminal terminal;
-    private MessageHandler messageHandler;
-    private final List<ToolProvider> toolProviders = new ArrayList<>();
 
     public Container(String[] args) {
         this.messageHandler = new MessageHandler(this);

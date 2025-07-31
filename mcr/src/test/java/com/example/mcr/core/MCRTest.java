@@ -2,6 +2,7 @@ package com.example.mcr.core;
 
 import com.example.mcr.translation.TranslationStrategy;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MCRTest {

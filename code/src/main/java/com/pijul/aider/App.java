@@ -7,7 +7,7 @@ public class App {
         try {
             // Initialize container for dependency injection
             Container container = new Container(args);
-            
+
             // Create and start the main application
             PijulAider aider = new PijulAider(container);
             aider.start();

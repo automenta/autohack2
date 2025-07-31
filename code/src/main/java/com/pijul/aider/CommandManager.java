@@ -1,13 +1,14 @@
 package com.pijul.aider;
 
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.commands.AddCommand;
+import com.pijul.aider.commands.Command;
 import com.pijul.aider.commands.commit.CommitCommand;
 import com.pijul.aider.commands.diff.DiffCommand;
 import com.pijul.aider.commands.exit.ExitCommand;
 import com.pijul.aider.commands.help.HelpCommand;
 import com.pijul.aider.commands.query.QueryCommand;
 import com.pijul.aider.commands.record.RecordCommand;
+
 import java.util.HashMap;
 import java.util.Map;
 

@@ -1,8 +1,8 @@
 package com.pijul.aider.commands.image;
 
 import com.pijul.aider.Container;
-import com.pijul.aider.commands.Command;
 import com.pijul.aider.MessageHandler;
+import com.pijul.aider.commands.Command;
 
 public class ImageCommand implements Command {
     private final Container container;

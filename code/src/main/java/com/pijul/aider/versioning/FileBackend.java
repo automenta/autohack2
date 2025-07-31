@@ -1,7 +1,7 @@
 package com.pijul.aider.versioning;
 
 import com.pijul.aider.Backend;
-import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -79,7 +79,7 @@ public class FileBackend implements Backend {
             try {
                 // Create temporary file for patch
                 Path tempPatch = Files.createTempFile("patch", ".diff");
-                Files.write(tempPatch, patch.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                Files.writeString(tempPatch, patch);
 
                 // Apply patch using external tool (e.g., git)
                 ProcessBuilder processBuilder = new ProcessBuilder("git", "apply", tempPatch.toString());
