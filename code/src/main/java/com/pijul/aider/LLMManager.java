@@ -1,24 +1,31 @@
 package com.pijul.aider;
 
+import com.pijul.common.LLMClient;
+import com.pijul.common.LLMResponse;
+
 public class LLMManager {
-    // Placeholder for LLMManager functionality
+    private LLMClient llmClient;
 
     public LLMManager() {
-        // Constructor
+        // For now, we will default to a google gemini model.
+        // This should be made configurable in the future.
+        this.llmClient = new LLMClient("google", "gemini-1.5-flash-001", null);
     }
 
     public void initialize() {
-        // Initialize LLM
+        // The LLMClient is initialized in the constructor.
     }
 
     public void shutdown() {
-        // Shutdown LLM
+        // Nothing to do here for now.
     }
 
     public String generateResponse(String prompt) {
-        // Generate response from LLM
-        return "Generated response for: " + prompt;
+        LLMResponse response = llmClient.generate(prompt);
+        if (response.isSuccess()) {
+            return response.getContent();
+        } else {
+            return "Error: " + response.getError();
+        }
     }
-
-    // Add more methods as needed
 }

@@ -1,34 +1,47 @@
 package com.pijul.aider;
 
 public class PijulAider {
-    // Placeholder for PijulAider functionality
+    private final BackendManager backendManager;
+    private final CodebaseManager codebaseManager;
+    private final LLMManager llmManager;
+    private final CommandManager commandManager;
+    private final UIManager uiManager;
 
-    private BackendManager backendManager;
-    private FileManager fileManager;
-    private LLMManager llmManager;
-    private UIManager uiManager;
-    private CommandManager commandManager;
-
-    public PijulAider() {
+    public PijulAider(UIManager uiManager) {
+        this.uiManager = uiManager;
         this.backendManager = new BackendManager();
-        this.fileManager = new FileManager();
+        this.codebaseManager = new CodebaseManager(backendManager.getBackend());
         this.llmManager = new LLMManager();
-        this.uiManager = new UIManager();
-        this.commandManager = new CommandManager();
+        this.commandManager = new CommandManager(this);
     }
 
     public void start() {
-        // Start PijulAider
-        backendManager.initialize();
         uiManager.displayWelcomeMessage();
-        commandManager.startListening();
+        // The command manager will be started by the TUI
     }
 
     public void stop() {
         // Stop PijulAider
-        commandManager.stopListening();
         backendManager.shutdown();
     }
 
-    // Add more methods as needed
+    public BackendManager getBackendManager() {
+        return backendManager;
+    }
+
+    public CodebaseManager getCodebaseManager() {
+        return codebaseManager;
+    }
+
+    public LLMManager getLlmManager() {
+        return llmManager;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
+    }
+
+    public UIManager getUiManager() {
+        return uiManager;
+    }
 }

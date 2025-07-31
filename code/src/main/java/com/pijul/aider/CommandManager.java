@@ -1,75 +1,48 @@
 package com.pijul.aider;
 
+import com.pijul.aider.commands.AddCommand;
 import com.pijul.aider.commands.Command;
+import com.pijul.aider.commands.ExitCommand;
+import com.pijul.aider.commands.HelpCommand;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
-/**
- * Manages command registration and execution
- */
 public class CommandManager {
-    private Map<String, Command> commands = new HashMap<>();
-    private boolean listening = false;
-    private Scanner scanner;
+    private final Map<String, Command> commands = new HashMap<>();
+    private final PijulAider aider;
 
-    /**
-     * Register a command with the manager
-     * @param name Command name (without parameters)
-     * @param command Command implementation
-     */
+    public CommandManager(PijulAider aider) {
+        this.aider = aider;
+        registerCommands();
+    }
+
+    private void registerCommands() {
+        registerCommand("/add", new AddCommand(aider));
+        registerCommand("/help", new HelpCommand(aider));
+        registerCommand("/exit", new ExitCommand(aider));
+    }
+
     public void registerCommand(String name, Command command) {
         commands.put(name, command);
     }
 
-    /**
-     * Start listening for commands from standard input
-     */
-    public void startListening() {
-        if (listening) return;
-        listening = true;
-        scanner = new Scanner(System.in);
-        System.out.println("Command listener started. Type 'help' for available commands.");
-        
-        new Thread(() -> {
-            while (listening) {
-                System.out.print("> ");
-                if (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    if (line.isEmpty()) continue;
-                    String[] parts = line.split(" ", 2);
-                    String cmdName = parts[0].toLowerCase();
-                    String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
-                    
-                    if (cmdName.equals("exit")) {
-                        stopListening();
-                        break;
-                    }
-                    
-                    Command cmd = commands.get(cmdName);
-                    if (cmd != null) {
-                        cmd.execute(args);
-                    } else {
-                        System.out.println("Error: Unknown command '" + cmdName + "'. Type 'help' for available commands.");
-                    }
-                }
-            }
-        }).start();
-    }
+    public void executeCommand(String line) {
+        if (line.isEmpty()) return;
+        String[] parts = line.split(" ", 2);
+        String cmdName = parts[0].toLowerCase();
+        String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
 
-    /**
-     * Stop listening for commands
-     */
-    public void stopListening() {
-        listening = false;
-        if (scanner != null) {
-            scanner.close();
+        Command cmd = commands.get(cmdName);
+        if (cmd != null) {
+            cmd.execute(args);
+        } else {
+            // If it's not a command, it's a prompt for the LLM
+            String response = aider.getLlmManager().generateResponse(line);
+            aider.getUiManager().displayMessage(response);
         }
     }
 
-    /**
-     * Get registered command count
-     */
     public int getCommandCount() {
         return commands.size();
     }

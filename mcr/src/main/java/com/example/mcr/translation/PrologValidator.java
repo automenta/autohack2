@@ -23,17 +23,17 @@ public class PrologValidator {
         
         // Check for predicate structure
         int predicateEnd = body.indexOf('(');
-        if (predicateEnd == -1) return false;
+        if (predicateEnd == -1) return true; // predicate with no args
         
         String predicate = body.substring(0, predicateEnd).trim();
-        String argsPart = body.substring(predicateEnd + 1);
+        String argsPart = body.substring(predicateEnd + 1, body.length() - 1);
         
         // Check arguments structure
-        if (argsPart.isEmpty()) return false;
+        if (argsPart.isEmpty()) return true;
         
         // Simple check for comma-separated arguments without nested structures
         for (char c : argsPart.toCharArray()) {
-            if (!Character.isLetterOrDigit(c) && c != ',' && c != ' ') {
+            if (!Character.isLetterOrDigit(c) && c != ',' && c != ' ' && c != '_') {
                 return false;
             }
         }

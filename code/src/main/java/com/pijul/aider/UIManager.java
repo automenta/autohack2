@@ -1,16 +1,33 @@
 package com.pijul.aider;
 
-public class UIManager {
-    // Placeholder for UIManager functionality
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.terminal.Terminal;
 
-    public UIManager() {
-        // Constructor
+import java.io.IOException;
+
+public class UIManager {
+    private final Screen screen;
+
+    public UIManager(Screen screen) {
+        this.screen = screen;
     }
 
     public void displayWelcomeMessage() {
-        // Display welcome message
-        System.out.println("Welcome to PijulAider!");
+        try {
+            screen.newTextGraphics().putString(0, 0, "Welcome to PijulAider!");
+            screen.refresh();
+        } catch (IOException e) {
+            // Ignore for now
+        }
     }
 
-    // Add more methods as needed
+    public void displayMessage(String message) {
+        try {
+            // This is a very basic implementation. A real implementation would handle scrolling.
+            screen.newTextGraphics().putString(0, 1, message);
+            screen.refresh();
+        } catch (IOException e) {
+            // Ignore for now
+        }
+    }
 }

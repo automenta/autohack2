@@ -17,20 +17,30 @@
     
     <!-- TuProlog core dependency -->
     <dependency>
-      <groupId>it.unibo.tuprolog</groupId>
-      <artifactId>full</artifactId>
-      <version>1.0.4</version>
-      <exclusions>
-        <exclusion>
-          <groupId>it.unibo.tuprolog</groupId>
-          <artifactId>test-dsl</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.tuprolog</groupId>
+      <artifactId>tuprolog-core</artifactId>
+      <version>0.20.0</version>
     </dependency>
+
+    <!-- Gson for JSON serialization -->
     <dependency>
-      <groupId>dev.langchain4j</groupId>
-      <artifactId>langchain4j</artifactId>
-      <version>1.2.0</version>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.10.1</version>
+    </dependency>
+
+    <!-- Jackson for JSON processing -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.15.2</version>
+    </dependency>
+
+    <!-- Shared common module -->
+    <dependency>
+      <groupId>com.pijul.project</groupId>
+      <artifactId>common</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 

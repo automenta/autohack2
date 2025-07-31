@@ -1,15 +1,15 @@
 package com.pijul.aider;
 
 public class MessageHandler {
-    private Container container;
+    private PijulAider aider;
 
-    public MessageHandler(Container container) {
-        this.container = container;
+    public MessageHandler(PijulAider aider) {
+        this.aider = aider;
     }
 
     public void addMessage(String sender, String message) {
         // Add message logic
-        System.out.println(sender + ": " + message);
+        aider.getUiManager().displayMessage(sender + ": " + message);
     }
 
     // Add more methods as needed

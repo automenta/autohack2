@@ -44,8 +44,19 @@ public class CodebaseManager {
     }
 
     public CompletableFuture<String> analyzeCodebase() {
-        // Implement code analysis logic here
-        return CompletableFuture.completedFuture("Codebase analysis placeholder");
+        return CompletableFuture.supplyAsync(() -> {
+            StringBuilder sb = new StringBuilder();
+            for (String file : files) {
+                try {
+                    sb.append("--- ").append(file).append(" ---\n");
+                    sb.append(Files.readString(Paths.get(codebasePath, file)));
+                    sb.append("\n");
+                } catch (Exception e) {
+                    // Ignore for now
+                }
+            }
+            return sb.toString();
+        });
     }
 
     public CompletableFuture<Void> trackFile(String filePath) {

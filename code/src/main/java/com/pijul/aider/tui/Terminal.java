@@ -4,7 +4,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.graphics.TextGraphics;
-import com.pijul.aider.commands.CommandManager;
+import com.pijul.aider.CommandManager;
 import java.io.IOException;
 
 public class Terminal {
@@ -16,20 +16,16 @@ public class Terminal {
     public Terminal(Screen screen, CommandManager commandManager) throws IOException {
         this.screen = (TerminalScreen) screen;
         this.commandManager = commandManager;
-        screen.startScreen();
     }
 
     public void run() {
-        // Start command input loop
-        commandManager.startListening();
-        
         while (running) {
             // Handle terminal input and rendering
-            screen.clear();
-            TextGraphics tg = screen.newTextGraphics();
-            tg.putString(0, 0, "Pijul Aider Terminal");
-            tg.putString(0, 2, "> " + inputBuffer.toString()); // Display current input
             try {
+                screen.clear();
+                TextGraphics tg = screen.newTextGraphics();
+                tg.putString(0, 0, "Pijul Aider Terminal");
+                tg.putString(0, 2, "> " + inputBuffer.toString()); // Display current input
                 screen.refresh();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -49,7 +45,7 @@ public class Terminal {
                         inputBuffer.append(keyStroke.getCharacter());
                         break;
                     case Enter:
-                        commandManager.processInput(inputBuffer.toString());
+                        commandManager.executeCommand(inputBuffer.toString());
                         inputBuffer.setLength(0); // Clear buffer after processing
                         break;
                     case Backspace:
