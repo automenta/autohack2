@@ -25,6 +25,8 @@ public class FileSystemTool implements Tool {
             return readFile((String) args.get("path"));
         } else if ("writeFile".equals(methodName)) {
             return writeFile((String) args.get("path"), (String) args.get("content"));
+        } else if ("listFiles".equals(methodName)) {
+            return listFiles((String) args.get("path"));
         } else {
             return "Error: Unknown method " + methodName;
         }
@@ -44,6 +46,16 @@ public class FileSystemTool implements Tool {
             return "File written successfully.";
         } catch (IOException e) {
             return "Error writing file: " + e.getMessage();
+        }
+    }
+
+    private String listFiles(String path) {
+        try {
+            return Files.list(Paths.get(path))
+                    .map(p -> p.getFileName().toString())
+                    .reduce("", (a, b) -> a + b + "\n");
+        } catch (IOException e) {
+            return "Error listing files: " + e.getMessage();
         }
     }
 }

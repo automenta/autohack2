@@ -11,6 +11,7 @@ public class HackToolProvider implements ToolProvider {
 
     public HackToolProvider() {
         registerTool(new FileSystemTool());
+        registerTool(new CommandExecutionTool());
     }
 
     private void registerTool(Tool tool) {
