@@ -1,6 +1,5 @@
 package com.pijul.mcr;
 
-import com.google.gson.Gson;
 import com.pijul.common.LLMClient;
 import com.pijul.mcr.prolog.Parser;
 import com.pijul.mcr.prolog.Solver;
@@ -168,12 +167,23 @@ public class Session {
             history.add("LLM goal: " + prologGoal);
 
             try {
+                Term parsedGoal = Parser.parseTerm(prologGoal);
                 QueryResult result = query(prologGoal);
-                history.add("Goal result: " + new Gson().toJson(result.getBindings()));
+                history.add("Goal result: " + result.getBindings());
 
-                if (Parser.parseTerm(prologGoal) instanceof com.pijul.mcr.prolog.Structure && ((com.pijul.mcr.prolog.Structure)Parser.parseTerm(prologGoal)).getFunctor().getName().equals("conclude")) {
-                    // This is a simplification. A real implementation would extract the answer from the bindings.
-                    return new ReasoningResult("Task concluded.", history);
+                if (parsedGoal instanceof com.pijul.mcr.prolog.Structure) {
+                    com.pijul.mcr.prolog.Structure goalStructure = (com.pijul.mcr.prolog.Structure) parsedGoal;
+                    if (goalStructure.getFunctor().getName().equals("conclude")) {
+                        if (result.isSuccess() && result.getBindings() != null && !result.getBindings().isEmpty()) {
+                            // Extract the answer from the first solution
+                            Map<Variable, Term> firstSolution = result.getBindings().get(0);
+                            Term answerTerm = firstSolution.values().stream().findFirst().orElse(null);
+                            String answer = (answerTerm != null) ? answerTerm.toString() : "Concluded without a specific answer.";
+                            return new ReasoningResult(answer, history);
+                        } else {
+                            return new ReasoningResult("Concluded, but no specific answer found.", history);
+                        }
+                    }
                 }
             } catch (Exception e) {
                 history.add("Error executing goal: " + e.getMessage());

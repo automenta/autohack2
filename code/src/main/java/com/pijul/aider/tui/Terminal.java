@@ -27,6 +27,10 @@ public class Terminal {
         messages.add(message);
     }
 
+    public Screen getScreen() {
+        return screen;
+    }
+
     public void run() {
         // Start command input loop
         commandManager.startListening();

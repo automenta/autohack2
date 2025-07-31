@@ -9,6 +9,10 @@ public class MCR {
 
     private final LLMClient llmClient;
 
+    public MCR(LLMClient llmClient) {
+        this.llmClient = llmClient;
+    }
+
     public MCR(Properties config) {
         String llmProvider = config.getProperty("llm.provider", "openai");
         String llmApiKey = config.getProperty("llm.apiKey");

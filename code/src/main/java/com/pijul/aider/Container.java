@@ -29,7 +29,7 @@ public class Container {
 
         this.fileManager = new FileManager();
         this.llmManager = new LLMManager();
-        this.uiManager = new UIManager();
+        this.uiManager = new UIManager(this);
         this.codebaseManager = new CodebaseManager(this.backend);
         this.fileSystem = new FileSystem();
         this.commandManager = new CommandManager(this); // Initialize CommandManager after other dependencies

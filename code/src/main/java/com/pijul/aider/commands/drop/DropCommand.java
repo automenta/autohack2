@@ -21,18 +21,15 @@ public class DropCommand implements Command {
     public void execute(String[] args) {
         CodebaseManager codebaseManager = container.getCodebaseManager();
         MessageHandler messageHandler = container.getMessageHandler();
-        String codebase = codebaseManager.getCodebase();
 
         for (String file : args) {
-            String fileRegex = "--- " + file + " ---\\n[\\s\\S]*?\\n\\n";
-            if (codebase.contains("--- " + file + " ---")) {
-                codebase = codebase.replaceAll(fileRegex, "");
+            if (codebaseManager.getFiles().contains(file)) {
+                codebaseManager.removeFile(file);
                 messageHandler.addMessage("system", "Removed " + file + " from the chat.");
             } else {
                 messageHandler.addMessage("system", "File " + file + " not found in the chat.");
             }
         }
-        codebaseManager.setCodebase(codebase);
     }
 
     @Override

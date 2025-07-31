@@ -56,17 +56,13 @@ public class AddCommand implements Command {
     }
 
     private void processFile(Path filePath, Backend backend, MessageHandler messageHandler, FileSystem fs, CodebaseManager codebaseManager) {
-        try {
-            backend.add(filePath.toString());
-            byte[] contentBytes = Files.readAllBytes(filePath);
-            String content = new String(contentBytes, StandardCharsets.UTF_8);
-            String currentCodebase = codebaseManager.getCodebase();
-            currentCodebase += "--- " + filePath + " ---\n" + content + "\n\n";
-            codebaseManager.setCodebase(currentCodebase);
+        codebaseManager.trackFile(filePath.toString()).thenRun(() -> {
             messageHandler.addMessage("system", "Added and staged " + filePath);
-        } catch (IOException e) {
+        }).exceptionally(e -> {
             e.printStackTrace();
-        }
+            messageHandler.addMessage("system", "Error adding file: " + filePath);
+            return null;
+        });
     }
 
     private void addAllTracked() {

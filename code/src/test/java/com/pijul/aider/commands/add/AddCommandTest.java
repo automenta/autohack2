@@ -52,7 +52,7 @@ public class AddCommandTest {
         verify(backend, times(1)).add(tempFile.toString());
 
         // Verify that the codebase manager was updated
-        String codebase = codebaseManager.getCodebase();
+        String codebase = codebaseManager.getCodebaseRepresentation();
         assert (codebase.contains("hello world"));
         assert (codebase.contains(tempFile.toString()));
 
