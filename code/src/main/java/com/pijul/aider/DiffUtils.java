@@ -1,17 +1,21 @@
 package com.pijul.aider;
 
-import java.util.ArrayList;
+import com.github.difflib.UnifiedDiffUtils;
+import com.github.difflib.patch.Patch;
+import com.github.difflib.patch.PatchFailedException;
+
+import java.util.Arrays;
 import java.util.List;
 
 public class DiffUtils {
-    public static String applyPatch(String original, String diff) {
-        // Implementation of diff patch application
-        // This is a simplified version - actual implementation would require proper diff parsing
-        List<String> originalLines = new ArrayList<>(List.of(original.split("\n")));
-        List<String> diffLines = new ArrayList<>(List.of(diff.split("\n")));
-        
-        // Basic implementation - actual diff application requires more complex logic
-        // For demonstration purposes, we'll just return the diff as the new content
-        return diff;
+
+    public static String applyPatch(String original, String diff) throws PatchFailedException {
+        List<String> originalLines = Arrays.asList(original.split("\n"));
+        List<String> diffLines = Arrays.asList(diff.split("\n"));
+
+        Patch<String> patch = UnifiedDiffUtils.parseUnifiedDiff(diffLines);
+        List<String> patchedLines = com.github.difflib.DiffUtils.patch(originalLines, patch);
+
+        return String.join("\n", patchedLines);
     }
 }

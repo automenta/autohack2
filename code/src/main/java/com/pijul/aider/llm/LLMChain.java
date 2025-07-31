@@ -26,8 +26,7 @@ public class LLMChain {
             LLMResponse response = llmClient.generate(prompt);
             if (response.isSuccess()) {
                 String output = response.getContent();
-                System.out.println("AI Response: " + output);
-                // container.addMessage("ai", "Response: " + output); // This method does not exist
+                container.getMessageHandler().addMessage("ai", "Response: " + output);
 
                 // Apply diff if present in response
                 if (output.contains("diff")) {
@@ -38,8 +37,7 @@ public class LLMChain {
                 return output;
             } else {
                 String error = "Error: " + response.getError();
-                System.err.println(error);
-                // container.addMessage("error", error); // This method does not exist
+                container.getMessageHandler().addMessage("error", error);
                 return error;
             }
         });

@@ -279,6 +279,38 @@ public class Session {
         String relationship = predicate + "(" + subject + ", " + object + ").";
         return assertProlog(relationship);
     }
+
+    public AssertionResult removeFact(String entity, String type) {
+        String fact = type + "(" + entity + ").";
+        return retractProlog(fact);
+    }
+
+    public AssertionResult removeRelationship(String subject, String predicate, String object) {
+        String relationship = predicate + "(" + subject + ", " + object + ").";
+        return retractProlog(relationship);
+    }
+
+    public AssertionResult removeRule(String rule) {
+        return retractProlog(rule);
+    }
+
+    public AssertionResult retractProlog(String prologClause) {
+        AssertionResult result = new AssertionResult();
+        if (!isValidPrologSyntax(prologClause)) {
+            result.setSuccess(false);
+            result.setError("Invalid Prolog clause");
+            return result;
+        }
+
+        if (program.remove(prologClause)) {
+            consultProgram();
+            result.setSuccess(true);
+        } else {
+            result.setSuccess(false);
+            result.setError("Clause not found in program");
+        }
+        return result;
+    }
     
     public static class SessionOptions {
         public long retryDelay = 500;

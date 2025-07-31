@@ -81,4 +81,57 @@ public class SessionTest {
         assertNotNull(result.getExplanation());
         assertFalse(result.getExplanation().isEmpty());
     }
+
+    @Test
+    void testSaveAndLoadState() throws ExecutionException, InterruptedException {
+        Session session1 = mcr.createSession(new Session.SessionOptions());
+        session1.assertProlog("fact(a).");
+        String state = session1.saveState();
+
+        Session session2 = mcr.createSession(new Session.SessionOptions());
+        session2.loadState(state);
+
+        Session.QueryResult result = session2.query("fact(a).", new Session.QueryOptions()).get();
+        assertTrue(result.isSuccess());
+    }
+
+    @Test
+    void testClear() throws ExecutionException, InterruptedException {
+        Session session = mcr.createSession(new Session.SessionOptions());
+        session.assertProlog("fact(a).");
+        session.clear();
+        Session.QueryResult result = session.query("fact(a).", new Session.QueryOptions()).get();
+        assertFalse(result.isSuccess());
+    }
+
+    @Test
+    void testAddAndRemoveFact() throws ExecutionException, InterruptedException {
+        Session session = mcr.createSession(new Session.SessionOptions());
+        session.assertFact("person(john).");
+        assertTrue(session.query("person(john).", new Session.QueryOptions()).get().isSuccess());
+
+        session.removeFact("john", "person");
+        assertFalse(session.query("person(john).", new Session.QueryOptions()).get().isSuccess());
+    }
+
+    @Test
+    void testAddAndRemoveRelationship() throws ExecutionException, InterruptedException {
+        Session session = mcr.createSession(new Session.SessionOptions());
+        session.addRelationship("john", "likes", "pizza");
+        assertTrue(session.query("likes(john, pizza).", new Session.QueryOptions()).get().isSuccess());
+
+        session.removeRelationship("john", "likes", "pizza");
+        assertFalse(session.query("likes(john, pizza).", new Session.QueryOptions()).get().isSuccess());
+    }
+
+    @Test
+    void testAddAndRemoveRule() throws ExecutionException, InterruptedException {
+        Session session = mcr.createSession(new Session.SessionOptions());
+        session.assertProlog("eats(X) :- likes(X, pizza).");
+        session.addRelationship("john", "likes", "pizza");
+        assertTrue(session.query("eats(john).", new Session.QueryOptions()).get().isSuccess());
+
+        session.removeRule("eats(X) :- likes(X, pizza).");
+        assertFalse(session.query("eats(john).", new Session.QueryOptions()).get().isSuccess());
+    }
 }

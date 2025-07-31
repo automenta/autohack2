@@ -7,16 +7,25 @@ import com.googlecode.lanterna.graphics.TextGraphics;
 import com.pijul.aider.CommandManager;
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Terminal {
     private TerminalScreen screen;
     private CommandManager commandManager;
     private boolean running = true;
     private StringBuilder inputBuffer = new StringBuilder();
+    private final List<String> messages = Collections.synchronizedList(new ArrayList<>());
 
     public Terminal(Screen screen, CommandManager commandManager) throws IOException {
         this.screen = (TerminalScreen) screen;
         this.commandManager = commandManager;
         screen.startScreen();
+    }
+
+    public void addMessage(String message) {
+        messages.add(message);
     }
 
     public void run() {
@@ -28,7 +37,16 @@ public class Terminal {
             screen.clear();
             TextGraphics tg = screen.newTextGraphics();
             tg.putString(0, 0, "Pijul Aider Terminal");
-            tg.putString(0, 2, "> " + inputBuffer.toString()); // Display current input
+
+            // Render messages
+            int row = 2;
+            synchronized (messages) {
+                for (String message : messages) {
+                    tg.putString(0, row++, message);
+                }
+            }
+
+            tg.putString(0, row, "> " + inputBuffer.toString()); // Display current input
             try {
                 screen.refresh();
             } catch (IOException e) {

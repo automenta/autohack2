@@ -1,5 +1,7 @@
 package com.pijul.aider;
 
+import com.pijul.aider.tui.Terminal;
+
 public class MessageHandler {
     private Container container;
 
@@ -8,8 +10,12 @@ public class MessageHandler {
     }
 
     public void addMessage(String sender, String message) {
-        // Add message logic
-        System.out.println(sender + ": " + message);
+        Terminal terminal = container.getTerminal();
+        if (terminal != null) {
+            terminal.addMessage(sender + ": " + message);
+        } else {
+            System.out.println(sender + ": " + message);
+        }
     }
 
     // Add more methods as needed

@@ -25,30 +25,30 @@ public class RunCommandTest {
     @Mock
     private MessageHandler messageHandler;
 
-    @InjectMocks
     private RunCommand runCommand;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         when(container.getMessageHandler()).thenReturn(messageHandler);
+        runCommand = new RunCommand(container);
     }
 
     @Test
-    public void testRunCommand_withValidCommand_executesCommandAndPrintsOutput() throws IOException, InterruptedException {
-        List<String> command = Arrays.asList("echo", "hello world");
+    public void testRunCommand_withValidCommand_executesCommandAndPrintsOutput() {
+        String[] command = {"echo", "hello world"};
 
-        runCommand.run(command);
+        runCommand.execute(command);
 
-        verify(messageHandler, times(1)).handle(eq("system"), anyString());
+        verify(messageHandler, times(1)).addMessage(eq("system"), anyString());
     }
 
     @Test
-    public void testRunCommand_withInvalidCommand_printsErrorMessage() throws IOException, InterruptedException {
-        List<String> command = Arrays.asList("invalid_command");
+    public void testRunCommand_withInvalidCommand_printsErrorMessage() {
+        String[] command = {"invalid_command"};
 
-        runCommand.run(command);
+        runCommand.execute(command);
 
-        verify(messageHandler, times(1)).handle(eq("system"), anyString());
+        verify(messageHandler, times(1)).addMessage(eq("system"), anyString());
     }
 }
