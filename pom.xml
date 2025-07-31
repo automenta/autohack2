@@ -11,6 +11,7 @@
     <modules>
         <module>code</module>
         <module>common</module>
+        <module>hack</module>
     </modules>
 
     <properties>
