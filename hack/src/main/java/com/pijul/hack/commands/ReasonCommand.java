@@ -1,6 +1,9 @@
 package com.pijul.hack.commands;
 
+import com.example.mcr.core.Session;
 import com.pijul.hack.Container;
+
+import java.util.concurrent.ExecutionException;
 
 public class ReasonCommand implements Command {
 
@@ -17,7 +20,19 @@ public class ReasonCommand implements Command {
             return;
         }
 
-        container.getMessageHandler().handleMessage("Reasoning capabilities are not yet implemented.");
+        String task = String.join(" ", args);
+        container.getMessageHandler().handleMessage("Reasoning about: " + task);
+
+        Session.SessionOptions options = new Session.SessionOptions();
+        options.setStrategy("direct"); // Or any other strategy
+
+        Session session = container.getMcr().createSession(options);
+        try {
+            String result = session.reason(task, null).toCompletableFuture().get();
+            container.getMessageHandler().handleMessage("Result: " + result);
+        } catch (InterruptedException | ExecutionException e) {
+            container.getMessageHandler().handleMessage("Error during reasoning: " + e.getMessage());
+        }
     }
 
     @Override

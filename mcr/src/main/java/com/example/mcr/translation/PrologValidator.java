@@ -1,6 +1,10 @@
 package com.example.mcr.translation;
 
 
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.Prolog;
+import alice.tuprolog.Theory;
+
 public class PrologValidator {
 
     /**
@@ -13,9 +17,10 @@ public class PrologValidator {
             return false;
         }
         try {
-            //new PrologParser.getWithDefaultOperators().parseTheory(prologClause);
+            Prolog engine = new Prolog();
+            engine.setTheory(new Theory(prologClause));
             return true;
-        } catch (Exception e) {
+        } catch (InvalidTheoryException e) {
             return false;
         }
     }

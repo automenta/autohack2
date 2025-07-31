@@ -1,5 +1,6 @@
 package com.pijul.hack;
 
+import com.example.mcr.core.MCR;
 import com.pijul.aider.llm.LLMChain;
 import com.pijul.hack.commands.McpCommand;
 import com.pijul.hack.commands.QueryCommand;
@@ -14,6 +15,7 @@ public class Container {
     private final Workspace workspace;
     private final CommandManager commandManager;
     private final McpConfig mcpConfig;
+    private final MCR mcr;
     private McpToolProvider mcpToolProvider;
     private MessageHandler messageHandler;
     private LLMChain llmChain;
@@ -22,6 +24,13 @@ public class Container {
         this.workspace = new Workspace();
         this.commandManager = new CommandManager(this);
         this.mcpConfig = new McpConfig();
+        MCR.LlmConfig llmConfig = new MCR.LlmConfig();
+        llmConfig.provider = "openai"; // or any other provider
+        llmConfig.apiKey = System.getenv("OPENAI_API_KEY");
+        llmConfig.model = "gpt-4";
+        MCR.Config mcrConfig = new MCR.Config();
+        mcrConfig.llm = llmConfig;
+        this.mcr = new MCR(mcrConfig);
         // The message handler will be set by the TUI
     }
 
@@ -64,5 +73,9 @@ public class Container {
 
     public void setMessageHandler(MessageHandler messageHandler) {
         this.messageHandler = messageHandler;
+    }
+
+    public MCR getMcr() {
+        return mcr;
     }
 }

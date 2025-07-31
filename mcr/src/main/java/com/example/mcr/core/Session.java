@@ -9,7 +9,6 @@ import com.pijul.common.LLMClient;
 import com.pijul.common.LLMResponse;
 import com.pijul.common.LLMUsage;
 
-import java.lang.Long;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +16,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class Session {
     private static final Pattern PREDICATE_PATTERN = Pattern.compile("^[a-z][a-zA-Z0-9_]*$");
@@ -31,12 +28,12 @@ public class Session {
     private final PrologValidator prologValidator = new PrologValidator();
     private String sessionId;
     private OntologyManager ontology;
-    private MutableSolver prologSession = ClassicSolverFactory.INSTANCE.newBuilder().buildMutable();
+    private Prolog prologSession = new Prolog();
 
     public Session(MCR mcr, SessionOptions options) {
         this.mcr = mcr;
         this.options = options;
-        this.sessionId = options.sessionId != null ? options.sessionId : Long.toString(System.currentTimeMillis(), 36);
+        this.sessionId = options.sessionId != null ? options.sessionId : java.lang.Long.toString(System.currentTimeMillis(), 36);
         this.logger = options.logger != null ? options.logger : Logger.getLogger(Session.class.getName());
         this.llmClient = mcr.getLlmClient();
 
@@ -61,9 +58,11 @@ public class Session {
 
     private void consultProgram() {
         try {
-            var ops = PrologParser.getWithDefaultOperators();
-            var t = new Theory(program.stream().map(ops::parseClause).collect(Collectors.toList()));
-            prologSession.appendStaticKb(t);
+            StringBuilder theory = new StringBuilder();
+            for (String clause : program) {
+                theory.append(clause).append("\n");
+            }
+            prologSession.setTheory(new Theory(theory.toString()));
         } catch (InvalidTheoryException e) {
             logger.severe("Error consulting program: " + e.getMessage());
         }
@@ -105,7 +104,7 @@ public class Session {
 
     public void clear() {
         program.clear();
-        prologSession = ClassicSolverFactory.get().createSolver();
+        prologSession = new Prolog();
         if (options.ontology != null) {
             ontology = new OntologyManager(new OntologyManager.Ontology(options.ontology));
         }
@@ -126,7 +125,7 @@ public class Session {
         this.sessionId = (String) data.get("sessionId");
         this.ontology = new OntologyManager(new OntologyManager.Ontology((Map<String, Object>) data.get("ontology")));
         this.program.clear();
-        this.prologSession = ClassicSolverFactory.INSTANCE.newBuilder().buildMutable();
+        this.prologSession = new Prolog();
 
         List<String> savedProgram = (List<String>) data.get("program");
         for (String clause : savedProgram) {
@@ -172,27 +171,35 @@ public class Session {
                 return result;
             }
 
-            Struct queryTerm = PrologParser.getWithDefaultOperators().parseStruct(prologQuery);
-            List<SolveInfo> solutions = StreamSupport.stream(prologSession.solve(queryTerm).spliterator(), false).collect(Collectors.toList());
-
-            if (solutions.isEmpty() || solutions.get(0).isNo()) {
-                result.setSuccess(false);
-                result.setError("No solutions found.");
-                return result;
-            }
-
-            result.setSuccess(true);
-            List<Map<String, String>> bindings = new ArrayList<>();
-            for (SolveInfo solutionInfo : solutions) {
-                if (solutionInfo.isYes()) {
-                    Map<String, String> binding = new HashMap<>();
-                    for (Map.Entry<Var, Term> entry : solutionInfo.getSolution().getSubstitution().getMap().entrySet()) {
-                        binding.put(entry.getKey().getName(), entry.getValue().toString());
-                    }
-                    bindings.add(binding);
+            try {
+                SolveInfo solutionInfo = prologSession.solve(prologQuery);
+                if (!solutionInfo.isSuccess()) {
+                    result.setSuccess(false);
+                    result.setError("No solutions found.");
+                    return result;
                 }
+
+                result.setSuccess(true);
+                List<Map<String, String>> bindings = new ArrayList<>();
+                if (solutionInfo.hasOpenAlternatives()) {
+                    // Handle multiple solutions if necessary
+                } else {
+                    try {
+                        Map<String, String> binding = new HashMap<>();
+                        for (Var v : solutionInfo.getBindingVars()) {
+                            binding.put(v.getName(), v.getTerm().toString());
+                        }
+                        bindings.add(binding);
+                    } catch (NoSolutionException e) {
+                        // This should not happen if isSuccess() is true, but just in case
+                    }
+                }
+                result.setBindings(bindings);
+
+            } catch (MalformedGoalException e) {
+                result.setSuccess(false);
+                result.setError("Malformed Prolog query: " + e.getMessage());
             }
-            result.setBindings(bindings);
             return result;
         });
     }
