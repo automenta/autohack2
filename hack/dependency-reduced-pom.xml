@@ -24,7 +24,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.pijul.hack.Agent</mainClass>
+                  <mainClass>com.pijul.hack.App</mainClass>
                 </transformer>
               </transformers>
               <filters>

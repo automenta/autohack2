@@ -3,6 +3,7 @@ package com.pijul.hack;
 import com.pijul.hack.tools.HackToolProvider;
 import com.pijul.mcr.MCR;
 import com.pijul.mcr.Session;
+import com.pijul.hack.commands.ApiKeyCommand;
 import com.pijul.hack.commands.McpCommand;
 import com.pijul.hack.commands.QueryCommand;
 import com.pijul.hack.commands.ReasonCommand;
@@ -18,6 +19,10 @@ public class Container {
     private final MCR mcr;
     private final Session mcrSession;
     private MessageHandler messageHandler;
+    private final com.pijul.aider.BackendManager backendManager;
+    private final com.pijul.aider.CodebaseManager codebaseManager;
+    private final com.pijul.aider.Backend backend;
+
 
     public Container() {
         this.workspace = new Workspace();
@@ -41,6 +46,11 @@ public class Container {
         mcrProps.setProperty("llm.model", "gpt-4o-mini");
         this.mcr = new MCR(mcrProps);
         this.mcrSession = mcr.createSession(new HackToolProvider());
+
+        this.backendManager = new com.pijul.aider.BackendManager(null); // Passing null as container, as it's not used.
+        this.backendManager.autodetectBackend();
+        this.backend = this.backendManager.getBackend();
+        this.codebaseManager = new com.pijul.aider.CodebaseManager(this.backend);
     }
 
     public void init() {
@@ -49,6 +59,7 @@ public class Container {
         commandManager.registerCommand("/query", new QueryCommand(this));
         commandManager.registerCommand("/reason", new ReasonCommand(this));
         commandManager.registerCommand("/apikey", new ApiKeyCommand(this));
+        commandManager.registerCommand("/ls", new com.pijul.hack.commands.LsCommand(this));
     }
 
     public Workspace getWorkspace() {
@@ -81,5 +92,9 @@ public class Container {
 
     public ApiKeyManager getApiKeyManager() {
         return apiKeyManager;
+    }
+
+    public com.pijul.aider.CodebaseManager getCodebaseManager() {
+        return codebaseManager;
     }
 }

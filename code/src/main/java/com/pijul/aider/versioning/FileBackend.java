@@ -56,24 +56,6 @@ public class FileBackend implements Backend {
     }
 
     @Override
-    public CompletableFuture<Void> unrecord(String hash) {
-        // No-op for file backend
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public CompletableFuture<Void> channel(String subcommand, String name) {
-        // No-op for file backend
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public CompletableFuture<Void> patch(String subcommand, String name) {
-        // No-op for file backend
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
     public CompletableFuture<Void> apply(String patch) {
         return CompletableFuture.runAsync(() -> {
             try {
@@ -100,7 +82,6 @@ public class FileBackend implements Backend {
         });
     }
 
-    @Override
     public CompletableFuture<String> conflicts() {
         return CompletableFuture.completedFuture("[]");
     }

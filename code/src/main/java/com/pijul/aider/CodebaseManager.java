@@ -53,4 +53,8 @@ public class CodebaseManager {
         }
         return CompletableFuture.completedFuture(null);
     }
+
+    public Backend getVersioningBackend() {
+        return versioningBackend;
+    }
 }

@@ -21,31 +21,27 @@ public class ConflictsCommand implements Command {
         Backend backend = container.getBackend();
         MessageHandler messageHandler = container.getMessageHandler();
 
-        try {
-            if (backend.conflicts() != null) {
-                String conflicts = backend.conflicts().get();
-                try {
-                    // Attempt to parse as JSON array
-                    conflicts = conflicts.replace("[", "").replace("]", "").replace("\"", "");
-                    String[] conflictArray = conflicts.split(",");
-                    if (conflictArray.length > 0) {
-                        StringBuilder conflictMessage = new StringBuilder("Conflicts:\n");
-                        for (String conflict : conflictArray) {
-                            conflictMessage.append("- ").append(conflict.trim()).append("\n");
-                        }
-                        messageHandler.addMessage("system", conflictMessage.toString());
-                    } else {
-                        messageHandler.addMessage("system", "No conflicts found.");
+        if (backend instanceof com.pijul.aider.PijulBackend) {
+            com.pijul.aider.PijulBackend pijulBackend = (com.pijul.aider.PijulBackend) backend;
+            try {
+                String conflicts = pijulBackend.conflicts().get();
+                // Attempt to parse as JSON array
+                conflicts = conflicts.replace("[", "").replace("]", "").replace("\"", "");
+                String[] conflictArray = conflicts.split(",");
+                if (conflictArray.length > 0 && !conflictArray[0].isEmpty()) {
+                    StringBuilder conflictMessage = new StringBuilder("Conflicts:\n");
+                    for (String conflict : conflictArray) {
+                        conflictMessage.append("- ").append(conflict.trim()).append("\n");
                     }
-                } catch (Exception e) {
-                    // If parsing fails, just show the raw output
-                    messageHandler.addMessage("system", conflicts);
+                    messageHandler.addMessage("system", conflictMessage.toString());
+                } else {
+                    messageHandler.addMessage("system", "No conflicts found.");
                 }
-            } else {
-                messageHandler.addMessage("system", "This backend does not support conflicts.");
+            } catch (Exception e) {
+                messageHandler.addMessage("system", "Error getting conflicts: " + e.getMessage());
             }
-        } catch (Exception e) {
-            messageHandler.addMessage("system", "Error: " + e.getMessage());
+        } else {
+            messageHandler.addMessage("system", "This backend does not support conflicts.");
         }
     }
 

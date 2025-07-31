@@ -24,14 +24,6 @@ public interface Backend {
 
     CompletableFuture<String> status();
 
-    CompletableFuture<Void> unrecord(String hash);
-
-    CompletableFuture<String> conflicts();
-
-    CompletableFuture<Void> channel(String subcommand, String name);
-
-    CompletableFuture<Void> patch(String subcommand, String name);
-
     CompletableFuture<Void> apply(String patch);
 
     CompletableFuture<Void> clear();

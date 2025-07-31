@@ -59,12 +59,10 @@ public class GitBackend implements Backend {
         return runCommand("git", "commit", "-m", message).thenApply(s -> null);
     }
 
-    @Override
     public CompletableFuture<Void> unrecord(String hash) {
         return runCommand("git", "reset", "--soft", "HEAD~1").thenApply(s -> null);
     }
 
-    @Override
     public CompletableFuture<Void> channel(String subcommand, String name) {
         return CompletableFuture.runAsync(() -> {
             try {
@@ -84,7 +82,6 @@ public class GitBackend implements Backend {
         }, executor);
     }
 
-    @Override
     public CompletableFuture<Void> patch(String subcommand, String name) {
         return CompletableFuture.runAsync(() -> {
             try {
@@ -112,7 +109,6 @@ public class GitBackend implements Backend {
         }, executor);
     }
 
-    @Override
     public CompletableFuture<String> conflicts() {
         return runCommand("git", "status", "--porcelain").thenApply(output -> {
             List<String> conflicts = new ArrayList<>();

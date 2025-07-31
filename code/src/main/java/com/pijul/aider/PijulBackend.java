@@ -21,17 +21,14 @@ public class PijulBackend implements Backend {
         return executeCommand("pijul", "record", "-m", message);
     }
 
-    @Override
     public CompletableFuture<Void> unrecord(String hash) {
         return executeCommand("pijul", "unrecord", hash);
     }
 
-    @Override
     public CompletableFuture<Void> channel(String subcommand, String name) {
         return executeCommand("pijul", "channel", subcommand, name);
     }
 
-    @Override
     public CompletableFuture<Void> patch(String subcommand, String name) {
         return executeCommand("pijul", "patch", subcommand, name);
     }
@@ -41,7 +38,6 @@ public class PijulBackend implements Backend {
         return executeCommand("pijul", "apply", patch);
     }
 
-    @Override
     public CompletableFuture<String> conflicts() {
         return executeCommandWithOutput("pijul", "conflicts");
     }
