@@ -10,6 +10,10 @@ public class OntologyManager {
     private final List<String> rules = new ArrayList<>();
     private final Map<String, String> synonyms = new HashMap<>();
 
+    public OntologyManager() {
+        this(new Ontology());
+    }
+
     public OntologyManager(Ontology ontology) {
         if (ontology != null) {
             this.types.addAll(ontology.getTypes());
@@ -18,6 +22,23 @@ public class OntologyManager {
             this.rules.addAll(ontology.getRules());
             this.synonyms.putAll(ontology.getSynonyms());
         }
+    }
+
+    public Map<String, Object> getState() {
+        Map<String, Object> state = new HashMap<>();
+        state.put("types", new HashSet<>(types));
+        state.put("relationships", new HashSet<>(relationships));
+        state.put("constraints", new HashSet<>(constraints));
+        state.put("rules", new ArrayList<>(rules));
+        state.put("synonyms", new HashMap<>(synonyms));
+        return state;
+    }
+
+    public Set<String> getTerms() {
+        Set<String> terms = new HashSet<>();
+        terms.addAll(types);
+        terms.addAll(relationships);
+        return terms;
     }
 
     public String resolveSynonym(String term) {
@@ -72,9 +93,14 @@ public class OntologyManager {
     }
 
     public void validatePrologClause(String prologClause) throws IllegalArgumentException {
-        String[] parts = prologClause.split(":-");
+        String clause = prologClause.trim();
+        if (clause.endsWith(".")) {
+            clause = clause.substring(0, clause.length() - 1);
+        }
+
+        String[] parts = clause.split(":-");
         String head = parts[0].trim();
-        String body = parts.length > 1 ? parts[1].replaceAll("\\.$", "").trim() : null;
+        String body = parts.length > 1 ? parts[1].trim() : null;
         
         Map<String, Object> headMatch = parsePredicate(head);
         if (headMatch == null) {
@@ -150,18 +176,29 @@ public class OntologyManager {
         private final Set<String> types;
         private final Set<String> relationships;
         private final Set<String> constraints;
+        private final List<String> rules;
         private final Map<String, String> synonyms;
         
         public Ontology() {
             this.types = new HashSet<>();
             this.relationships = new HashSet<>();
             this.constraints = new HashSet<>();
+            this.rules = new ArrayList<>();
             this.synonyms = new HashMap<>();
+        }
+
+        public Ontology(Map<String, Object> map) {
+            this.types = new HashSet<>((Collection<String>) map.get("types"));
+            this.relationships = new HashSet<>((Collection<String>) map.get("relationships"));
+            this.constraints = new HashSet<>((Collection<String>) map.get("constraints"));
+            this.rules = new ArrayList<>((Collection<String>) map.get("rules"));
+            this.synonyms = new HashMap<>((Map<String, String>) map.get("synonyms"));
         }
         
         public Set<String> getTypes() { return types; }
         public Set<String> getRelationships() { return relationships; }
         public Set<String> getConstraints() { return constraints; }
+        public List<String> getRules() { return rules; }
         public Map<String, String> getSynonyms() { return synonyms; }
     }
 }

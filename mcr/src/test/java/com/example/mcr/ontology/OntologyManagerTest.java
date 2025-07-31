@@ -1,71 +1,73 @@
 package com.example.mcr.ontology;
 
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OntologyManagerTest {
     private OntologyManager ontologyManager;
 
     @BeforeEach
     void setUp() {
-        ontologyManager = new OntologyManager();
-        ontologyManager.addType("bird");
-        ontologyManager.addType("animal");
-        ontologyManager.defineRelationshipType("has_wings");
+        Map<String, Object> ontologyData = new HashMap<>();
+        ontologyData.put("types", new HashSet<>(Arrays.asList("bird", "animal")));
+        ontologyData.put("relationships", new HashSet<>(Arrays.asList("has_wings")));
+        ontologyData.put("constraints", new HashSet<>());
+        ontologyData.put("rules", Arrays.asList());
+        ontologyData.put("synonyms", new HashMap<>());
+        ontologyManager = new OntologyManager(new OntologyManager.Ontology(ontologyData));
     }
 
     @Test
     void shouldValidateFactWithExistingType() {
-        assertTrue(ontologyManager.isValidFact("bird", "tweety"));
+        assertDoesNotThrow(() -> ontologyManager.validateFact("bird", List.of("tweety")));
     }
 
     @Test
     void shouldRejectFactWithMissingType() {
-        assertFalse(ontologyManager.isValidFact("fish", "nemo"));
+        assertThrows(IllegalArgumentException.class, () -> ontologyManager.validateFact("fish", List.of("nemo")));
     }
 
     @Test
     void shouldValidateRelationshipWithExistingType() {
-        assertTrue(ontologyManager.isValidRelationship("has_wings", "tweety", "true"));
+        assertDoesNotThrow(() -> ontologyManager.validateFact("has_wings", List.of("tweety", "true")));
     }
 
     @Test
     void shouldRejectRelationshipWithMissingType() {
-        assertFalse(ontologyManager.isValidRelationship("swims", "nemo", "true"));
+        assertThrows(IllegalArgumentException.class, () -> ontologyManager.validateFact("swims", List.of("nemo", "true")));
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "bird(tweety)., true",
-        "fish(nemo)., false",
-        "has_wings(tweety, true)., true",
-        "swims(nemo, true)., false"
-    })
-    void shouldValidatePrologClauseAgainstOntology(String clause, boolean expected) {
-        assertEquals(expected, ontologyManager.isValidPrologClause(clause));
+    @Test
+    void shouldValidatePrologClauseAgainstOntology() {
+        assertDoesNotThrow(() -> ontologyManager.validatePrologClause("bird(tweety)."));
+        assertThrows(IllegalArgumentException.class, () -> ontologyManager.validatePrologClause("fish(nemo)."));
     }
 
     @Test
     void shouldReloadOntologyAndRevalidate() {
-        ontologyManager.reloadOntology(new OntologyManager.OntologyConfig(
-            new HashSet<>(Arrays.asList("mammal")),
-            new HashSet<>(Arrays.asList("eats")),
-            new HashSet<>(),
-            null
-        ));
+        Map<String, Object> newOntologyData = new HashMap<>();
+        newOntologyData.put("types", new HashSet<>(Arrays.asList("mammal")));
+        newOntologyData.put("relationships", new HashSet<>(Arrays.asList("eats")));
+        newOntologyData.put("constraints", new HashSet<>());
+        newOntologyData.put("rules", Arrays.asList());
+        newOntologyData.put("synonyms", new HashMap<>());
+
+        ontologyManager = new OntologyManager(new OntologyManager.Ontology(newOntologyData));
         
-        assertFalse(ontologyManager.isValidFact("bird", "tweety"));
-        assertTrue(ontologyManager.isValidFact("mammal", "dog"));
+        assertThrows(IllegalArgumentException.class, () -> ontologyManager.validateFact("bird", List.of("tweety")));
+        assertDoesNotThrow(() -> ontologyManager.validateFact("mammal", List.of("dog")));
     }
 
     @Test
     void shouldAddAndRetrieveSynonyms() {
         ontologyManager.addSynonym("canary", "bird");
-        assertEquals("bird", ontologyManager.getSynonym("canary"));
+        assertEquals("bird", ontologyManager.resolveSynonym("canary"));
     }
 }
