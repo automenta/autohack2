@@ -2,40 +2,43 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <groupId>com.pijul.aider</groupId>
+  <parent>
+    <groupId>com.pijul.project</groupId>
+    <artifactId>pijul-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
   <artifactId>pijul-aider</artifactId>
-  <version>1.0-SNAPSHOT</version>
   
   
   <dependencies>
+    <!-- Shared common module -->
+    <dependency>
+      <groupId>com.pijul.project</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- Add Lanterna dependency for terminal UI -->
     <dependency>
       <groupId>com.googlecode.lanterna</groupId>
       <artifactId>lanterna</artifactId>
       <version>3.2.0-alpha1</version>
     </dependency>
-    
+
     <!-- Add LangChain4j dependency for LLM integration -->
     <dependency>
       <groupId>dev.langchain4j</groupId>
       <artifactId>langchain4j-google-ai-gemini</artifactId>
-      <version>1.1.0-rc1</version>
     </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-ollama</artifactId>
-            <version>1.1.0-rc1</version>
-        </dependency>
         
-        
-        <!-- JUnit for testing -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.9.2</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <!-- JUnit for testing -->
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <scope>test</scope>
+    </dependency>
+  </dependencies>
     
     <build>
         <plugins>

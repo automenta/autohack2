@@ -2,19 +2,17 @@ package com.pijul.aider;
 
 import java.util.List;
 import java.util.ArrayList;
-import com.pijul.aider.versioning.VersioningBackend;
 import java.util.concurrent.CompletableFuture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
 
-public class PijulBackend extends VersioningBackend implements Backend {
+public class PijulBackend implements Backend {
     @Override
     public CompletableFuture<Void> add(String file) {
         return executeCommand("pijul", "add", file);
     }
 
-    @Override
     public CompletableFuture<Void> unstage(String file) {
         return executeCommand("pijul", "remove", file);
     }
@@ -94,7 +92,6 @@ public class PijulBackend extends VersioningBackend implements Backend {
         return CompletableFuture.completedFuture(null);
     }
 
-    @Override
     public CompletableFuture<Void> undo() {
         return executeCommand("pijul", "undo");
     }

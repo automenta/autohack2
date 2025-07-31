@@ -3,10 +3,10 @@ package com.pijul.aider;
 import com.pijul.aider.commands.CommandManager;
 import com.pijul.aider.tui.Terminal;
 import com.pijul.aider.versioning.FileBackend;
-import com.pijul.aider.versioning.VersioningBackend;
+import com.pijul.aider.Backend;
 
 public class Container {
-    private MessageHandler messageHandler;
+    private Backend backend;
     private BackendManager backendManager;
     private FileManager fileManager;
     private LLMManager llmManager;
@@ -16,6 +16,7 @@ public class Container {
     private FileSystem fileSystem;
     private String diff;
     private Terminal terminal;
+    private MessageHandler messageHandler;
 
     public Container() {
         this.messageHandler = new MessageHandler(this);
@@ -23,7 +24,7 @@ public class Container {
         this.fileManager = new FileManager();
         this.llmManager = new LLMManager();
         this.uiManager = new UIManager();
-        this.codebaseManager = new CodebaseManager(new FileBackend()); // Default to FileBackend
+        this.codebaseManager = new CodebaseManager(this.backend);
         this.fileSystem = new FileSystem();
         this.commandManager = new CommandManager(this); // Initialize CommandManager after other dependencies
     }
@@ -32,8 +33,8 @@ public class Container {
         return messageHandler;
     }
 
-    public VersioningBackend getBackend() {
-        return backendManager.getBackend();
+    public Backend getBackend() {
+        return this.backend;
     }
 
     public BackendManager getBackendManager() {

@@ -1,17 +1,21 @@
-package com.example.mcr.llm;
+package com.pijul.common;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
-import dev.langchain4j.model.googlepalm.GooglePalmChatModel;
+import dev.langchain4j.model.vertexai.VertexAiChatModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Client for interacting with various LLM providers.
  * Provides a unified interface for generating responses from different LLM providers.
  */
 public class LLMClient {
-    private final ChatLanguageModel model;
+    private static final Logger logger = Logger.getLogger(LLMClient.class.getName());
+    private final ChatModel model;
 
     /**
      * Constructs an LLMClient for the specified provider and configuration.
@@ -29,17 +33,15 @@ public class LLMClient {
                     .baseUrl("http://localhost:11434")
                     .build();
                 break;
-                
+
             case "google":
-                if (apiKey == null) {
-                    throw new IllegalArgumentException("Google provider requires an apiKey");
-                }
-                this.model = GooglePalmChatModel.builder()
+                this.model = VertexAiChatModel.builder()
+                    .project("mcr-llm")
+                    .location("us-central1")
                     .modelName(modelName)
-                    .apiKey(apiKey)
                     .build();
                 break;
-                
+
             case "anthropic":
                 if (apiKey == null) {
                     throw new IllegalArgumentException("Anthropic provider requires an apiKey");
@@ -49,7 +51,7 @@ public class LLMClient {
                     .apiKey(apiKey)
                     .build();
                 break;
-                
+
             case "openai":
                 if (apiKey == null) {
                     throw new IllegalArgumentException("OpenAI provider requires an apiKey");
@@ -59,7 +61,7 @@ public class LLMClient {
                     .apiKey(apiKey)
                     .build();
                 break;
-                
+
             default:
                 throw new IllegalArgumentException("Unsupported LLM provider: " + provider);
         }
@@ -72,44 +74,23 @@ public class LLMClient {
      * @return The generated response as a string
      */
     public LLMResponse generate(String prompt) {
-        long startTime = System.currentTimeMillis();
         LLMResponse response = new LLMResponse();
-        
         try {
-            // Get raw response from the model
-            String rawResponse = model.generate(prompt);
+            String rawResponse = model.chat(prompt);
             
-            // Parse response for token usage (implementation depends on actual model response format)
+            // The token usage is not available in the simple model.generate(prompt) response.
+            // LangChain4j's StreamingChatLanguageModel provides more detailed responses with token counts.
+            // For now, we will leave the usage empty.
             LLMUsage usage = new LLMUsage();
-            usage.setPromptTokens(10);  // Example values
-            usage.setCompletionTokens(20);
-            usage.setTotalTokens(30);
             
             response.setContent(rawResponse);
             response.setUsage(usage);
             response.setSuccess(true);
         } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error in LLM generation", e);
             response.setSuccess(false);
             response.setError("LLM generation failed: " + e.getMessage());
-            logger.log(Level.SEVERE, "Error in LLM generation", e);
-        } finally {
-            long endTime = System.currentTimeMillis();
-            // Record latency in metrics
-            LLMUsage finalUsage = response.getUsage();
-            if (finalUsage != null) {
-                // Add latency tracking if supported
-                // finalUsage.setLatencyMs(endTime - startTime);
-            }
         }
-        
         return response;
-    }
-    
-    // Helper method to parse usage metrics from model response
-    private LLMUsage parseUsageFromResponse(String response) {
-        // Implement actual parsing logic based on model's response format
-        // For example, parse JSON response from OpenAI:
-        // {"usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}, ...}
-        return new LLMUsage(); // Return populated usage object
     }
 }

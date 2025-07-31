@@ -1,12 +1,12 @@
 package com.pijul.aider;
 
-import com.pijul.aider.versioning.VersioningBackend;
+import com.pijul.aider.Backend;
 import com.pijul.aider.versioning.FileBackend;
 import com.pijul.aider.versioning.GitBackend;
 import com.pijul.aider.PijulBackend;
 
 public class BackendManager {
-    private VersioningBackend backend;
+    private Backend backend;
 
     public BackendManager() {
         // Default to FileBackend for now
@@ -29,7 +29,7 @@ public class BackendManager {
         }
     }
 
-    public VersioningBackend getBackend() {
+    public Backend getBackend() {
         return backend;
     }
 

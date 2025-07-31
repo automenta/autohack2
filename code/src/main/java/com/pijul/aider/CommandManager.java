@@ -1,6 +1,6 @@
-package com.piul.aider;
+package com.pijul.aider;
 
-import com.piul.aider.commands.Command;
+import com.pijul.aider.commands.Command;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;

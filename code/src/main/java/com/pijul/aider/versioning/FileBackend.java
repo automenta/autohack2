@@ -1,5 +1,7 @@
 package com.pijul.aider.versioning;
 
+import com.pijul.aider.Backend;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class FileBackend extends VersioningBackend {
+public class FileBackend implements Backend {
     private final Map<String, String> files = new HashMap<>();
 
     @Override
@@ -33,7 +35,6 @@ public class FileBackend extends VersioningBackend {
         });
     }
 
-    @Override
     public CompletableFuture<Void> unstage(String file) {
         return CompletableFuture.runAsync(() -> {
             String backupFile = files.get(file);
@@ -74,31 +75,29 @@ public class FileBackend extends VersioningBackend {
 
     @Override
     public CompletableFuture<Void> apply(String patch) {
-    public CompletableFuture<Void> apply(String patch) {
         return CompletableFuture.runAsync(() -> {
             try {
                 // Create temporary file for patch
                 Path tempPatch = Files.createTempFile("patch", ".diff");
-                Files.write(tempPatch, patch.getBytes(StandardCharsets.UTF_8));
-                
+                Files.write(tempPatch, patch.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
                 // Apply patch using external tool (e.g., git)
                 ProcessBuilder processBuilder = new ProcessBuilder("git", "apply", tempPatch.toString());
                 processBuilder.redirectErrorStream(true);
                 Process process = processBuilder.start();
-                
+
                 // Wait for process to complete
                 int exitCode = process.waitFor();
                 if (exitCode != 0) {
                     throw new RuntimeException("Failed to apply patch: " + new String(process.getErrorStream().readAllBytes()));
                 }
-                
+
                 // Clean up temporary file
                 Files.delete(tempPatch);
-            } catch (IOException | InterruptedException e) {
+            } catch (java.io.IOException | InterruptedException e) {
                 throw new RuntimeException("Error applying patch", e);
             }
         });
-    }
     }
 
     @Override
@@ -120,7 +119,6 @@ public class FileBackend extends VersioningBackend {
         });
     }
 
-    @Override
     public CompletableFuture<Void> undo() {
         return CompletableFuture.runAsync(() -> {
             for (String file : files.keySet()) {
@@ -161,5 +159,25 @@ public class FileBackend extends VersioningBackend {
     @Override
     public CompletableFuture<List<String>> listUntrackedFiles() {
         return CompletableFuture.completedFuture(new ArrayList<>());
+    }
+
+    @Override
+    public CompletableFuture<Void> revertAll() {
+        return undo();
+    }
+
+    @Override
+    public CompletableFuture<String> status() {
+        return CompletableFuture.completedFuture("");
+    }
+
+    @Override
+    public CompletableFuture<Void> initialize() {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<Void> shutdown() {
+        return CompletableFuture.completedFuture(null);
     }
 }

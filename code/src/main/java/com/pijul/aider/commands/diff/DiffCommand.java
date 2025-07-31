@@ -13,16 +13,24 @@ public class DiffCommand implements Command {
     }
 
     @Override
+    public void init() {
+    }
+
+    @Override
     public void execute(String[] args) {
         Backend backend = container.getBackend();
         MessageHandler messageHandler = container.getMessageHandler();
         
         try {
-            String diff = backend.diff();
+            String diff = backend.diff().get();
             container.setDiff(diff);
             messageHandler.addMessage("system", diff);
         } catch (Exception e) {
             messageHandler.addMessage("system", "Error: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void cleanup() {
     }
 }

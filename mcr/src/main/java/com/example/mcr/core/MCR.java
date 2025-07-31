@@ -1,9 +1,7 @@
 package com.example.mcr.core;
 
-import com.example.mcr.llm.LLMClient;
 import com.example.mcr.translation.TranslationStrategy;
 import com.example.mcr.translation.DirectToProlog;
-import com.example.mcr.translation.JsonToProlog;
 import com.example.mcr.translation.AgenticReasoning;
 import com.example.mcr.core.Session;
 import java.util.HashMap;
@@ -21,7 +19,7 @@ public class MCR {
         this.llmModel = config.llm != null ? config.llm.model : "gpt-3.5-turbo";
         this.strategyRegistry = new HashMap<>();
         this.strategyRegistry.put("direct", new DirectToProlog());
-        this.strategyRegistry.put("json", new JsonToProlog());
+        this.strategyRegistry.put("json", new JsonToProlog("gpt-3.5-turbo", 0.7));
         this.strategyRegistry.put("agentic", new AgenticReasoning());
         if (config.strategyRegistry != null) {
             this.strategyRegistry.putAll(config.strategyRegistry);
@@ -37,22 +35,6 @@ public class MCR {
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Failed to create default LLM client", e);
             }
-        }
-        private LLMClient getLlmClient(LlmConfig llmConfig) {
-            if (llmConfig == null) {
-                throw new IllegalArgumentException("LLM config cannot be null");
-            }
-            
-            try {
-                return new LLMClient(
-                    llmConfig.provider,
-                    llmConfig.model,
-                    llmConfig.apiKey
-                );
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Invalid LLM configuration: " + e.getMessage(), e);
-            }
-        }
         }
     }
 
