@@ -6,6 +6,7 @@ import com.pijul.aider.commands.commit.CommitCommand;
 import com.pijul.aider.commands.diff.DiffCommand;
 import com.pijul.aider.commands.exit.ExitCommand;
 import com.pijul.aider.commands.help.HelpCommand;
+import com.pijul.aider.commands.query.QueryCommand;
 import com.pijul.aider.commands.record.RecordCommand;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class CommandManager {
         registerCommand("diff", new DiffCommand(container));
         registerCommand("record", new RecordCommand(container));
         registerCommand("commit", new CommitCommand(container)); // Alias for record
+        registerCommand("query", new QueryCommand(container));
     }
 
     public void registerCommand(String name, Command command) {

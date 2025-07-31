@@ -4,7 +4,10 @@ import com.pijul.aider.CommandManager;
 import com.pijul.aider.tui.Terminal;
 import com.pijul.aider.versioning.FileBackend;
 import com.pijul.aider.Backend;
+import dev.langchain4j.service.tool.ToolProvider;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Container {
     private Backend backend;
@@ -18,6 +21,7 @@ public class Container {
     private String diff;
     private Terminal terminal;
     private MessageHandler messageHandler;
+    private final List<ToolProvider> toolProviders = new ArrayList<>();
 
     public Container(String[] args) {
         this.messageHandler = new MessageHandler(this);
@@ -103,5 +107,13 @@ public class Container {
 
     public void setTerminal(Terminal terminal) {
         this.terminal = terminal;
+    }
+
+    public void addToolProvider(ToolProvider toolProvider) {
+        this.toolProviders.add(toolProvider);
+    }
+
+    public List<ToolProvider> getToolProviders() {
+        return toolProviders;
     }
 }

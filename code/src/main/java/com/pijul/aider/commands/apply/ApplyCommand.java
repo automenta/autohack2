@@ -40,13 +40,13 @@ public class ApplyCommand implements Command {
             String filePath = args[0];
             String fileContent = new String(Files.readAllBytes(Paths.get(filePath)));
             
-            String result = DiffUtils.applyPatch(fileContent, currentDiff);
-            if (result != null) {
+            try {
+                String result = DiffUtils.applyPatch(fileContent, currentDiff);
                 Files.write(Paths.get(filePath), result.getBytes());
                 messageHandler.addMessage("system", "Applied patch to " + filePath);
                 container.setDiff(null); // Clear the diff after application
-            } else {
-                messageHandler.addMessage("system", "Failed to apply patch.");
+            } catch (Exception e) {
+                messageHandler.addMessage("system", "Failed to apply patch: " + e.getMessage());
             }
         } catch (IOException e) {
             e.printStackTrace();

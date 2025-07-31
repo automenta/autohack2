@@ -1,23 +1,27 @@
 package com.example.mcr.core;
 
 import com.example.mcr.ontology.OntologyManager;
+import com.example.mcr.translation.PrologValidator;
 import com.example.mcr.translation.TranslationStrategy;
 import com.google.gson.Gson;
 import com.pijul.common.LLMClient;
 import com.pijul.common.LLMResponse;
 import com.pijul.common.LLMUsage;
-// import it.unibo.tuprolog.core.Term;
-// import it.unibo.tuprolog.core.parsing.TermParser;
-// import it.unibo.tuprolog.solve.SolveInfo;
-// import it.unibo.tuprolog.solve.Solver;
-// import it.unibo.tuprolog.solve.classic.ClassicSolverFactory;
-// import it.unibo.tuprolog.theory.Theory;
-// import it.unibo.tuprolog.theory.parsing.InvalidTheoryException;
-
+import it.unibo.tuprolog.core.Struct;
+import it.unibo.tuprolog.core.Term;
+import it.unibo.tuprolog.core.Var;
+import it.unibo.tuprolog.parser.PrologParser;
+import it.unibo.tuprolog.solve.SolveInfo;
+import it.unibo.tuprolog.solve.Solver;
+import it.unibo.tuprolog.solve.classic.ClassicSolverFactory;
+import it.unibo.tuprolog.theory.InvalidTheoryException;
+import it.unibo.tuprolog.theory.Theory;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class Session {
     private final MCR mcr;
@@ -28,8 +32,9 @@ public class Session {
     private final Logger logger;
     private OntologyManager ontology;
     private final MCR.LLMUsageMetrics llmUsage = new MCR.LLMUsageMetrics();
-    // private Solver prologSession = ClassicSolverFactory.INSTANCE.createSolver();
+    private Solver prologSession = ClassicSolverFactory.get().createSolver();
     private static final Pattern PREDICATE_PATTERN = Pattern.compile("^[a-z][a-zA-Z0-9_]*$");
+    private final PrologValidator prologValidator = new PrologValidator();
 
     public Session(MCR mcr, SessionOptions options) {
         this.mcr = mcr;
@@ -58,24 +63,15 @@ public class Session {
     }
 
     private void consultProgram() {
-        // try {
-        //     prologSession.loadStaticKb(Theory.of(program.stream().map(TermParser.getDEFAULT()::parseClause).toArray(it.unibo.tuprolog.core.Clause[]::new)));
-        // } catch (InvalidTheoryException e) {
-        //     logger.severe("Error consulting program: " + e.getMessage());
-        // }
+        try {
+            prologSession.setStaticKb(Theory.of(program.stream().map(PrologParser.getWithDefaultOperators()::parseClause).collect(Collectors.toList())));
+        } catch (InvalidTheoryException e) {
+            logger.severe("Error consulting program: " + e.getMessage());
+        }
     }
 
     private boolean isValidPrologSyntax(String prologString) {
-        if (prologString == null || prologString.trim().isEmpty()) {
-            return false;
-        }
-        // try {
-        //     Theory.of(TermParser.getDEFAULT().parseClause(prologString));
-        //     return true;
-        // } catch (Exception e) {
-        //     return false;
-        // }
-        return true;
+        return prologValidator.isValidPrologClause(prologString);
     }
 
     private void recordLlmUsage(long startTime, LLMResponse response) {
@@ -110,7 +106,7 @@ public class Session {
 
     public void clear() {
         program.clear();
-        // prologSession = ClassicSolverFactory.INSTANCE.createSolver();
+        prologSession = ClassicSolverFactory.get().createSolver();
         if (options.ontology != null) {
             ontology = new OntologyManager(new OntologyManager.Ontology(options.ontology));
         }
@@ -131,7 +127,7 @@ public class Session {
         this.sessionId = (String) data.get("sessionId");
         this.ontology = new OntologyManager(new OntologyManager.Ontology((Map<String, Object>) data.get("ontology")));
         this.program.clear();
-        // this.prologSession = ClassicSolverFactory.INSTANCE.createSolver();
+        this.prologSession = ClassicSolverFactory.get().createSolver();
         
         List<String> savedProgram = (List<String>) data.get("program");
         for (String clause : savedProgram) {
@@ -171,7 +167,33 @@ public class Session {
     public CompletableFuture<QueryResult> query(String prologQuery, QueryOptions options) {
         return CompletableFuture.supplyAsync(() -> {
             QueryResult result = new QueryResult();
+            if (!isValidPrologSyntax(prologQuery)) {
+                result.setSuccess(false);
+                result.setError("Invalid Prolog query syntax");
+                return result;
+            }
+
+            Struct queryTerm = PrologParser.getWithDefaultOperators().parseStruct(prologQuery);
+            List<SolveInfo> solutions = StreamSupport.stream(prologSession.solve(queryTerm).spliterator(), false).collect(Collectors.toList());
+
+            if (solutions.isEmpty() || solutions.get(0).isNo()) {
+                result.setSuccess(false);
+                result.setError("No solutions found.");
+                return result;
+            }
+
             result.setSuccess(true);
+            List<Map<String, String>> bindings = new ArrayList<>();
+            for (SolveInfo solutionInfo : solutions) {
+                if (solutionInfo.isYes()) {
+                    Map<String, String> binding = new HashMap<>();
+                    for (Map.Entry<Var, Term> entry : solutionInfo.getSolution().getSubstitution().getMap().entrySet()) {
+                        binding.put(entry.getKey().getName(), entry.getValue().toString());
+                    }
+                    bindings.add(binding);
+                }
+            }
+            result.setBindings(bindings);
             return result;
         });
     }
@@ -185,6 +207,7 @@ public class Session {
         }
         
         program.add(prologClause);
+        consultProgram();
         result.setSuccess(true);
         return result;
     }
@@ -256,6 +279,58 @@ public class Session {
         String relationship = predicate + "(" + subject + ", " + object + ").";
         return assertProlog(relationship);
     }
+
+    public AssertionResult removeFact(String entity, String type) {
+        String fact = type + "(" + entity + ").";
+        return retractProlog(fact);
+    }
+
+    public AssertionResult removeRelationship(String subject, String predicate, String object) {
+        String relationship = predicate + "(" + subject + ", " + object + ").";
+        return retractProlog(relationship);
+    }
+
+    public CompletableFuture<AssertionResult> assertNatural(String naturalLanguageText) {
+        logger.info("Natural language assertion: " + naturalLanguageText);
+        TranslationStrategy translator = mcr.strategyRegistry.get(this.options.translator);
+        if (translator == null) {
+            return CompletableFuture.failedFuture(new IllegalStateException("Translator not configured or not found in registry"));
+        }
+
+        return translator.translate(naturalLanguageText, llmClient, mcr.llmModel, new ArrayList<>(ontology.getTerms()), null, false)
+                .thenApply(translationResult -> {
+                    String prologClause = translationResult.getContent();
+                    AssertionResult assertionResult = assertProlog(prologClause);
+                    assertionResult.setSymbolicRepresentation(prologClause);
+                    return assertionResult;
+                });
+    }
+
+    public AssertionResult removeRule(String rule) {
+        return retractProlog(rule);
+    }
+
+    public AssertionResult addRule(String rule) {
+        return assertProlog(rule);
+    }
+
+    public AssertionResult retractProlog(String prologClause) {
+        AssertionResult result = new AssertionResult();
+        if (!isValidPrologSyntax(prologClause)) {
+            result.setSuccess(false);
+            result.setError("Invalid Prolog clause");
+            return result;
+        }
+
+        if (program.remove(prologClause)) {
+            consultProgram();
+            result.setSuccess(true);
+        } else {
+            result.setSuccess(false);
+            result.setError("Clause not found in program");
+        }
+        return result;
+    }
     
     public static class SessionOptions {
         public long retryDelay = 500;
@@ -308,8 +383,24 @@ public class Session {
             this.error = error;
         }
 
+        public boolean isSuccess() {
+            return success;
+        }
+
         public void setSuccess(boolean success) {
             this.success = success;
+        }
+
+        public String getSymbolicRepresentation() {
+            return symbolicRepresentation;
+        }
+
+        public void setSymbolicRepresentation(String symbolicRepresentation) {
+            this.symbolicRepresentation = symbolicRepresentation;
+        }
+
+        public String getError() {
+            return error;
         }
 
         public void setError(String error) {
