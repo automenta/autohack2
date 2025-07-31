@@ -5,6 +5,9 @@ import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.vertexai.VertexAiChatModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.output.TokenUsage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.response.ChatResponse;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,23 +77,27 @@ public class LLMClient {
      * @return The generated response as a string
      */
     public LLMResponse generate(String prompt) {
-        LLMResponse response = new LLMResponse();
+        LLMResponse llmResponse = new LLMResponse();
         try {
-            String rawResponse = model.chat(prompt);
+            ChatResponse response = model.chat(UserMessage.from(prompt));
+            String content = response.aiMessage().text();
+            TokenUsage tokenUsage = response.tokenUsage();
             
-            // The token usage is not available in the simple model.generate(prompt) response.
-            // LangChain4j's StreamingChatLanguageModel provides more detailed responses with token counts.
-            // For now, we will leave the usage empty.
             LLMUsage usage = new LLMUsage();
+            if (tokenUsage != null) {
+                usage.setPromptTokens(tokenUsage.inputTokenCount());
+                usage.setCompletionTokens(tokenUsage.outputTokenCount());
+                usage.setTotalTokens(tokenUsage.totalTokenCount());
+            }
             
-            response.setContent(rawResponse);
-            response.setUsage(usage);
-            response.setSuccess(true);
+            llmResponse.setContent(content);
+            llmResponse.setUsage(usage);
+            llmResponse.setSuccess(true);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in LLM generation", e);
-            response.setSuccess(false);
-            response.setError("LLM generation failed: " + e.getMessage());
+            llmResponse.setSuccess(false);
+            llmResponse.setError("LLM generation failed: " + e.getMessage());
         }
-        return response;
+        return llmResponse;
     }
 }

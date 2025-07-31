@@ -1,49 +1,46 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.example</groupId>
-  <artifactId>mcr</artifactId>
-  <version>1.0</version>
+    <parent>
+        <groupId>com.pijul.project</groupId>
+        <artifactId>pijul-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
 
-  <dependencies>
-    <!-- JUnit Jupiter for testing -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>5.9.3</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <!-- TuProlog core dependency -->
-    <dependency>
-      <groupId>it.unibo.tuprolog</groupId>
-      <artifactId>full</artifactId>
-      <version>1.0.4</version>
-      <exclusions>
-        <exclusion>
-          <groupId>it.unibo.tuprolog</groupId>
-          <artifactId>test-dsl</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>dev.langchain4j</groupId>
-      <artifactId>langchain4j</artifactId>
-      <version>1.2.0</version>
-    </dependency>
-  </dependencies>
+    <artifactId>pijul-mcr</artifactId>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
-        <configuration>
-          <release>17</release>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+    <dependencies>
+        <!-- Shared common module -->
+        <dependency>
+            <groupId>com.pijul.project</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- JUnit Jupiter for testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- TuProlog core dependency -->
+        <dependency>
+            <groupId>it.unibo.tuprolog</groupId>
+            <artifactId>full</artifactId>
+            <version>1.0.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>it.unibo.tuprolog</groupId>
+                    <artifactId>test-dsl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-core</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

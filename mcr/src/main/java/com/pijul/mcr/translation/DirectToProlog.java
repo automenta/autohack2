@@ -1,4 +1,4 @@
-package com.example.mcr.translation;
+package com.pijul.mcr.translation;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import java.util.List;

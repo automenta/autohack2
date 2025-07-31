@@ -3,7 +3,7 @@ package com.pijul.aider;
 import com.pijul.aider.Backend;
 import com.pijul.aider.versioning.FileBackend;
 import com.pijul.aider.versioning.GitBackend;
-import com.pijul.aider.PijulBackend;
+import com.pijul.aider.versioning.PijulBackend;
 
 public class BackendManager {
     private Backend backend;

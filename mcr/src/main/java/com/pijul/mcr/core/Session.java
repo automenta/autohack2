@@ -1,4 +1,4 @@
-package com.example.mcr.core;
+package com.pijul.mcr.core;
 
 import com.example.mcr.llm.LLMClient;
 import com.example.mcr.ontology.OntologyManager;

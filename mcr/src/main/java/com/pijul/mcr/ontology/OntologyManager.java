@@ -1,4 +1,4 @@
-package com.example.mcr.ontology;
+package com.pijul.mcr.ontology;
 
 import java.util.*;
 import java.util.regex.*;

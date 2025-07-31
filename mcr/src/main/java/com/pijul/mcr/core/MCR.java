@@ -1,9 +1,12 @@
-package com.example.mcr.core;
+package com.pijul.mcr.core;
 
-import com.example.mcr.translation.TranslationStrategy;
-import com.example.mcr.translation.DirectToProlog;
-import com.example.mcr.translation.AgenticReasoning;
-import com.example.mcr.core.Session;
+import com.pijul.mcr.translation.TranslationStrategy;
+import com.pijul.mcr.translation.DirectToProlog;
+import com.pijul.mcr.translation.AgenticReasoning;
+import com.pijul.mcr.core.Session;
+import com.pijul.common.LLMClient;
+import com.pijul.common.LLMUsage;
+import com.pijul.mcr.translation.JsonToProlog;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,22 +15,22 @@ public class MCR {
     private LLMClient llmClient;
     private final String llmModel;
     private final Map<String, TranslationStrategy> strategyRegistry;
-    private final LLMUsageMetrics totalLlmUsage;
+    private final LLMUsage totalLlmUsage;
 
     public MCR(Config config) {
         this.config = config;
         this.llmModel = config.llm != null ? config.llm.model : "gpt-3.5-turbo";
         this.strategyRegistry = new HashMap<>();
         this.strategyRegistry.put("direct", new DirectToProlog());
-        this.strategyRegistry.put("json", new JsonToProlog("gpt-3.5-turbo", 0.7));
+        this.strategyRegistry.put("json", new JsonToProlog());
         this.strategyRegistry.put("agentic", new AgenticReasoning());
         if (config.strategyRegistry != null) {
             this.strategyRegistry.putAll(config.strategyRegistry);
         }
-        this.totalLlmUsage = new LLMUsageMetrics();
-        
+        this.totalLlmUsage = new LLMUsage();
+
         if (config.llm != null && config.llm.provider != null) {
-            this.llmClient = getLlmClient(config.llm);
+            this.llmClient = getLlmClient(config.llm.provider, config.llm.model, config.llm.apiKey);
         } else {
             // Default to OpenAI if no config provided
             try {
@@ -49,22 +52,13 @@ public class MCR {
         this.strategyRegistry.put(name, strategy);
     }
 
-    public LLMUsageMetrics getLlmMetrics() {
-        return new LLMUsageMetrics(totalLlmUsage);
+    public LLMUsage getLlmMetrics() {
+        return totalLlmUsage;
     }
 
-    // Assuming getLlmClient is implemented elsewhere
-    private LLMClient getLlmClient(LlmConfig llmConfig) {
-        if (llmConfig == null) {
-            throw new IllegalArgumentException("LLM config cannot be null");
-        }
-        
+    private LLMClient getLlmClient(String provider, String model, String apiKey) {
         try {
-            return new LLMClient(
-                llmConfig.provider,
-                llmConfig.model,
-                llmConfig.apiKey
-            );
+            return new LLMClient(provider, model, apiKey);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid LLM configuration: " + e.getMessage(), e);
         }
@@ -94,23 +88,5 @@ public class MCR {
         public String translator;
         
         public SessionOptions() {}
-    }
-
-    public static class LLMUsageMetrics {
-        public long promptTokens;
-        public long completionTokens;
-        public long totalTokens;
-        public int calls;
-        public long totalLatencyMs;
-        
-        public LLMUsageMetrics() {}
-        
-        public LLMUsageMetrics(LLMUsageMetrics source) {
-            this.promptTokens = source.promptTokens;
-            this.completionTokens = source.completionTokens;
-            this.totalTokens = source.totalTokens;
-            this.calls = source.calls;
-            this.totalLatencyMs = source.totalLatencyMs;
-        }
     }
 }

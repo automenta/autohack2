@@ -1,5 +1,7 @@
 package com.pijul.aider;
 
+import com.pijul.aider.commands.CommandManager;
+
 public class PijulAider {
     // Placeholder for PijulAider functionality
 
@@ -14,7 +16,7 @@ public class PijulAider {
         this.fileManager = new FileManager();
         this.llmManager = new LLMManager();
         this.uiManager = new UIManager();
-        this.commandManager = new CommandManager();
+        this.commandManager = new CommandManager(null);
     }
 
     public void start() {

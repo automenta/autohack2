@@ -2,8 +2,6 @@ package com.pijul.aider.commands;
 
 import com.pijul.aider.Container;
 import com.pijul.aider.MessageHandler;
-import com.pijul.aider.commands.exit.ExitCommand;
-import com.pijul.aider.commands.help.HelpCommand;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,8 +12,9 @@ public class CommandManager {
     public CommandManager(Container container) {
         this.messageHandler = container.getMessageHandler();
         this.commands = new HashMap<>();
-        registerCommand("help", new HelpCommand(container));
-        registerCommand("exit", new ExitCommand(container));
+        registerCommand("/add", new AddCommand(container));
+        registerCommand("/diff", new DiffCommand(container));
+        // Register other commands here
     }
 
     public void registerCommand(String name, Command command) {

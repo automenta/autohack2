@@ -1,4 +1,4 @@
-package com.pijul.aider;
+package com.pijul.aider.versioning;
 
 import java.util.List;
 import java.util.ArrayList;
