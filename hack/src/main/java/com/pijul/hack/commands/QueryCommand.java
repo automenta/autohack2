@@ -1,9 +1,8 @@
 package com.pijul.hack.commands;
 
-import com.pijul.aider.llm.LLMChain;
 import com.pijul.hack.Container;
-
-import java.util.concurrent.ExecutionException;
+import com.pijul.mcr.QueryResult;
+import com.pijul.mcr.Session;
 
 public class QueryCommand implements Command {
 
@@ -16,21 +15,30 @@ public class QueryCommand implements Command {
     @Override
     public void execute(String[] args) {
         if (args.length == 0) {
-            container.getMessageHandler().handleMessage("Usage: /query <your query>");
+            container.getMessageHandler().handleMessage("Usage: /query <your natural language query>");
             return;
         }
 
-        LLMChain llmChain = container.getLlmChain();
-        if (llmChain == null) {
-            container.getMessageHandler().handleMessage("LLMChain not initialized.");
+        Session mcrSession = container.getMcrSession();
+        if (mcrSession == null) {
+            container.getMessageHandler().handleMessage("MCR Session not initialized.");
             return;
         }
 
         String query = String.join(" ", args);
-        try {
-            llmChain.handleQuery(query).get(); // Wait for the future to complete
-        } catch (InterruptedException | ExecutionException e) {
-            container.getMessageHandler().handleMessage("Error executing query: " + e.getMessage());
+        QueryResult result = mcrSession.nquery(query);
+
+        if (result.isSuccess()) {
+            container.getMessageHandler().handleMessage("Query successful.");
+            if (result.getBindings().isEmpty()) {
+                container.getMessageHandler().handleMessage("No results found.");
+            } else {
+                result.getBindings().forEach(bindings -> {
+                    container.getMessageHandler().handleMessage("Solution: " + bindings.toString());
+                });
+            }
+        } else {
+            container.getMessageHandler().handleMessage("Error executing query: " + result.getError());
         }
     }
 

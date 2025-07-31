@@ -51,10 +51,36 @@ via modular abstraction for easy backend swaps.
 
 ----
 
-# AutoHack
+## Vision: The Hands-On Coder
 
-Terminal-based AI pair programming tool designed to streamline your workflow with LLM-driven code editing, feature
-generation, bug fixing, and change management. It supports Git, Pijul, and a simple file-based versioning system.
+The `autohack` module is currently a terminal-based AI pair programmer. Its ultimate purpose is to become the **hands** of the autonomous agent, interacting with the codebase and the development environment.
+
+*   **From Assistant to Agent:** Evolve from a tool that responds to user commands to an agent that can work autonomously on a set of goals.
+*   **Full Development Lifecycle Integration:** The agent would not just write code, but also handle the entire development lifecycle:
+    *   **Task Management:** Decompose high-level goals into specific, actionable tasks.
+    *   **Version Control Mastery:** Seamlessly work with version control systems like Git and Pijul, including branching, merging, and writing descriptive commit messages.
+    *   **CI/CD Integration:** Create and manage pull requests, respond to code review feedback, and work with CI/CD pipelines to ensure code quality.
+*   **Self-Healing and Self-Improving:** The agent could proactively identify and fix bugs, refactor code for better performance and readability, and even update its own source code to improve its capabilities over time.
+
+## Building and Running
+
+### Building
+
+To build the project, run the following command from the project's root directory:
+
+```bash
+mvn clean install
+```
+
+This will build all modules and create the executable JAR file in the `code/target/` directory.
+
+### Running AutoHack
+
+To run the AutoHack application, execute the following command from the project's root directory:
+
+```bash
+java -jar code/target/code-1.0-SNAPSHOT.jar
+```
 
 ## Features
 
@@ -65,21 +91,6 @@ generation, bug fixing, and change management. It supports Git, Pijul, and a sim
 - **Extensible command system:**  AutoHack comes with a set of built-in commands, and you can easily add your own to
   extend its functionality.
 - **Terminal-based UI:** The user-friendly terminal interface provides a smooth and efficient user experience.
-
-## Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/automenta/pijulaider.git
-   ```
-2. Install the dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the tool:
-   ```bash
-   ./src/index.js
-   ```
 
 ## Usage
 

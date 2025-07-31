@@ -22,7 +22,7 @@ public class Container {
 
     public Container(String[] args) {
         this.messageHandler = new MessageHandler(this);
-        this.backendManager = new BackendManager();
+        this.backendManager = new BackendManager(this);
 
         // Initialize backend
         initializeBackend(args);

@@ -1,6 +1,8 @@
 package com.pijul.hack.commands;
 
 import com.pijul.hack.Container;
+import com.pijul.mcr.ReasoningResult;
+import com.pijul.mcr.Session;
 
 public class ReasonCommand implements Command {
 
@@ -17,7 +19,24 @@ public class ReasonCommand implements Command {
             return;
         }
 
-        container.getMessageHandler().handleMessage("Reasoning capabilities are not yet implemented.");
+        Session mcrSession = container.getMcrSession();
+        if (mcrSession == null) {
+            container.getMessageHandler().handleMessage("MCR Session not initialized.");
+            return;
+        }
+
+        String task = String.join(" ", args);
+        container.getMessageHandler().handleMessage("Reasoning about task: " + task);
+
+        ReasoningResult result = mcrSession.reason(task);
+
+        container.getMessageHandler().handleMessage("\n--- Reasoning History ---");
+        for (String step : result.getHistory()) {
+            container.getMessageHandler().handleMessage(step);
+        }
+        container.getMessageHandler().handleMessage("--- End of History ---\n");
+
+        container.getMessageHandler().handleMessage("Final Answer: " + result.getAnswer());
     }
 
     @Override

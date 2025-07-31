@@ -1,5 +1,6 @@
 package com.pijul.aider;
 
+import com.pijul.aider.tui.Terminal;
 import com.pijul.aider.versioning.FileBackend;
 import com.pijul.aider.versioning.GitBackend;
 
@@ -7,8 +8,10 @@ import java.io.IOException;
 
 public class BackendManager {
     private Backend backend;
+    private final Container container;
 
-    public BackendManager() {
+    public BackendManager(Container container) {
+        this.container = container;
         // The backend is now initialized by the Container,
         // which calls either setBackend or autodetectBackend.
         // We can leave the field null here initially.
