@@ -33,6 +33,9 @@ public class LLMClient {
                         .modelName(modelName)
                         .build();
                 break;
+            case "mock":
+                this.model = new com.pijul.common.mock.MockChatModel();
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported LLM provider: " + provider);
         }

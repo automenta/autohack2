@@ -56,7 +56,8 @@ public class Session {
     private void assertToolFacts() {
         if (toolProvider != null) {
             for (Tool tool : toolProvider.getTools().values()) {
-                knowledgeGraph.addClause("tool(" + tool.getName() + ", '" + tool.getDescription() + "').");
+                String descriptionAtom = tool.getDescription().replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
+                knowledgeGraph.addClause("tool(" + tool.getName() + ", " + descriptionAtom + ").");
             }
             resetSolver();
         }

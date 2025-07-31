@@ -17,15 +17,14 @@ public class Agent {
         String task = String.join(" ", args);
 
         String apiKey = System.getenv("OPENAI_API_KEY");
-        if (apiKey == null || apiKey.isEmpty()) {
-            System.err.println("Error: The OPENAI_API_KEY environment variable is not set.");
-            System.err.println("Please set the key and try again.");
-            System.exit(1);
-        }
-
         Properties config = new Properties();
-        config.setProperty("llm.provider", "openai");
-        config.setProperty("llm.apiKey", apiKey);
+        if (apiKey == null || apiKey.isEmpty()) {
+            System.out.println("OPENAI_API_KEY not found. Using mock LLM.");
+            config.setProperty("llm.provider", "mock");
+        } else {
+            config.setProperty("llm.provider", "openai");
+            config.setProperty("llm.apiKey", apiKey);
+        }
         config.setProperty("llm.model", "gpt-4o-mini");
 
         MCR mcr = new MCR(config);

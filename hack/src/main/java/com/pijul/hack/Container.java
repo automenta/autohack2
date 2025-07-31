@@ -14,6 +14,7 @@ public class Container {
     private final Workspace workspace;
     private final CommandManager commandManager;
     private final McpConfig mcpConfig;
+    private final ApiKeyManager apiKeyManager;
     private final MCR mcr;
     private final Session mcrSession;
     private MessageHandler messageHandler;
@@ -22,10 +23,21 @@ public class Container {
         this.workspace = new Workspace();
         this.commandManager = new CommandManager(this);
         this.mcpConfig = new McpConfig();
+        this.apiKeyManager = new ApiKeyManager();
 
         Properties mcrProps = new Properties();
-        mcrProps.setProperty("llm.provider", "openai");
-        mcrProps.setProperty("llm.apiKey", System.getenv("OPENAI_API_KEY"));
+        String provider = System.getProperty("llm.provider", "openai");
+        String apiKey = apiKeyManager.getApiKey(provider);
+        if (apiKey == null) {
+            apiKey = System.getenv(provider.toUpperCase() + "_API_KEY");
+        }
+
+        if (apiKey == null || apiKey.isEmpty()) {
+            mcrProps.setProperty("llm.provider", "mock");
+        } else {
+            mcrProps.setProperty("llm.provider", provider);
+            mcrProps.setProperty("llm.apiKey", apiKey);
+        }
         mcrProps.setProperty("llm.model", "gpt-4o-mini");
         this.mcr = new MCR(mcrProps);
         this.mcrSession = mcr.createSession(new HackToolProvider());
@@ -36,6 +48,7 @@ public class Container {
         commandManager.registerCommand("/mcp", new McpCommand(mcpConfig, messageHandler));
         commandManager.registerCommand("/query", new QueryCommand(this));
         commandManager.registerCommand("/reason", new ReasonCommand(this));
+        commandManager.registerCommand("/apikey", new ApiKeyCommand(this));
     }
 
     public Workspace getWorkspace() {
@@ -64,5 +77,9 @@ public class Container {
 
     public Session getMcrSession() {
         return mcrSession;
+    }
+
+    public ApiKeyManager getApiKeyManager() {
+        return apiKeyManager;
     }
 }
