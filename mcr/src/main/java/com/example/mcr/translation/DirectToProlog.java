@@ -1,38 +1,45 @@
 package com.example.mcr.translation;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import com.pijul.common.LLMClient;
+import com.pijul.common.LLMResponse;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class DirectToProlog implements TranslationStrategy {
-    private final ChatLanguageModel llmClient;
-    private final String model;
+    private LLMClient llmClient;
+    private String model;
 
     public DirectToProlog() {
-        this(null, "gpt-3.5-turbo");
     }
 
-    public DirectToProlog(ChatLanguageModel llmClient, String model) {
+    public DirectToProlog(LLMClient llmClient, String model) {
         this.llmClient = llmClient;
         this.model = model;
     }
 
     @Override
-    public CompletableFuture<String> translate(String text, List<String> ontologyTerms, String feedback) {
+    public CompletableFuture<TranslationResult> translate(String input, LLMClient llmClient, String model, List<String> ontologyTerms, String feedback, boolean returnFullResponse) {
+        this.llmClient = llmClient;
+        this.model = model;
         return CompletableFuture.supplyAsync(() -> {
             if (llmClient == null) {
                 throw new IllegalStateException("LLM client not configured for direct translation");
             }
             
-            String prompt = "Translate the following English text to Prolog: \"" + text + "\"";
+            String prompt = "Translate the following English text to Prolog: \"" + input + "\"";
             if (feedback != null) {
                 prompt += "\n\nPrevious error: " + feedback;
             }
-            if (!ontologyTerms.isEmpty()) {
+            if (ontologyTerms != null && !ontologyTerms.isEmpty()) {
                 prompt += "\n\nUse these ontology terms: " + String.join(", ", ontologyTerms);
             }
             
-            return llmClient.generate(prompt);
+            LLMResponse response = llmClient.generate(prompt);
+            TranslationResult result = new TranslationResult();
+            result.setContent(response.getContent());
+            // Token usage is not available in the simple model.generate(prompt) response.
+            // We will leave the usage empty.
+            return result;
         });
     }
 }

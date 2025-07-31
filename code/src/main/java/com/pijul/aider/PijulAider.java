@@ -1,34 +1,36 @@
 package com.pijul.aider;
 
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.pijul.aider.tui.Terminal;
+import java.io.IOException;
+
 public class PijulAider {
-    // Placeholder for PijulAider functionality
+    private final Container container;
+    private Terminal tui;
 
-    private BackendManager backendManager;
-    private FileManager fileManager;
-    private LLMManager llmManager;
-    private UIManager uiManager;
-    private CommandManager commandManager;
-
-    public PijulAider() {
-        this.backendManager = new BackendManager();
-        this.fileManager = new FileManager();
-        this.llmManager = new LLMManager();
-        this.uiManager = new UIManager();
-        this.commandManager = new CommandManager();
+    public PijulAider(Container container) {
+        this.container = container;
     }
 
-    public void start() {
-        // Start PijulAider
-        backendManager.initialize();
-        uiManager.displayWelcomeMessage();
-        commandManager.startListening();
+    public void start() throws IOException {
+        // Initialize terminal
+        DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
+        Screen screen = new TerminalScreen(terminalFactory.createTerminal());
+        screen.startScreen();
+
+        // Start terminal UI with command manager
+        this.tui = new Terminal(screen, container.getCommandManager());
+        container.setTerminal(tui); // Set the terminal in the container
+        tui.run();
     }
 
     public void stop() {
-        // Stop PijulAider
-        commandManager.stopListening();
-        backendManager.shutdown();
+        if (tui != null) {
+            // It's good practice to have a way to gracefully shut down the TUI
+            // For now, we can just stop the command manager's listening aspect
+            container.getCommandManager().stopListening();
+        }
     }
-
-    // Add more methods as needed
 }

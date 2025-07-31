@@ -2,24 +2,75 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.example</groupId>
+  <parent>
+    <groupId>com.pijul.project</groupId>
+    <artifactId>pijul-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
   <artifactId>mcr</artifactId>
-  <version>1.0</version>
 
   <dependencies>
+    <!-- Common module dependency -->
+    <dependency>
+        <groupId>com.pijul.project</groupId>
+        <artifactId>common</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+
+    <!-- Gson for JSON serialization -->
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.10.1</version>
+    </dependency>
+
     <!-- JUnit Jupiter for testing -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.9.3</version>
       <scope>test</scope>
     </dependency>
-    
-    <!-- TuProlog core dependency -->
+
+    <!-- Mockito for mocking dependencies in tests -->
     <dependency>
-      <groupId>org.tuprolog</groupId>
-      <artifactId>tuprolog-core</artifactId>
-      <version>0.20.0</version>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>5.3.1</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>5.3.1</version>
+        <scope>test</scope>
+    </dependency>
+    
+    <!-- TuProlog dependencies -->
+    <!-- <dependency>
+        <groupId>it.unibo.tuprolog</groupId>
+        <artifactId>core-jvm</artifactId>
+        <version>1.0.4</version>
+    </dependency>
+    <dependency>
+        <groupId>it.unibo.tuprolog</groupId>
+        <artifactId>solve-classic-jvm</artifactId>
+        <version>1.0.4</version>
+    </dependency>
+    <dependency>
+        <groupId>it.unibo.tuprolog</groupId>
+        <artifactId>theory-jvm</artifactId>
+        <version>1.0.4</version>
+    </dependency>
+    <dependency>
+        <groupId>it.unibo.tuprolog</groupId>
+        <artifactId>parser-jvm</artifactId>
+        <version>1.0.4</version>
+    </dependency> -->
+
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j</artifactId>
     </dependency>
   </dependencies>
 
@@ -28,10 +79,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
-        <configuration>
-          <release>17</release>
-        </configuration>
       </plugin>
     </plugins>
   </build>

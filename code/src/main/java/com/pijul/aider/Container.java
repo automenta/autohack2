@@ -1,12 +1,13 @@
 package com.pijul.aider;
 
-import com.pijul.aider.commands.CommandManager;
+import com.pijul.aider.CommandManager;
 import com.pijul.aider.tui.Terminal;
 import com.pijul.aider.versioning.FileBackend;
-import com.pijul.aider.versioning.VersioningBackend;
+import com.pijul.aider.Backend;
+import java.util.Arrays;
 
 public class Container {
-    private MessageHandler messageHandler;
+    private Backend backend;
     private BackendManager backendManager;
     private FileManager fileManager;
     private LLMManager llmManager;
@@ -16,24 +17,48 @@ public class Container {
     private FileSystem fileSystem;
     private String diff;
     private Terminal terminal;
+    private MessageHandler messageHandler;
 
-    public Container() {
+    public Container(String[] args) {
         this.messageHandler = new MessageHandler(this);
         this.backendManager = new BackendManager();
+
+        // Initialize backend
+        initializeBackend(args);
+
         this.fileManager = new FileManager();
         this.llmManager = new LLMManager();
         this.uiManager = new UIManager();
-        this.codebaseManager = new CodebaseManager(new FileBackend()); // Default to FileBackend
+        this.codebaseManager = new CodebaseManager(this.backend);
         this.fileSystem = new FileSystem();
         this.commandManager = new CommandManager(this); // Initialize CommandManager after other dependencies
+    }
+
+    private void initializeBackend(String[] args) {
+        String backendType = parseBackendFromArgs(args);
+        if (backendType != null) {
+            backendManager.setBackend(backendType);
+        } else {
+            backendManager.autodetectBackend();
+        }
+        this.backend = backendManager.getBackend();
+    }
+
+    private String parseBackendFromArgs(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("--backend") && i + 1 < args.length) {
+                return args[i + 1];
+            }
+        }
+        return null;
     }
 
     public MessageHandler getMessageHandler() {
         return messageHandler;
     }
 
-    public VersioningBackend getBackend() {
-        return backendManager.getBackend();
+    public Backend getBackend() {
+        return this.backend;
     }
 
     public BackendManager getBackendManager() {

@@ -1,76 +1,62 @@
-package com.piul.aider;
+package com.pijul.aider;
 
-import com.piul.aider.commands.Command;
+import com.pijul.aider.commands.Command;
+import com.pijul.aider.commands.AddCommand;
+import com.pijul.aider.commands.commit.CommitCommand;
+import com.pijul.aider.commands.diff.DiffCommand;
+import com.pijul.aider.commands.exit.ExitCommand;
+import com.pijul.aider.commands.help.HelpCommand;
+import com.pijul.aider.commands.record.RecordCommand;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
-/**
- * Manages command registration and execution
- */
 public class CommandManager {
-    private Map<String, Command> commands = new HashMap<>();
-    private boolean listening = false;
-    private Scanner scanner;
+    private final MessageHandler messageHandler;
+    private final Map<String, Command> commands;
 
-    /**
-     * Register a command with the manager
-     * @param name Command name (without parameters)
-     * @param command Command implementation
-     */
+    public CommandManager(Container container) {
+        this.messageHandler = container.getMessageHandler();
+        this.commands = new HashMap<>();
+        registerCommand("help", new HelpCommand(container));
+        registerCommand("exit", new ExitCommand(container));
+        registerCommand("add", new AddCommand(container));
+        registerCommand("diff", new DiffCommand(container));
+        registerCommand("record", new RecordCommand(container));
+        registerCommand("commit", new CommitCommand(container)); // Alias for record
+    }
+
     public void registerCommand(String name, Command command) {
         commands.put(name, command);
     }
 
-    /**
-     * Start listening for commands from standard input
-     */
-    public void startListening() {
-        if (listening) return;
-        listening = true;
-        scanner = new Scanner(System.in);
-        System.out.println("Command listener started. Type 'help' for available commands.");
-        
-        new Thread(() -> {
-            while (listening) {
-                System.out.print("> ");
-                if (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    if (line.isEmpty()) continue;
-                    String[] parts = line.split(" ", 2);
-                    String cmdName = parts[0].toLowerCase();
-                    String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
-                    
-                    if (cmdName.equals("exit")) {
-                        stopListening();
-                        break;
-                    }
-                    
-                    Command cmd = commands.get(cmdName);
-                    if (cmd != null) {
-                        cmd.execute(args);
-                    } else {
-                        System.out.println("Error: Unknown command '" + cmdName + "'. Type 'help' for available commands.");
-                    }
-                }
-            }
-        }).start();
-    }
+    public void processInput(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return;
+        }
 
-    /**
-     * Stop listening for commands
-     */
-    public void stopListening() {
-        listening = false;
-        if (scanner != null) {
-            scanner.close();
+        String[] parts = input.trim().split(" ", 2);
+        String commandName = parts[0].toLowerCase();
+        String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
+
+        Command command = commands.get(commandName);
+        if (command != null) {
+            command.execute(args);
+        } else {
+            messageHandler.addMessage("system", "Unknown command: " + commandName);
         }
     }
 
-    /**
-     * Get registered command count
-     */
-    public int getCommandCount() {
-        return commands.size();
+    public void startListening() {
+        for (Command command : commands.values()) {
+            command.init();
+        }
+        System.out.println("All commands initialized and listening.");
+    }
+
+    public void stopListening() {
+        for (Command command : commands.values()) {
+            command.cleanup();
+        }
+        System.out.println("All commands stopped.");
     }
 }

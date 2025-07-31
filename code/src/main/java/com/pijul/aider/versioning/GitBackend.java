@@ -1,5 +1,6 @@
 package com.pijul.aider.versioning;
 
+import com.pijul.aider.Backend;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class GitBackend extends VersioningBackend {
+public class GitBackend implements Backend {
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     private CompletableFuture<String> runCommand(String... command) {
@@ -48,7 +49,6 @@ public class GitBackend extends VersioningBackend {
         return runCommand("git", "add", file).thenApply(s -> null);
     }
 
-    @Override
     public CompletableFuture<Void> unstage(String file) {
         return runCommand("git", "reset", "HEAD", "--", file).thenApply(s -> null);
     }
@@ -132,7 +132,6 @@ public class GitBackend extends VersioningBackend {
         return runCommand("git", "checkout", "HEAD", "--", file).thenApply(s -> null);
     }
 
-    @Override
     public CompletableFuture<Void> undo() {
         return unrecord(null);
     }
@@ -172,5 +171,26 @@ public class GitBackend extends VersioningBackend {
             }
             return files;
         });
+    }
+
+    @Override
+    public CompletableFuture<String> status() {
+        return runCommand("git", "status", "--short");
+    }
+
+    @Override
+    public CompletableFuture<Void> revertAll() {
+        return runCommand("git", "reset", "--hard").thenApply(s -> null);
+    }
+
+    @Override
+    public CompletableFuture<Void> initialize() {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<Void> shutdown() {
+        executor.shutdown();
+        return CompletableFuture.completedFuture(null);
     }
 }

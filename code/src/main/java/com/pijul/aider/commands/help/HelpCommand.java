@@ -38,8 +38,8 @@ public class HelpCommand implements Command {
         commandMap.put("test", "Run the test suite.");
         commandMap.put("undo", "Undo changes to a file or the entire project.");
     }
-@Override
-public void init() {
+    @Override
+    public void init() {
     // No initialization needed for HelpCommand
 }
 

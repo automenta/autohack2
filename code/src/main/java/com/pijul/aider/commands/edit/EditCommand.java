@@ -16,6 +16,10 @@ public class EditCommand implements Command {
     }
 
     @Override
+    public void init() {
+    }
+
+    @Override
     public void execute(String[] args) {
         if (args.length == 0) {
             container.getMessageHandler().addMessage("system", "Please specify a file to edit.");
@@ -34,11 +38,15 @@ public class EditCommand implements Command {
             
             // After editing, show diff
             Backend backend = container.getBackend();
-            String diff = backend.diff();
+            String diff = backend.diff().get();
             container.setDiff(diff);
             container.getMessageHandler().addMessage("system", "Finished editing " + file);
         } catch (Exception e) {
             container.getMessageHandler().addMessage("system", "Error: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void cleanup() {
     }
 }

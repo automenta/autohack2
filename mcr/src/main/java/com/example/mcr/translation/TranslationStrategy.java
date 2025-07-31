@@ -1,10 +1,11 @@
 package com.example.mcr.translation;
 
+import com.pijul.common.LLMClient;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface TranslationStrategy {
-    CompletableFuture<TranslationResult> translate(String input, Object llmClient, String model, List<String> ontologyTerms, String feedback, boolean returnFullResponse);
+    CompletableFuture<TranslationResult> translate(String input, LLMClient llmClient, String model, List<String> ontologyTerms, String feedback, boolean returnFullResponse);
     
     class TranslationResult {
         private String type;
@@ -15,6 +16,8 @@ public interface TranslationStrategy {
         private int completionTokens;
         private int totalTokens;
         
+        public TranslationResult() {}
+
         public TranslationResult(String content, int promptTokens, int completionTokens, int totalTokens) {
             this.content = content;
             this.promptTokens = promptTokens;

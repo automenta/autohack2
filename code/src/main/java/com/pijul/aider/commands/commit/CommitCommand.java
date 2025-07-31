@@ -13,6 +13,10 @@ public class CommitCommand implements Command {
     }
 
     @Override
+    public void init() {
+    }
+
+    @Override
     public void execute(String[] args) {
         Backend backend = container.getBackend();
         MessageHandler messageHandler = container.getMessageHandler();
@@ -29,5 +33,9 @@ public class CommitCommand implements Command {
                 messageHandler.addMessage("system", "Error: " + e.getMessage());
                 return null;
             });
+    }
+
+    @Override
+    public void cleanup() {
     }
 }

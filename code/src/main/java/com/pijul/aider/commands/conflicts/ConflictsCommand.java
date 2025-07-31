@@ -13,13 +13,17 @@ public class ConflictsCommand implements Command {
     }
 
     @Override
+    public void init() {
+    }
+
+    @Override
     public void execute(String[] args) {
         Backend backend = container.getBackend();
         MessageHandler messageHandler = container.getMessageHandler();
 
         try {
             if (backend.conflicts() != null) {
-                String conflicts = backend.conflicts();
+                String conflicts = backend.conflicts().get();
                 try {
                     // Attempt to parse as JSON array
                     conflicts = conflicts.replace("[", "").replace("]", "").replace("\"", "");
@@ -43,5 +47,9 @@ public class ConflictsCommand implements Command {
         } catch (Exception e) {
             messageHandler.addMessage("system", "Error: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void cleanup() {
     }
 }

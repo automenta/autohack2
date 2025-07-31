@@ -18,6 +18,10 @@ public class GrepCommand implements Command {
     }
 
     @Override
+    public void init() {
+    }
+
+    @Override
     public void execute(String[] args) {
         MessageHandler messageHandler = container.getMessageHandler();
         if (args.length < 1) {
@@ -58,5 +62,9 @@ public class GrepCommand implements Command {
         } catch (IOException | InterruptedException e) {
             messageHandler.addMessage("system", "Error: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void cleanup() {
     }
 }

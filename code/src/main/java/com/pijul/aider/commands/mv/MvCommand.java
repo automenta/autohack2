@@ -17,6 +17,10 @@ public class MvCommand implements Command {
     }
 
     @Override
+    public void init() {
+    }
+
+    @Override
     public void execute(String[] args) {
         MessageHandler messageHandler = container.getMessageHandler();
         
@@ -36,5 +40,9 @@ public class MvCommand implements Command {
         } catch (IOException e) {
             messageHandler.addMessage("system", "Error: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void cleanup() {
     }
 }
