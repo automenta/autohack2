@@ -290,8 +290,28 @@ public class Session {
         return retractProlog(relationship);
     }
 
+    public CompletableFuture<AssertionResult> assertNatural(String naturalLanguageText) {
+        logger.info("Natural language assertion: " + naturalLanguageText);
+        TranslationStrategy translator = mcr.strategyRegistry.get(this.options.translator);
+        if (translator == null) {
+            return CompletableFuture.failedFuture(new IllegalStateException("Translator not configured or not found in registry"));
+        }
+
+        return translator.translate(naturalLanguageText, llmClient, mcr.llmModel, new ArrayList<>(ontology.getTerms()), null, false)
+                .thenApply(translationResult -> {
+                    String prologClause = translationResult.getContent();
+                    AssertionResult assertionResult = assertProlog(prologClause);
+                    assertionResult.setSymbolicRepresentation(prologClause);
+                    return assertionResult;
+                });
+    }
+
     public AssertionResult removeRule(String rule) {
         return retractProlog(rule);
+    }
+
+    public AssertionResult addRule(String rule) {
+        return assertProlog(rule);
     }
 
     public AssertionResult retractProlog(String prologClause) {
@@ -363,8 +383,24 @@ public class Session {
             this.error = error;
         }
 
+        public boolean isSuccess() {
+            return success;
+        }
+
         public void setSuccess(boolean success) {
             this.success = success;
+        }
+
+        public String getSymbolicRepresentation() {
+            return symbolicRepresentation;
+        }
+
+        public void setSymbolicRepresentation(String symbolicRepresentation) {
+            this.symbolicRepresentation = symbolicRepresentation;
+        }
+
+        public String getError() {
+            return error;
         }
 
         public void setError(String error) {

@@ -143,7 +143,10 @@ public class PijulBackend implements Backend {
 
     private CompletableFuture<List<String>> executeCommandWithListOutput(String... commands) {
         return executeCommandWithOutput(commands).thenApply(output -> {
-            return java.util.Arrays.asList(output.split("\\s+"));
+            if (output.isEmpty()) {
+                return new ArrayList<>();
+            }
+            return java.util.Arrays.asList(output.split("\\R"));
         });
     }
 }
