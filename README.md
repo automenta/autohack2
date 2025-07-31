@@ -23,7 +23,7 @@ This will build all three modules and install them into your local Maven reposit
 To run the AutoHack application, execute the following command:
 
 ```bash
-java -jar code/target/pijul-aider-1.0-SNAPSHOT.jar
+java -jar code/target/code-1.0-SNAPSHOT.jar
 ```
 
 ### MCR

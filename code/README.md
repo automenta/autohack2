@@ -51,10 +51,25 @@ via modular abstraction for easy backend swaps.
 
 ----
 
-# AutoHack
+## Building and Running
 
-Terminal-based AI pair programming tool designed to streamline your workflow with LLM-driven code editing, feature
-generation, bug fixing, and change management. It supports Git, Pijul, and a simple file-based versioning system.
+### Building
+
+To build the project, run the following command from the project's root directory:
+
+```bash
+mvn clean install
+```
+
+This will build all modules and create the executable JAR file in the `code/target/` directory.
+
+### Running AutoHack
+
+To run the AutoHack application, execute the following command from the project's root directory:
+
+```bash
+java -jar code/target/code-1.0-SNAPSHOT.jar
+```
 
 ## Features
 
@@ -65,21 +80,6 @@ generation, bug fixing, and change management. It supports Git, Pijul, and a sim
 - **Extensible command system:**  AutoHack comes with a set of built-in commands, and you can easily add your own to
   extend its functionality.
 - **Terminal-based UI:** The user-friendly terminal interface provides a smooth and efficient user experience.
-
-## Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/automenta/pijulaider.git
-   ```
-2. Install the dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the tool:
-   ```bash
-   ./src/index.js
-   ```
 
 ## Usage
 
