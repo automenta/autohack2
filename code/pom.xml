@@ -113,7 +113,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.pijul.aider.App</mainClass>
+                                    <mainClass>dumb.code.App</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>
