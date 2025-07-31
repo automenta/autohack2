@@ -10,7 +10,6 @@
 
     <modules>
         <module>code</module>
-        <module>mcr</module>
         <module>common</module>
     </modules>
 
@@ -18,8 +17,10 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <langchain4j.version>1.1.0</langchain4j.version>
+        <langchain4j.version>1.2.0</langchain4j.version>
         <junit.jupiter.version>5.9.3</junit.jupiter.version>
+        <mockito.version>5.3.1</mockito.version>
+        <kotlin.version>1.8.0</kotlin.version>
     </properties>
 
     <dependencyManagement>
@@ -33,14 +34,32 @@
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-core</artifactId>
+                <artifactId>langchain4j-google-ai-gemini</artifactId>
                 <version>${langchain4j.version}</version>
             </dependency>
-            <!-- Testing -->
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

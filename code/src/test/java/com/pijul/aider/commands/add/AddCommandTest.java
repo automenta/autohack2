@@ -1,8 +1,10 @@
 package com.pijul.aider.commands.add;
 
 import com.pijul.aider.Container;
+import com.pijul.aider.Backend;
 import com.pijul.aider.MessageHandler;
 import com.pijul.aider.CodebaseManager;
+import com.pijul.aider.FileSystem;
 import com.pijul.aider.commands.AddCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import java.util.concurrent.CompletableFuture;
+
 import static org.mockito.Mockito.*;
 
 public class AddCommandTest {
@@ -20,15 +24,23 @@ public class AddCommandTest {
     private MessageHandler messageHandler;
     private CodebaseManager codebaseManager;
     private AddCommand addCommand;
+    private Backend backend;
+    private FileSystem fileSystem;
 
     @BeforeEach
     public void setUp() {
         container = mock(Container.class);
         messageHandler = mock(MessageHandler.class);
-        codebaseManager = new CodebaseManager(null); // Passing null for backend as it's not used in this test
+        backend = mock(Backend.class);
+        fileSystem = mock(FileSystem.class);
+        codebaseManager = new CodebaseManager(backend);
 
         when(container.getMessageHandler()).thenReturn(messageHandler);
         when(container.getCodebaseManager()).thenReturn(codebaseManager);
+        when(container.getBackend()).thenReturn(backend);
+        when(container.getFileSystem()).thenReturn(fileSystem);
+        when(backend.add(anyString())).thenReturn(CompletableFuture.completedFuture(null));
+
 
         addCommand = new AddCommand(container);
     }
@@ -41,6 +53,9 @@ public class AddCommandTest {
 
         String[] args = {tempFile.toString()};
         addCommand.execute(args);
+
+        // Verify that the backend's add method was called
+        verify(backend, times(1)).add(tempFile.toString());
 
         // Verify that the codebase manager was updated
         String codebase = codebaseManager.getCodebase();
