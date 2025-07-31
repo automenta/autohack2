@@ -1,9 +1,10 @@
 package com.pijul.aider;
 
-import com.pijul.aider.commands.CommandManager;
+import com.pijul.aider.CommandManager;
 import com.pijul.aider.tui.Terminal;
 import com.pijul.aider.versioning.FileBackend;
 import com.pijul.aider.Backend;
+import java.util.Arrays;
 
 public class Container {
     private Backend backend;
@@ -18,15 +19,38 @@ public class Container {
     private Terminal terminal;
     private MessageHandler messageHandler;
 
-    public Container() {
+    public Container(String[] args) {
         this.messageHandler = new MessageHandler(this);
         this.backendManager = new BackendManager();
+
+        // Initialize backend
+        initializeBackend(args);
+
         this.fileManager = new FileManager();
         this.llmManager = new LLMManager();
         this.uiManager = new UIManager();
         this.codebaseManager = new CodebaseManager(this.backend);
         this.fileSystem = new FileSystem();
         this.commandManager = new CommandManager(this); // Initialize CommandManager after other dependencies
+    }
+
+    private void initializeBackend(String[] args) {
+        String backendType = parseBackendFromArgs(args);
+        if (backendType != null) {
+            backendManager.setBackend(backendType);
+        } else {
+            backendManager.autodetectBackend();
+        }
+        this.backend = backendManager.getBackend();
+    }
+
+    private String parseBackendFromArgs(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("--backend") && i + 1 < args.length) {
+                return args[i + 1];
+            }
+        }
+        return null;
     }
 
     public MessageHandler getMessageHandler() {

@@ -4,7 +4,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.graphics.TextGraphics;
-import com.pijul.aider.commands.CommandManager;
+import com.pijul.aider.CommandManager;
 import java.io.IOException;
 
 public class Terminal {
