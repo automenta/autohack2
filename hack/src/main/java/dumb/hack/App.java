@@ -32,16 +32,21 @@ public class App {
                 mcrProps.setProperty("llm.apiKey", apiKey);
             }
             mcrProps.setProperty("llm.model", "gpt-4o-mini");
-            MCR mcr = new MCR(mcrProps);
-            Session mcrSession = mcr.createSession();
 
             // 2. Get necessary components from autohack's context
             CommandManager commandManager = context.commandManager;
             CodebaseManager codebaseManager = context.getCodebaseManager();
             MessageHandler messageHandler = context.getMessageHandler();
 
+            // Create a ToolProvider with the code modification tools
+            dumb.hack.tools.CodeToolProvider toolProvider = new dumb.hack.tools.CodeToolProvider(context.fileManager, codebaseManager);
+
+            MCR mcr = new MCR(mcrProps);
+            Session mcrSession = mcr.createSession(toolProvider);
+
+
             // 3. Create and register the ReasonCommand
-            ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler);
+            ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, context.fileManager);
             commandManager.registerCommand("/reason", reasonCommand);
             // --- End of Integration Logic ---
 

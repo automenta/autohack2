@@ -106,4 +106,51 @@ public class Terminal {
     public void stop() {
         running = false;
     }
+
+    public String readLine(String prompt) {
+        try {
+            // Temporarily stop the command manager's listener if it's running
+            // to avoid conflicts with input handling.
+            commandManager.stopListening();
+            screen.clear();
+            TextGraphics tg = screen.newTextGraphics();
+
+            StringBuilder line = new StringBuilder();
+            int row = screen.getTerminalSize().getRows() - 1;
+
+            while (true) {
+                tg.putString(0, row, prompt + line.toString());
+                screen.refresh();
+
+                com.googlecode.lanterna.input.KeyStroke keyStroke = screen.readInput();
+                if (keyStroke != null) {
+                    switch (keyStroke.getKeyType()) {
+                        case Character:
+                            line.append(keyStroke.getCharacter());
+                            break;
+                        case Enter:
+                            // Resume command listening after getting input
+                            commandManager.startListening();
+                            return line.toString();
+                        case Backspace:
+                            if (line.length() > 0) {
+                                line.setLength(line.length() - 1);
+                            }
+                            break;
+                        case Escape:
+                             // Resume command listening
+                            commandManager.startListening();
+                            return null; // User cancelled
+                        default:
+                            break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Resume command listening in case of error
+            commandManager.startListening();
+            return null;
+        }
+    }
 }
