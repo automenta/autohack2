@@ -31,8 +31,13 @@ public class CodeParser {
         } catch (Exception e) {
             // If parsing fails, treat it as a generic file
             facts.addAll(parseGenericFile(path, content));
-            facts.add("parsing_error('" + escape(normalizedPath) + "', '" + escape(e.getMessage()) + "').");
+            String errorMessage = escape(e.getMessage());
+            if(errorMessage != null && !errorMessage.isBlank()) {
+                facts.add("parsing_error('" + escape(normalizedPath) + "', '" + errorMessage + "').");
+            }
         }
+        // Ensure we don't return any null or blank facts
+        facts.removeIf(fact -> fact == null || fact.isBlank());
         return facts;
     }
 
@@ -46,7 +51,10 @@ public class CodeParser {
         if (text == null) {
             return "";
         }
-        return text.replace("\\", "\\\\").replace("'", "\\'");
+        return text.replace("\\", "\\\\")
+                   .replace("'", "\\'")
+                   .replace("\n", "\\n")
+                   .replace("\r", "\\r");
     }
 
     private static class JavaFileVisitor extends VoidVisitorAdapter<List<String>> {
@@ -61,7 +69,10 @@ public class CodeParser {
         public void visit(ClassOrInterfaceDeclaration n, List<String> facts) {
             super.visit(n, facts);
             String className = n.getNameAsString();
-            facts.add("class('" + escape(className) + "', '" + escape(filepath) + "').");
+            String fact = "class('" + escape(className) + "', '" + escape(filepath) + "').";
+            if (!fact.isBlank()) {
+                facts.add(fact);
+            }
         }
 
         @Override
@@ -70,7 +81,10 @@ public class CodeParser {
             String methodName = n.getNameAsString();
             n.findAncestor(ClassOrInterfaceDeclaration.class).ifPresent(p -> {
                 String className = p.getNameAsString();
-                facts.add("method('" + escape(className) + "', '" + escape(methodName) + "', '" + escape(filepath) + "').");
+                String fact = "method('" + escape(className) + "', '" + escape(methodName) + "', '" + escape(filepath) + "').";
+                if (!fact.isBlank()) {
+                    facts.add(fact);
+                }
             });
         }
 
@@ -78,7 +92,10 @@ public class CodeParser {
             if (text == null) {
                 return "";
             }
-            return text.replace("\\", "\\\\").replace("'", "\\'");
+            return text.replace("\\", "\\\\")
+                       .replace("'", "\\'")
+                       .replace("\n", "\\n")
+                       .replace("\r", "\\r");
         }
     }
 }

@@ -1,7 +1,5 @@
 package dumb.hack.commands;
 
-import com.github.difflib.UnifiedDiffUtils;
-import com.github.difflib.patch.Patch;
 import dumb.code.CodebaseManager;
 import dumb.code.IFileManager;
 import dumb.code.MessageHandler;
@@ -9,17 +7,17 @@ import dumb.code.commands.Command;
 import dumb.hack.util.CodeParser;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
+import dumb.mcr.step.PrologStep;
+import dumb.mcr.step.StepResult;
+import dumb.mcr.step.ToolStep;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public record ReasonCommand(
         Session mcrSession,
         CodebaseManager codebaseManager,
         MessageHandler messageHandler,
-        IFileManager fileManager, // Added FileManager
+        IFileManager fileManager,
         boolean interactive
 ) implements Command {
 
@@ -48,14 +46,13 @@ public record ReasonCommand(
         }
 
         messageHandler.addMessage("system", "Reasoning...");
-        // Add codebase context to the MCR session
         addCodebaseContext();
 
         ReasoningResult result = mcrSession.reason(task);
 
         messageHandler.addMessage("system", "\n--- Reasoning History ---");
-        for (String step : result.history()) {
-            messageHandler.addMessage("system", "  - " + step);
+        for (StepResult step : result.history()) {
+            displayStep(step);
         }
         messageHandler.addMessage("system", "--- End of History ---\n");
 
@@ -63,8 +60,28 @@ public record ReasonCommand(
         messageHandler.addMessage("system", "Final Answer: " + answer);
     }
 
+    private void displayStep(StepResult step) {
+        switch (step) {
+            case PrologStep prologStep -> {
+                String solutions = "No solutions found.";
+                if (prologStep.result() != null && prologStep.result().getBindings() != null && !prologStep.result().getBindings().isEmpty()) {
+                    solutions = prologStep.result().getBindings().stream()
+                            .map(Object::toString)
+                            .collect(Collectors.joining(", "));
+                }
+                messageHandler.addMessage("system", "🤖 Thought: " + prologStep.goal() + " -> " + solutions);
+            }
+            case ToolStep toolStep -> {
+                messageHandler.addMessage("system", "🛠️ Tool Call: " + toolStep.toolName());
+                messageHandler.addMessage("system", "   Args: " + toolStep.args());
+                messageHandler.addMessage("system", "   Result: " + toolStep.result());
+            }
+            default -> messageHandler.addMessage("system", "Unknown step type: " + step.getClass().getName());
+        }
+    }
+
+
     private void addCodebaseContext() {
-        // Add file information
         CodeParser codeParser = new CodeParser();
         java.util.List<String> files = codebaseManager.getFiles();
         for (String file : files) {
@@ -80,7 +97,6 @@ public record ReasonCommand(
             }
         }
 
-        // Add git status information
         try {
             String status = codebaseManager.getVersioningBackend().status().get();
             mcrSession.assertProlog("git_status(\"" + status + "\").");
@@ -89,5 +105,4 @@ public record ReasonCommand(
             Thread.currentThread().interrupt();
         }
     }
-
 }

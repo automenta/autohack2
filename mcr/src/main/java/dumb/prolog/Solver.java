@@ -1,6 +1,7 @@
 package dumb.prolog;
 
 import dumb.mcr.exceptions.ToolExecutionException;
+import dumb.mcr.step.ToolStep;
 import dumb.mcr.tools.Tool;
 import dumb.mcr.tools.ToolProvider;
 
@@ -11,16 +12,17 @@ import java.util.Map;
 
 public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
 
-    public List<Map<Variable, Term>> solve(Term query) {
+    public record SolverResult(List<Map<Variable, Term>> solutions, ToolStep toolStep) {}
+
+    public SolverResult solve(Term query) {
         List<Map<Variable, Term>> solutions = new ArrayList<>();
-        solve(query, new HashMap<>(), solutions);
-        return solutions;
+        ToolStep toolStep = solve(query, new HashMap<>(), solutions);
+        return new SolverResult(solutions, toolStep);
     }
 
-    private void solve(Term query, Map<Variable, Term> substitution, List<Map<Variable, Term>> solutions) {
-        if (query instanceof Structure structure && structure.getFunctor().getName().equals("use_tool") && structure.getArgs().size() == 3) {
-            executeTool(structure, substitution, solutions);
-            return;
+    private ToolStep solve(Term query, Map<Variable, Term> substitution, List<Map<Variable, Term>> solutions) {
+        if (query instanceof Structure structure && "use_tool".equals(structure.getFunctor().getName()) && structure.getArgs().size() == 3) {
+            return executeTool(structure, substitution, solutions);
         }
 
         for (Clause clause : knowledgeBase) {
@@ -33,6 +35,7 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
                 }
             }
         }
+        return null; // No tool was executed
     }
 
     private void solveBody(List<Term> body, Map<Variable, Term> substitution, List<Map<Variable, Term>> solutions) {
@@ -44,7 +47,7 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
         Term firstGoal = body.getFirst();
         List<Term> remainingGoals = body.subList(1, body.size());
 
-        solve(firstGoal, substitution, (newSolutions) -> {
+        solve(firstGoal, substitution, (newSolutions, toolStep) -> {
             for (Map<Variable, Term> newSubst : newSolutions) {
                 solveBody(remainingGoals, newSubst, solutions);
             }
@@ -53,18 +56,16 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
 
     private void solve(Term query, Map<Variable, Term> substitution, SolutionCallback callback) {
         List<Map<Variable, Term>> solutions = new ArrayList<>();
-        // This is a simplified version, a real implementation would be more complex
-        solve(query, substitution, solutions);
-        callback.onSolutions(solutions);
+        ToolStep toolStep = solve(query, substitution, solutions);
+        callback.onSolutions(solutions, toolStep);
     }
 
-    private void executeTool(Structure toolQuery, Map<Variable, Term> substitution, List<Map<Variable, Term>> solutions) {
+    private ToolStep executeTool(Structure toolQuery, Map<Variable, Term> substitution, List<Map<Variable, Term>> solutions) {
         try {
             if (toolProvider == null) {
                 throw new ToolExecutionException("No tool provider configured.");
             }
 
-            // use_tool(ToolName, [prop(K,V), ...], ResultVar)
             Term toolNameTerm = toolQuery.getArgs().get(0);
             Term argsListTerm = toolQuery.getArgs().get(1);
             Term resultVariable = toolQuery.getArgs().get(2);
@@ -85,15 +86,18 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
             }
 
             String result = tool.run(args);
-            // The result from a tool is always a string, so we create an Atom.
-            // In a more advanced system, tools might return structured terms.
             Map<Variable, Term> newSubst = Unification.unify(resultVariable, new Atom(result), substitution);
             if (newSubst != null) {
-                // The tool call was successful and the result was unified.
                 solutions.add(newSubst);
             }
-        } catch (dumb.mcr.exceptions.PrologParseException e) {
-            throw new ToolExecutionException(e.getMessage());
+
+            // Return the details of the tool execution
+            return new ToolStep(toolName, args, result);
+
+        } catch (Exception e) {
+            // In case of an error, we wrap it in a runtime exception.
+            // A more robust implementation would have custom, checked exceptions.
+            throw new ToolExecutionException("Error executing tool: " + e.getMessage(), e);
         }
     }
 
@@ -101,15 +105,13 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
         Map<String, Object> args = new HashMap<>();
         Term current = argsListTerm;
 
-        while (current instanceof Structure listNode && listNode.getFunctor().getName().equals(".") && listNode.getArgs().size() == 2) {
+        while (current instanceof Structure listNode && ".".equals(listNode.getFunctor().getName()) && listNode.getArgs().size() == 2) {
             Term head = listNode.getArgs().get(0);
-            if (head instanceof Structure prop && prop.getFunctor().getName().equals("prop") && prop.getArgs().size() == 2) {
+            if (head instanceof Structure prop && "prop".equals(prop.getFunctor().getName()) && prop.getArgs().size() == 2) {
                 Term keyTerm = prop.getArgs().get(0);
                 Term valueTerm = prop.getArgs().get(1);
 
                 if (keyTerm instanceof Atom keyAtom) {
-                    // For now, we'll convert values to their string representation.
-                    // A more sophisticated implementation might handle different types.
                     args.put(keyAtom.getName(), valueTerm.toString());
                 } else {
                     return null; // Key must be an atom
@@ -120,16 +122,15 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
             current = listNode.getArgs().get(1);
         }
 
-        if (current instanceof Atom atom && atom.getName().equals("[]")) {
+        if (current instanceof Atom atom && "[]".equals(atom.getName())) {
             return args; // End of list
         }
 
         return null; // Malformed list
     }
 
-
     // Helper interface for callback
     private interface SolutionCallback {
-        void onSolutions(List<Map<Variable, Term>> solutions);
+        void onSolutions(List<Map<Variable, Term>> solutions, ToolStep toolStep);
     }
 }

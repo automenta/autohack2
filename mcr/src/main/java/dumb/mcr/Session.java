@@ -2,6 +2,8 @@ package dumb.mcr;
 
 import dumb.lm.LMClient;
 import dumb.lm.LMResponse;
+import dumb.mcr.step.PrologStep;
+import dumb.mcr.step.StepResult;
 import dumb.mcr.tools.Tool;
 import dumb.mcr.tools.ToolProvider;
 import dumb.prolog.*;
@@ -12,17 +14,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Session {
 
-    private final LMClient LMClient;
+    private final LMClient lmClient;
     private KnowledgeGraph knowledgeGraph;
     private Ontology ontology;
     private final ToolProvider toolProvider;
     private Solver solver;
 
-    public Session(LMClient LMClient, ToolProvider toolProvider) {
-        this.LMClient = LMClient;
+    public Session(LMClient lmClient, ToolProvider toolProvider) {
+        this.lmClient = lmClient;
         this.knowledgeGraph = new KnowledgeGraph();
         this.ontology = new Ontology();
         this.toolProvider = toolProvider;
@@ -40,7 +43,6 @@ public class Session {
                 return scanner.useDelimiter("\\A").next();
             }
         } catch (Exception e) {
-            // Consider a more robust error handling strategy
             throw new RuntimeException("Failed to load prompt: " + name, e);
         }
     }
@@ -60,6 +62,9 @@ public class Session {
     }
 
     public Result assertProlog(String clause) {
+        if (clause == null || clause.isBlank()) {
+            throw new IllegalArgumentException("Cannot assert a null or blank clause.");
+        }
         knowledgeGraph.addClause(clause);
         resetSolver();
         return Result.success("Clause asserted successfully.");
@@ -92,7 +97,6 @@ public class Session {
     }
 
     public Result addRule(String rule) {
-        // Basic validation: check if it contains ':-'
         if (!rule.contains(":-")) {
             return Result.failure("Invalid rule format. Expected 'head :- body.'");
         }
@@ -116,8 +120,9 @@ public class Session {
     public QueryResult query(String prologQuery) {
         try {
             Term queryTerm = Parser.parseTerm(prologQuery);
-            List<Map<Variable, Term>> solutions = solver.solve(queryTerm);
-            return new QueryResult(!solutions.isEmpty(), prologQuery, solutions, null);
+            Solver.SolverResult solverResult = solver.solve(queryTerm);
+            // The public query method does not return tool execution info, for now.
+            return new QueryResult(!solverResult.solutions().isEmpty(), prologQuery, solverResult.solutions(), null);
         } catch (Exception e) {
             return new QueryResult(false, prologQuery, null, e.getMessage());
         }
@@ -125,14 +130,13 @@ public class Session {
 
     public QueryResult nquery(String naturalLanguageQuery) {
         String prompt = buildNQueryPrompt(naturalLanguageQuery);
-        LMResponse response = LMClient.generate(prompt);
+        LMResponse response = lmClient.generate(prompt);
 
         if (!response.success()) {
             return new QueryResult(false, naturalLanguageQuery, null, "LLM query translation failed: " + response.error());
         }
 
         String prologQuery = response.content().trim();
-        // Optional: Add some basic validation for the generated prolog query
         if (!prologQuery.endsWith(".")) {
             prologQuery += ".";
         }
@@ -149,70 +153,86 @@ public class Session {
     }
 
     public ReasoningResult reason(String taskDescription, int maxSteps) {
-        List<String> history = new ArrayList<>();
-        history.add("Task: " + taskDescription);
+        List<StepResult> history = new ArrayList<>();
+        // We don't add the initial task to the history, as it's not a StepResult.
+        // The caller can manage the overall task description.
 
         for (int i = 0; i < maxSteps; i++) {
             String prompt = buildReasoningPrompt(history);
-            LMResponse response = LMClient.generate(prompt);
+            LMResponse response = lmClient.generate(prompt);
 
             if (!response.success()) {
                 return new ReasoningResult("LLM reasoning failed: " + response.error(), history);
             }
 
             String prologGoal = response.content().trim();
-            history.add("LLM goal: " + prologGoal);
+            if (prologGoal.isBlank()) continue;
 
             try {
                 Term parsedGoal = Parser.parseTerm(prologGoal);
-                QueryResult result = query(prologGoal);
-                history.add(formatStepResult(prologGoal, result));
+                Solver.SolverResult solverResult = solver.solve(parsedGoal);
+
+                QueryResult queryResult = new QueryResult(
+                        !solverResult.solutions().isEmpty(),
+                        prologGoal,
+                        solverResult.solutions(),
+                        null); // Assuming no error for now
+
+                history.add(new PrologStep(prologGoal, queryResult));
+                if (solverResult.toolStep() != null) {
+                    history.add(solverResult.toolStep());
+                }
 
                 if (parsedGoal instanceof Structure goalStructure) {
-                    if (goalStructure.getFunctor().getName().equals("conclude")) {
-                        return new ReasoningResult(
-                                result.success() && result.bindings() != null && !result.bindings().isEmpty() ? firstAnswer(result) : "Concluded, but no specific answer found.",
-                                history);
+                    if ("conclude".equals(goalStructure.getFunctor().getName())) {
+                        String answer = queryResult.success() && queryResult.bindings() != null && !queryResult.bindings().isEmpty()
+                                ? firstAnswer(queryResult)
+                                : "Concluded, but no specific answer found.";
+                        return new ReasoningResult(answer, history);
                     }
                 }
             } catch (Exception e) {
-                history.add("Error executing goal: " + e.getMessage());
+                // Log the exception, maybe add an ErrorStep to history in the future.
+                // For now, we'll just stop reasoning.
+                return new ReasoningResult("Error executing goal: " + e.getMessage(), history);
             }
         }
 
         return new ReasoningResult("Max steps reached without conclusion.", history);
     }
 
-    /** Extract the answer from the first solution */
     private String firstAnswer(QueryResult result) {
         var firstSolution = result.bindings().get(0);
         return firstSolution.values().stream().findFirst().map(Object::toString).orElse("Concluded without a specific answer.");
     }
 
-    private String formatStepResult(String prologGoal, QueryResult result) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Goal '").append(prologGoal).append("' result: ");
+    private String formatStepResultForPrompt(StepResult step) {
+        if (step instanceof PrologStep prologStep) {
+            QueryResult result = prologStep.result();
+            StringBuilder sb = new StringBuilder();
+            sb.append("Goal '").append(prologStep.goal()).append("' result: ");
 
-        if (!result.success()) {
-            sb.append("Failed. Error: ").append(result.error());
-        } else if (result.bindings() == null || result.bindings().isEmpty()) {
-            sb.append("Success, but no solutions found (false).");
-        } else {
-            sb.append("Success with ").append(result.bindings().size()).append(" solution(s).\n");
-            // Using the raw bindings here to avoid the string conversion in getBindings()
-            List<Map<Variable, Term>> bindings = result.bindings();
-            for (int i = 0; i < bindings.size(); i++) {
-                sb.append("  Solution ").append(i + 1).append(": ").append(result.getBindings().get(i));
-                if (i < bindings.size() - 1) {
-                    sb.append("\n");
-                }
+            if (!result.success()) {
+                sb.append("Failed. Error: ").append(result.error());
+            } else if (result.bindings() == null || result.bindings().isEmpty()) {
+                sb.append("Success, but no solutions found (false).");
+            } else {
+                sb.append("Success with ").append(result.bindings().size()).append(" solution(s): ");
+                String solutionsString = result.getBindings().stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(", "));
+                sb.append(solutionsString);
             }
+            return sb.toString();
         }
-        return sb.toString();
+        if (step instanceof dumb.mcr.step.ToolStep toolStep) {
+            return "Tool '" + toolStep.toolName() + "' was called with args " + toolStep.args() + " and returned: " + toolStep.result();
+        }
+        return "Unknown step type.";
     }
 
     public ReasoningResult reason(String taskDescription) {
-        return reason(taskDescription, 10); // Default to 10 steps
+        return reason(taskDescription, 10);
     }
 
     public void save(String path) throws IOException {
@@ -234,9 +254,12 @@ public class Session {
         }
     }
 
-    private String buildReasoningPrompt(List<String> history) {
+    private String buildReasoningPrompt(List<StepResult> history) {
         String promptTemplate = loadPrompt("reason.prompt");
-        String historyString = String.join("\n", history);
+        String historyString = history.stream()
+                .map(this::formatStepResultForPrompt)
+                .collect(Collectors.joining("\n"));
+
         return promptTemplate
                 .replace("{{ontology_types}}", ontology.getTypes().toString())
                 .replace("{{ontology_relationships}}", ontology.getRelationships().toString())
