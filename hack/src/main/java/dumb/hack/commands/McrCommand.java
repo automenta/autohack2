@@ -66,7 +66,12 @@ public class McrCommand implements Callable<Integer> {
         session.addRelationship("tweety", "likes", "seeds");
 
         if (tuiMode) {
-            new McrTUI(session).start();
+            McrTUI mcrTUI = new McrTUI(session);
+            com.googlecode.lanterna.screen.TerminalScreen screen = new com.googlecode.lanterna.terminal.DefaultTerminalFactory().createScreen();
+            screen.startScreen();
+            com.googlecode.lanterna.gui2.BasicWindow window = new com.googlecode.lanterna.gui2.BasicWindow("MCR TUI");
+            window.setComponent(mcrTUI.createPanel());
+            new com.googlecode.lanterna.gui2.MultiWindowTextGUI(screen).addWindowAndWait(window);
         } else if (serverMode) {
             new McrServer(session).start();
         } else {

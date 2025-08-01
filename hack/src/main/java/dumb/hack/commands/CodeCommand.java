@@ -62,10 +62,10 @@ public class CodeCommand implements Callable<Integer> {
             System.out.println("Non-interactive task completed.");
             return 0;
         } else {
-            // Existing interactive mode logic
-            var aider = aider(model, !nonInteractive); // Pass true for interactive
-            aider.start();
-            return 0;
+            // In interactive mode, the HackTUI is responsible for starting the UI.
+            // This command is now only for non-interactive mode.
+            System.err.println("Interactive mode must be launched from the main `hack` command.");
+            return 1;
         }
     }
 
@@ -93,6 +93,10 @@ public class CodeCommand implements Callable<Integer> {
 
     private CodeUI aider(ChatModel model, boolean interactive) {
         CodeServices services = setup(model, interactive);
-        return new CodeUI(services.code());
+        CodeUI codeUI = new CodeUI(services.code());
+        // Since we are not in the integrated HackTUI, we create our own screen
+        // In the integrated TUI, the screen is managed by HackTUI
+        // The UI is now started by HackTUI
+        return codeUI;
     }
 }

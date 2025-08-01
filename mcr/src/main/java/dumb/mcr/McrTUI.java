@@ -1,8 +1,7 @@
 package dumb.mcr;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.gui2.*;
 
 public class McrTUI {
     private final Session session;
@@ -11,35 +10,39 @@ public class McrTUI {
         this.session = session;
     }
 
-    public void start() throws IOException {
-        System.out.println("MCR Interactive TUI");
-        System.out.println("Type 'exit' to quit.");
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            while (true) {
-                System.out.print("> ");
-                String line = reader.readLine();
-                if (line == null || line.equalsIgnoreCase("exit")) {
-                    break;
-                }
-                if (line.isBlank()) {
-                    continue;
-                }
+    public Panel createPanel() {
+        Panel contentPanel = new Panel(new LinearLayout(Direction.VERTICAL));
 
-                QueryResult result = session.nquery(line);
+        contentPanel.addComponent(new Label("Enter your query:"));
+        TextBox queryBox = new TextBox(new TerminalSize(50, 1));
+        contentPanel.addComponent(queryBox);
 
-                System.out.println("Original Query: " + result.originalQuery());
-                if (result.success()) {
-                    System.out.println("Success!");
-                    if (result.bindings() != null && !result.bindings().isEmpty()) {
-                        System.out.println("Solutions:");
-                        result.getBindings().forEach(solution -> System.out.println("  " + solution));
-                    } else {
-                        System.out.println("Query was successful, but returned no solutions.");
-                    }
-                } else {
-                    System.err.println("MCR query failed.");
-                }
+        Panel resultsPanel = new Panel();
+        resultsPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+        contentPanel.addComponent(resultsPanel.withBorder(Borders.singleLine("Results")));
+
+        Button submitButton = new Button("Submit", () -> {
+            String query = queryBox.getText();
+            if (query.isBlank()) {
+                return;
             }
-        }
+            QueryResult result = session.nquery(query);
+            resultsPanel.removeAllComponents();
+            resultsPanel.addComponent(new Label("Original Query: " + result.originalQuery()));
+            if (result.success()) {
+                resultsPanel.addComponent(new Label("Success!"));
+                if (result.bindings() != null && !result.bindings().isEmpty()) {
+                    resultsPanel.addComponent(new Label("Solutions:"));
+                    result.getBindings().forEach(solution -> resultsPanel.addComponent(new Label("  " + solution)));
+                } else {
+                    resultsPanel.addComponent(new Label("Query was successful, but returned no solutions."));
+                }
+            } else {
+                resultsPanel.addComponent(new Label("MCR query failed."));
+            }
+        });
+        contentPanel.addComponent(submitButton);
+
+        return contentPanel;
     }
 }

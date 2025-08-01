@@ -1,10 +1,7 @@
 package dumb.code;
 
-import com.googlecode.lanterna.screen.TerminalScreen;
-import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.gui2.Panel;
 import dumb.code.tui.Terminal;
-
-import java.io.IOException;
 
 public class CodeUI {
     private final Code code;
@@ -14,15 +11,14 @@ public class CodeUI {
         this.code = code;
     }
 
-    public void start() throws IOException {
-
-        var screen = new TerminalScreen(new DefaultTerminalFactory().createTerminal());
-        screen.startScreen();
-
-        // Start terminal UI with command manager
-        this.tui = new Terminal(screen, code.commandManager);
+    public Panel createPanel() {
+        this.tui = new Terminal(code.commandManager);
         code.setTerminal(tui); // Set the terminal in the container
-        tui.run();
+        return tui.getTerminalPanel();
+    }
+
+    public Terminal getTerminal() {
+        return tui;
     }
 
     public void stop() {

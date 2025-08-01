@@ -64,28 +64,24 @@ public class QueryCommand implements Command {
     }
 
     private void applyDiff(String filePath, String newContent) {
+        String oldContent = code.codebaseManager.getFileContent(filePath);
+        List<String> oldLines = Arrays.asList(oldContent.split("\n"));
+        List<String> newLines = Arrays.asList(newContent.split("\n"));
+        Patch<String> patch = DiffUtils.diff(oldLines, newLines);
+        List<String> diff = UnifiedDiffUtils.generateUnifiedDiff(filePath, filePath, oldLines, patch, 0);
+
+        code.messageHandler.addMessage("system", "The agent proposes the following changes to " + filePath + ":");
+        for (String line : diff) {
+            code.messageHandler.addMessage("diff", line);
+        }
+
+        // For now, automatically apply the change.
+        // A better solution would be to have UI buttons for this.
         try {
-            String oldContent = code.codebaseManager.getFileContent(filePath);
-            List<String> oldLines = Arrays.asList(oldContent.split("\n"));
-            List<String> newLines = Arrays.asList(newContent.split("\n"));
-            Patch<String> patch = DiffUtils.diff(oldLines, newLines);
-            List<String> diff = UnifiedDiffUtils.generateUnifiedDiff(filePath, filePath, oldLines, patch, 0);
-
-            code.messageHandler.addMessage("system", "The agent proposes the following changes to " + filePath + ":");
-            for (String line : diff) {
-                code.messageHandler.addMessage("diff", line);
-            }
-
-            code.messageHandler.addMessage("system", "Apply this change? (yes/no)");
-            String response = code.messageHandler.promptUser("> ");
-            if (response != null && response.equalsIgnoreCase("yes")) {
-                Files.writeString(Path.of(filePath), newContent);
-                code.messageHandler.addMessage("system", "Changes applied.");
-            } else {
-                code.messageHandler.addMessage("system", "Changes discarded.");
-            }
+            Files.writeString(Path.of(filePath), newContent);
+            code.messageHandler.addMessage("system", "Changes applied.");
         } catch (IOException e) {
-            code.messageHandler.addMessage("error", "Error applying diff: " + e.getMessage());
+            code.messageHandler.addMessage("error", "Error writing file: " + e.getMessage());
         }
     }
 }

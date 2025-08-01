@@ -30,6 +30,7 @@ import dumb.code.commands.speech.SpeechCommand;
 import dumb.code.commands.status.StatusCommand;
 import dumb.code.commands.test.TestCommand;
 import dumb.code.commands.undo.UndoCommand;
+import dumb.code.commands.mcr.McrCommand;
 import dumb.code.commands.unrecord.UnrecordCommand;
 
 import java.util.HashMap;
@@ -49,6 +50,7 @@ public class CommandManager {
         registerCommand("record", new RecordCommand(code));
         registerCommand("commit", new CommitCommand(code)); // Alias for record
         registerCommand("query", new QueryCommand(code));
+        registerCommand("mcr", new McrCommand(code.processRunner, code.messageHandler));
 
         // Newly registered commands
         registerCommand("apply", new ApplyCommand(code));

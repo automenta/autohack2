@@ -23,17 +23,7 @@ public class UIManager {
 
     public void displayWelcomeMessage() {
         // Display welcome message
-        displayMessage("Welcome to PijulAider!");
-    }
-
-    public void displayMessage(String message) {
-        try {
-            getTerminal().getScreen().clear();
-            getTerminal().getScreen().newTextGraphics().putString(0, 0, message);
-            getTerminal().getScreen().refresh();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        code.messageHandler.onMessage("Welcome to PijulAider!");
     }
 
     public String getUserInput() {
