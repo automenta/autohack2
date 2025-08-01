@@ -1,6 +1,6 @@
 # AutoHack
 
-AutoHack is an Aider clone: a terminal-based AI pair programming tool for LLM-driven code editing, feature generation,
+AutoHack is an Aider clone: a terminal-based AI pair programming tool for LM-driven code editing, feature generation,
 bug fixing, and change management. It supports three versioning backends—plain files (no VCS), Git, or Pijul—with Pijul
 as the preferred option for its commutative patches, enabling flexible, non-linear workflows ideal for advanced LLM
 experiments. Users can start with files or Git and upgrade to Pijul seamlessly for enhanced features.
@@ -13,7 +13,7 @@ experiments. Users can start with files or Git and upgrade to Pijul seamlessly f
 - **Preference for Pijul**: Prompts users to switch to Pijul during setup, highlighting benefits like conflict-free
   merging, granular patch unapplying, and composable changes for AI iterations. For upgrades, provide guided steps:
   Export Git history to Pijul, or layer Pijul atop files/Git for hybrid use.
-- **Backend-Agnostic Core**: Core logic (chat interface, LLM integration, codebase mapping, testing) remains unchanged;
+- **Backend-Agnostic Core**: Core logic (chat interface, LM integration, codebase mapping, testing) remains unchanged;
   versioning abstracted to a modular layer handling init, add, record/commit, apply/revert, and diff/preview.
 
 #### Architecture Overview
@@ -53,34 +53,26 @@ via modular abstraction for easy backend swaps.
 
 ## Vision: The Hands-On Coder
 
-The `autohack` module is currently a terminal-based AI pair programmer. Its ultimate purpose is to become the **hands** of the autonomous agent, interacting with the codebase and the development environment.
+The `autohack` module is currently a terminal-based AI pair programmer. Its ultimate purpose is to become the **hands**
+of the autonomous agent, interacting with the codebase and the development environment.
 
-*   **From Assistant to Agent:** Evolve from a tool that responds to user commands to an agent that can work autonomously on a set of goals.
-*   **Full Development Lifecycle Integration:** The agent would not just write code, but also handle the entire development lifecycle:
-    *   **Task Management:** Decompose high-level goals into specific, actionable tasks.
-    *   **Version Control Mastery:** Seamlessly work with version control systems like Git and Pijul, including branching, merging, and writing descriptive commit messages.
-    *   **CI/CD Integration:** Create and manage pull requests, respond to code review feedback, and work with CI/CD pipelines to ensure code quality.
-*   **Self-Healing and Self-Improving:** The agent could proactively identify and fix bugs, refactor code for better performance and readability, and even update its own source code to improve its capabilities over time.
+* **From Assistant to Agent:** Evolve from a tool that responds to user commands to an agent that can work autonomously
+  on a set of goals.
+* **Full Development Lifecycle Integration:** The agent would not just write code, but also handle the entire
+  development lifecycle:
+    * **Task Management:** Decompose high-level goals into specific, actionable tasks.
+    * **Version Control Mastery:** Seamlessly work with version control systems like Git and Pijul, including branching,
+      merging, and writing descriptive commit messages.
+    * **CI/CD Integration:** Create and manage pull requests, respond to code review feedback, and work with CI/CD
+      pipelines to ensure code quality.
+* **Self-Healing and Self-Improving:** The agent could proactively identify and fix bugs, refactor code for better
+  performance and readability, and even update its own source code to improve its capabilities over time.
 
 ## Building and Running
 
-### Building
+To build the project, run `mvn clean install` from the root directory.
 
-To build the project, run the following command from the project's root directory:
-
-```bash
-mvn clean install
-```
-
-This will build all modules and create the executable JAR file in the `code/target/` directory.
-
-### Running AutoHack
-
-To run the AutoHack application, execute the following command from the project's root directory:
-
-```bash
-java -jar code/target/code-1.0-SNAPSHOT.jar
-```
+To run the application, see the instructions in the main `README.md` file.
 
 ## Features
 

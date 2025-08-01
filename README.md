@@ -8,11 +8,16 @@ This project is a multi-module Maven project. It consists of three modules:
 
 ## Vision: An Autonomous Software Engineering Agent
 
-The project, with its `autohack` and `mcr` modules, has the potential to become a fully autonomous AI software engineer. This agent would be capable of not just assisting with coding tasks, but independently managing and evolving a codebase to meet high-level goals.
+The project, with its `autohack` and `mcr` modules, has the potential to become a fully autonomous AI software engineer.
+This agent would be capable of not just assisting with coding tasks, but independently managing and evolving a codebase
+to meet high-level goals.
 
-The combination of `autohack` and `mcr` creates a powerful synergy. `mcr` provides the high-level reasoning and planning, while `autohack` executes those plans in the real world of code, files, and development tools. This separation of concerns mirrors the way a human software architect and a developer might work together.
+The combination of `autohack` and `mcr` creates a powerful synergy. `mcr` provides the high-level reasoning and
+planning, while `autohack` executes those plans in the real world of code, files, and development tools. This separation
+of concerns mirrors the way a human software architect and a developer might work together.
 
-This vision represents a significant leap forward from current AI coding assistants, moving towards a future where AI can be a true partner in the creative and complex process of software development.
+This vision represents a significant leap forward from current AI coding assistants, moving towards a future where AI
+can be a true partner in the creative and complex process of software development.
 
 ## Building the Project
 
@@ -24,20 +29,12 @@ mvn clean install
 
 This will build all three modules and install them into your local Maven repository.
 
-## Running the Applications
+## Running the Application
 
-### AutoHack
-
-To run the AutoHack application, execute the following command:
+To run the application, execute the following command from the root directory:
 
 ```bash
-java -jar code/target/code-1.0-SNAPSHOT.jar
+java -jar hack/target/hack-1.0-SNAPSHOT.jar
 ```
 
-### MCR
-
-To run the MCR application, execute the following command:
-
-```bash
-java -jar mcr/target/mcr-1.0.jar
-```
+This will start the AutoHack terminal UI, with the MCR reasoning engine integrated.
