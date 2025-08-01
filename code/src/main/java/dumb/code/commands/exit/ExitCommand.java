@@ -13,12 +13,7 @@ public record ExitCommand(Code code) implements Command {
 
     @Override
     public void execute(String[] args) {
-        Terminal terminal = code.getTerminal();
-        if (terminal != null) {
-            terminal.stop();
-            code.setTerminal(null);
-            code.messageHandler.addMessage("system", "Terminal session ended.");
-        }
+        System.exit(0);
     }
 
     @Override

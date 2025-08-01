@@ -28,7 +28,6 @@ public class ReasonCommandTest {
         when(mcrSession.reason(anyString())).thenReturn(mockResult);
 
         MessageHandler messageHandler = mock(MessageHandler.class);
-        when(messageHandler.promptUser(anyString())).thenReturn("yes");
 
         ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, null, true);
 

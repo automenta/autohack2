@@ -36,14 +36,7 @@ public record ReasonCommand(
         String task = String.join(" ", args);
         messageHandler.addMessage("system", "Task: " + task);
 
-        if (interactive) {
-            messageHandler.addMessage("system", "Proceed with this task? (yes/no)");
-            String response = messageHandler.promptUser("> ");
-            if (response == null || !response.equalsIgnoreCase("yes")) {
-                messageHandler.addMessage("system", "Task cancelled.");
-                return;
-            }
-        }
+        // Automatically proceed with the task
 
         messageHandler.addMessage("system", "Reasoning...");
         addCodebaseContext();

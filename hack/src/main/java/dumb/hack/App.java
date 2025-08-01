@@ -2,7 +2,10 @@ package dumb.hack;
 
 import dumb.hack.commands.CodeCommand;
 import dumb.hack.commands.McrCommand;
+import dumb.hack.tui.HackTUI;
 import picocli.CommandLine;
+
+import java.io.IOException;
 
 @CommandLine.Command(
         name = "hack",
@@ -23,8 +26,13 @@ public class App {
         return lmOptions;
     }
 
-    public static void main(String[] args) {
-        int exitCode = new CommandLine(new App()).execute(args);
-        System.exit(exitCode);
+    public static void main(String[] args) throws IOException {
+        App app = new App();
+        if (args.length == 0) {
+            new HackTUI(app).start();
+        } else {
+            int exitCode = new CommandLine(app).execute(args);
+            System.exit(exitCode);
+        }
     }
 }
