@@ -1,5 +1,6 @@
 package dumb.hack.commands;
 
+import dumb.hack.App;
 import dumb.hack.LMOptions;
 import dumb.hack.provider.ProviderFactory;
 import dumb.hack.provider.MissingApiKeyException;
@@ -19,12 +20,12 @@ public class McrCommand implements Callable<Integer> {
     @CommandLine.Parameters(index = "0", description = "The natural language query to send to the MCR.")
     private String query;
 
-    @CommandLine.Mixin
-    private LMOptions lmOptions;
+    @CommandLine.ParentCommand
+    private App app;
 
     @Override
     public Integer call() {
-        ProviderFactory factory = new ProviderFactory(lmOptions);
+        ProviderFactory factory = new ProviderFactory(app.getLmOptions());
         ChatModel model;
         try {
             model = factory.create();

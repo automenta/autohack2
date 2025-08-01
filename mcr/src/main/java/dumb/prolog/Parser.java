@@ -31,15 +31,24 @@ public class Parser {
 
     private static List<Term> parseBody(String bodyString) {
         List<Term> body = new ArrayList<>();
+        if (bodyString == null || bodyString.isEmpty()) {
+            return body;
+        }
+
         int parenCount = 0;
+        boolean inQuote = false;
         int start = 0;
+
         for (int i = 0; i < bodyString.length(); i++) {
             char c = bodyString.charAt(i);
-            if (c == '(') {
+
+            if (c == '\'') {
+                inQuote = !inQuote;
+            } else if (c == '(' && !inQuote) {
                 parenCount++;
-            } else if (c == ')') {
+            } else if (c == ')' && !inQuote) {
                 parenCount--;
-            } else if (c == ',' && parenCount == 0) {
+            } else if (c == ',' && parenCount == 0 && !inQuote) {
                 body.add(parseTerm(bodyString.substring(start, i).trim()));
                 start = i + 1;
             }

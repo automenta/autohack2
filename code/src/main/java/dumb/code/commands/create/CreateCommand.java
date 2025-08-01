@@ -1,12 +1,9 @@
 package dumb.code.commands.create;
 
 import dumb.code.Code;
+import dumb.code.IFileManager;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class CreateCommand implements Command {
     private final Code code;
@@ -24,13 +21,17 @@ public class CreateCommand implements Command {
         }
 
         String file = args[0];
+        IFileManager fileManager = code.fileManager;
+
         try {
-            Path path = Paths.get(file);
-            Files.createFile(path);
+            if (fileManager.fileExists(file)) {
+                messageHandler.addMessage("system", "Error: File already exists.");
+                return;
+            }
+            fileManager.writeFile(file, ""); // Create an empty file
             messageHandler.addMessage("system", "Created file: " + file);
         } catch (Exception e) {
             messageHandler.addMessage("system", "Error: " + e.getMessage());
         }
     }
-
 }

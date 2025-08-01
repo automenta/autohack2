@@ -158,7 +158,7 @@ public class Session {
         // The caller can manage the overall task description.
 
         for (int i = 0; i < maxSteps; i++) {
-            String prompt = buildReasoningPrompt(history);
+            String prompt = buildReasoningPrompt(taskDescription, history);
             LMResponse response = lmClient.generate(prompt);
 
             if (!response.success()) {
@@ -170,6 +170,18 @@ public class Session {
 
             try {
                 Term parsedGoal = Parser.parseTerm(prologGoal);
+
+                // Handle the conclude signal directly
+                if (parsedGoal instanceof Structure goalStructure && "conclude".equals(goalStructure.getFunctor().getName())) {
+                    if (!goalStructure.getArgs().isEmpty()) {
+                        // Return the first argument as the final answer.
+                        String answer = goalStructure.getArgs().get(0).toString();
+                        return new ReasoningResult(answer, history);
+                    } else {
+                        return new ReasoningResult("Concluded.", history);
+                    }
+                }
+
                 Solver.SolverResult solverResult = solver.solve(parsedGoal);
 
                 QueryResult queryResult = new QueryResult(
@@ -183,14 +195,6 @@ public class Session {
                     history.add(solverResult.toolStep());
                 }
 
-                if (parsedGoal instanceof Structure goalStructure) {
-                    if ("conclude".equals(goalStructure.getFunctor().getName())) {
-                        String answer = queryResult.success() && queryResult.bindings() != null && !queryResult.bindings().isEmpty()
-                                ? firstAnswer(queryResult)
-                                : "Concluded, but no specific answer found.";
-                        return new ReasoningResult(answer, history);
-                    }
-                }
             } catch (Exception e) {
                 // Log the exception, maybe add an ErrorStep to history in the future.
                 // For now, we'll just stop reasoning.
@@ -254,13 +258,14 @@ public class Session {
         }
     }
 
-    private String buildReasoningPrompt(List<StepResult> history) {
+    private String buildReasoningPrompt(String taskDescription, List<StepResult> history) {
         String promptTemplate = loadPrompt("reason.prompt");
         String historyString = history.stream()
                 .map(this::formatStepResultForPrompt)
                 .collect(Collectors.joining("\n"));
 
         return promptTemplate
+                .replace("{{task_description}}", taskDescription)
                 .replace("{{ontology_types}}", ontology.getTypes().toString())
                 .replace("{{ontology_relationships}}", ontology.getRelationships().toString())
                 .replace("{{tools}}", buildToolManifest())

@@ -1,4 +1,6 @@
-You are a reasoning agent. Your goal is to solve a task by issuing a series of Prolog goals.
+You are a reasoning agent. Your goal is to solve the following task by issuing a series of Prolog goals:
+Task: {{task_description}}
+
 You can use the following defined types and relationships:
 Types: {{ontology_types}}
 Relationships: {{ontology_relationships}}

@@ -22,6 +22,10 @@ public class MockChatModel implements ChatModel {
         this.defaultResponse = defaultResponse;
     }
 
+    public void clearCannedResponses() {
+        cannedResponses.clear();
+    }
+
     @Override
     public ChatResponse chat(ChatRequest chatRequest) {
         if (chatRequest.messages().isEmpty()) {

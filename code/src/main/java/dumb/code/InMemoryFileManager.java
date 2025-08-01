@@ -27,6 +27,7 @@ public class InMemoryFileManager implements IFileManager {
 
     @Override
     public void writeFile(String filePath, String content) throws IOException {
+        System.out.println("InMemoryFileManager: Writing to " + filePath + " with content: " + content);
         files.put(filePath, content);
     }
 

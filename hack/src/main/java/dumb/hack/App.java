@@ -15,6 +15,14 @@ import picocli.CommandLine;
                 CommandLine.HelpCommand.class
         })
 public class App {
+
+    @CommandLine.Mixin
+    private LMOptions lmOptions = new LMOptions();
+
+    public LMOptions getLmOptions() {
+        return lmOptions;
+    }
+
     public static void main(String[] args) {
         int exitCode = new CommandLine(new App()).execute(args);
         System.exit(exitCode);

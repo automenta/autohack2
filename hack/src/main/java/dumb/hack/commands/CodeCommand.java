@@ -1,5 +1,6 @@
 package dumb.hack.commands;
 
+import dumb.hack.App;
 import dumb.code.Code;
 import dumb.code.CodeUI;
 import dumb.code.CodebaseManager;
@@ -32,22 +33,23 @@ public class CodeCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"--non-interactive"}, description = "Enable non-interactive mode.", defaultValue = "false")
     private boolean nonInteractive;
 
-    @CommandLine.Mixin
-    private LMOptions lmOptions;
+    @CommandLine.ParentCommand
+    private App app;
 
     @Override
     public Integer call() throws IOException {
+        ProviderFactory factory = new ProviderFactory(app.getLmOptions());
+        ChatModel model;
+        try {
+            model = factory.create();
+        } catch (MissingApiKeyException e) {
+            System.err.println(e.getMessage());
+            return 1;
+        }
+
         if (nonInteractive) {
             if (task == null || task.isEmpty()) {
                 System.err.println("Error: --task option is required for non-interactive mode.");
-                return 1;
-            }
-            ProviderFactory factory = new ProviderFactory(lmOptions);
-            ChatModel model;
-            try {
-                model = factory.create();
-            } catch (MissingApiKeyException e) {
-                System.err.println(e.getMessage());
                 return 1;
             }
 
@@ -61,15 +63,6 @@ public class CodeCommand implements Callable<Integer> {
             return 0;
         } else {
             // Existing interactive mode logic
-            ProviderFactory factory = new ProviderFactory(lmOptions);
-            ChatModel model;
-            try {
-                model = factory.create();
-            } catch (MissingApiKeyException e) {
-                System.err.println(e.getMessage());
-                return 1;
-            }
-
             var aider = aider(model, !nonInteractive); // Pass true for interactive
             aider.start();
             return 0;
