@@ -99,7 +99,9 @@ public record ReasonCommand(
 
         try {
             String status = codebaseManager.getVersioningBackend().status().get();
-            mcrSession.assertProlog("git_status(\"" + status + "\").");
+            if (status != null && !status.isBlank()) {
+                mcrSession.assertProlog("git_status(\"" + status + "\").");
+            }
         } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
             messageHandler.addMessage("system", "Error getting git status: " + e.getMessage());
             Thread.currentThread().interrupt();

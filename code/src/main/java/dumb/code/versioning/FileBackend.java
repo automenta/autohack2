@@ -156,7 +156,7 @@ public class FileBackend implements Backend {
 
     @Override
     public CompletableFuture<String> status() {
-        return CompletableFuture.completedFuture("");
+        return CompletableFuture.completedFuture("not_a_git_repo");
     }
 
     @Override

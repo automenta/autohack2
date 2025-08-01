@@ -26,31 +26,60 @@ public class CodeCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"--backend"}, description = "Specify the version control backend (git, pijul, or files).")
     private String backend;
 
-    @CommandLine.Option(names = {"--interactive"}, description = "Enable interactive mode.", defaultValue = "true", fallbackValue = "true")
-    private boolean interactive;
+    @CommandLine.Option(names = {"--task"}, description = "The task to perform non-interactively.")
+    private String task;
+
+    @CommandLine.Option(names = {"--non-interactive"}, description = "Enable non-interactive mode.", defaultValue = "false")
+    private boolean nonInteractive;
 
     @CommandLine.Mixin
     private LMOptions lmOptions;
 
     @Override
     public Integer call() throws IOException {
-        ProviderFactory factory = new ProviderFactory(lmOptions);
-        ChatModel model;
-        try {
-            model = factory.create();
-        } catch (MissingApiKeyException e) {
-            System.err.println(e.getMessage());
-            return 1;
+        if (nonInteractive) {
+            if (task == null || task.isEmpty()) {
+                System.err.println("Error: --task option is required for non-interactive mode.");
+                return 1;
+            }
+            ProviderFactory factory = new ProviderFactory(lmOptions);
+            ChatModel model;
+            try {
+                model = factory.create();
+            } catch (MissingApiKeyException e) {
+                System.err.println(e.getMessage());
+                return 1;
+            }
+
+            // Setup services but don't start the UI
+            CodeServices services = setup(model, false); // false for interactive
+
+            // Execute the reasoning command directly
+            services.reasonCommand().execute(new String[]{task});
+
+            System.out.println("Non-interactive task completed.");
+            return 0;
+        } else {
+            // Existing interactive mode logic
+            ProviderFactory factory = new ProviderFactory(lmOptions);
+            ChatModel model;
+            try {
+                model = factory.create();
+            } catch (MissingApiKeyException e) {
+                System.err.println(e.getMessage());
+                return 1;
+            }
+
+            var aider = aider(model, !nonInteractive); // Pass true for interactive
+            aider.start();
+            return 0;
         }
-
-        var aider = aider(model, interactive);
-        aider.start();
-
-        return 0;
     }
 
-    private CodeUI aider(ChatModel model, boolean interactive) {
-        LMClient lmClient = new LMClient(model); // Create a single LMClient
+    private record CodeServices(Code code, ReasonCommand reasonCommand) {}
+
+    private CodeServices setup(ChatModel model, boolean interactive) {
+        LMClient lmClient = new LMClient(model);
         LMManager lmManager = new LMManager(lmClient);
         Code code = new Code(backend, null, lmManager);
 
@@ -60,12 +89,17 @@ public class CodeCommand implements Callable<Integer> {
 
         CodeToolProvider toolProvider = new CodeToolProvider(code.fileManager, codebaseManager);
 
-        MCR mcr = new MCR(lmClient); // Reuse the same LMClient for MCR
+        MCR mcr = new MCR(lmClient);
         Session mcrSession = mcr.createSession(toolProvider);
 
         ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager, interactive);
         commandManager.registerCommand("/reason", reasonCommand);
 
-        return new CodeUI(code);
+        return new CodeServices(code, reasonCommand);
+    }
+
+    private CodeUI aider(ChatModel model, boolean interactive) {
+        CodeServices services = setup(model, interactive);
+        return new CodeUI(services.code());
     }
 }
