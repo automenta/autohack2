@@ -40,6 +40,19 @@ public record ReasonCommand(
         addCodebaseContext();
 
         ReasoningResult result = mcrSession.reason(task);
+
+        messageHandler.addMessage("system", "\n--- Reasoning History ---");
+        for (String step : result.history()) {
+            messageHandler.addMessage("system", "  - " + step);
+        }
+        messageHandler.addMessage("system", "--- End of History ---\n");
+
+        String answer = result.answer();
+        if (answer != null && answer.startsWith("diff:")) {
+            handleDiff(answer);
+        } else {
+            messageHandler.addMessage("system", "Final Answer: " + answer);
+        }
     }
 
     private void addCodebaseContext() {
@@ -57,20 +70,12 @@ public record ReasonCommand(
         }
 
         // Add git status information
-        String status = codebaseManager.getVersioningBackend().status().get();
-        mcrSession.assertProlog("git_status(\"" + status + "\").");
-
-        messageHandler.addMessage("system", "\n--- Reasoning History ---");
-        for (String step : result.history()) {
-            messageHandler.addMessage("system", "  - " + step);
-        }
-        messageHandler.addMessage("system", "--- End of History ---\n");
-
-        String answer = result.answer();
-        if (answer != null && answer.startsWith("diff:")) {
-            handleDiff(answer);
-        } else {
-            messageHandler.addMessage("system", "Final Answer: " + answer);
+        try {
+            String status = codebaseManager.getVersioningBackend().status().get();
+            mcrSession.assertProlog("git_status(\"" + status + "\").");
+        } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
+            messageHandler.addMessage("system", "Error getting git status: " + e.getMessage());
+            Thread.currentThread().interrupt();
         }
     }
 

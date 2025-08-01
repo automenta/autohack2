@@ -47,7 +47,7 @@ public class ErrorHandlingTest {
         when(mockToolProvider.getTools()).thenReturn(Collections.emptyMap());
         Solver solver = new Solver(new ArrayList<>(), mockToolProvider);
         assertThrows(ToolExecutionException.class, () -> {
-            solver.solve(Parser.parseTerm("use_tool(a,[],C)."));
+            solver.solve(Parser.parseTerm("use_tool(a,[],C)"));
         });
     }
 }

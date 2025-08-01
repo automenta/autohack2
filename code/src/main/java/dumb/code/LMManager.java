@@ -1,10 +1,7 @@
 package dumb.code;
 
-import dumb.lm.LMClient;
-import dumb.lm.LMResponse;
-
+import dumb.code.llm.LMClient;
 import dumb.lm.ILMClient;
-import dumb.lm.LMClient;
 import dumb.lm.LMResponse;
 
 public class LMManager {

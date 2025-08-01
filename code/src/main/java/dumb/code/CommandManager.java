@@ -87,15 +87,27 @@ public class CommandManager {
             return;
         }
 
-        String[] parts = input.trim().split(" ", 2);
-        String commandName = parts[0].toLowerCase();
-        String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
+        input = input.trim();
 
-        Command command = commands.get(commandName);
-        if (command != null) {
-            command.execute(args);
+        if (input.startsWith("/")) {
+            String[] parts = input.substring(1).split(" ", 2);
+            String commandName = parts[0].toLowerCase();
+            String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
+
+            Command command = commands.get(commandName);
+            if (command != null) {
+                command.execute(args);
+            } else {
+                messageHandler.addMessage("system", "Unknown command: " + commandName);
+            }
         } else {
-            messageHandler.addMessage("system", "Unknown command: " + commandName);
+            // It's a natural language prompt, treat it as a query.
+            Command queryCommand = commands.get("query");
+            if (queryCommand != null) {
+                queryCommand.execute(new String[]{input});
+            } else {
+                messageHandler.addMessage("system", "Query command not found.");
+            }
         }
     }
 

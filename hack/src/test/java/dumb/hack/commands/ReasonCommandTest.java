@@ -1,8 +1,9 @@
 package dumb.hack.commands;
 
+import dumb.code.Backend;
 import dumb.code.CodebaseManager;
 import dumb.code.MessageHandler;
-import dumb.code.versioning.Backend;
+import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +22,11 @@ public class ReasonCommandTest {
         when(backend.status()).thenReturn(CompletableFuture.completedFuture("M. newfile.txt"));
 
         Session mcrSession = mock(Session.class);
+        ReasoningResult mockResult = mock(ReasoningResult.class);
+        when(mockResult.history()).thenReturn(new java.util.ArrayList<>());
+        when(mockResult.answer()).thenReturn("Test Answer");
+        when(mcrSession.reason(anyString())).thenReturn(mockResult);
+
         MessageHandler messageHandler = mock(MessageHandler.class);
 
         ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, null);

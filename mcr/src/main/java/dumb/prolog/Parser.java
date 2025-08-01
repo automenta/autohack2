@@ -50,6 +50,9 @@ public class Parser {
 
     public static Term parseTerm(String text) {
         text = text.trim();
+        if (text.equals("[]")) {
+            return new Atom("[]");
+        }
         if (text.endsWith(")")) {
             int openParen = text.indexOf('(');
             if (openParen == -1) {
