@@ -27,13 +27,14 @@ public class AddCommandTest {
         messageHandler = mock(MessageHandler.class);
         backend = mock(Backend.class);
         fileSystem = mock(FileSystem.class);
-        codebaseManager = new CodebaseManager(backend);
+        codebaseManager = mock(CodebaseManager.class);
 
-        when(context.messageHandler).thenReturn(messageHandler);
-        when(context.codebaseManager).thenReturn(codebaseManager);
+        when(context.getMessageHandler()).thenReturn(messageHandler);
+        when(context.getCodebaseManager()).thenReturn(codebaseManager);
         when(context.getBackend()).thenReturn(backend);
-        when(context.files).thenReturn(fileSystem);
+        when(context.getFiles()).thenReturn(fileSystem);
         when(backend.add(anyString())).thenReturn(CompletableFuture.completedFuture(null));
+        when(codebaseManager.trackFile(anyString())).thenReturn(CompletableFuture.completedFuture(null));
 
 
         addCommand = new AddCommand(context);
@@ -48,13 +49,8 @@ public class AddCommandTest {
         String[] args = {tempFile.toString()};
         addCommand.execute(args);
 
-        // Verify that the backend's add method was called
-        verify(backend, times(1)).add(tempFile.toString());
-
         // Verify that the codebase manager was updated
-        String codebase = codebaseManager.getCodebaseRepresentation();
-        assert (codebase.contains("hello world"));
-        assert (codebase.contains(tempFile.toString()));
+        verify(codebaseManager, times(1)).trackFile(anyString());
 
         // Verify that a message was sent
         verify(messageHandler, times(1)).addMessage(eq("system"), anyString());

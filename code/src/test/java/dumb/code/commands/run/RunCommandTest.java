@@ -22,7 +22,7 @@ public class RunCommandTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        when(context.messageHandler).thenReturn(messageHandler);
+        when(context.getMessageHandler()).thenReturn(messageHandler);
         runCommand = new RunCommand(context);
     }
 

@@ -57,6 +57,18 @@ public class Context {
         return this.backend;
     }
 
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+    public CodebaseManager getCodebaseManager() {
+        return codebaseManager;
+    }
+
+    public FileSystem getFiles() {
+        return files;
+    }
+
 
     public String getDiff() {
         return diff;

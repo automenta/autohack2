@@ -186,7 +186,7 @@ public class Session {
     /** Extract the answer from the first solution */
     private String firstAnswer(QueryResult result) {
         var firstSolution = result.getBindings().getFirst();
-        return firstSolution.values().stream().findFirst().orElse("Concluded without a specific answer.");
+        return firstSolution.values().stream().findFirst().map(Object::toString).orElse("Concluded without a specific answer.");
     }
 
     public ReasoningResult reason(String taskDescription) {

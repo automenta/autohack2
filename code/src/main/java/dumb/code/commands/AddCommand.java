@@ -8,11 +8,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-public record AddCommand(Context context) implements Command {
+public class AddCommand implements Command {
 
-    @Override
-    public void init() {
-        // No initialization needed for AddCommand
+    private final Context context;
+    private final MessageHandler messageHandler;
+    private final CodebaseManager codebaseManager;
+    private final Backend backend;
+    private final FileSystem fs;
+
+    public AddCommand(Context context) {
+        this.context = context;
+        this.messageHandler = context.getMessageHandler();
+        this.codebaseManager = context.getCodebaseManager();
+        this.backend = context.getBackend();
+        this.fs = context.getFiles();
     }
 
     @Override
@@ -31,17 +40,12 @@ public record AddCommand(Context context) implements Command {
 
     private void addFiles(String[] files) {
         try {
-            Backend backend = context.getBackend();
-            MessageHandler messageHandler = context.messageHandler;
-            FileSystem fs = context.files;
-            CodebaseManager codebaseManager = context.codebaseManager;
-
             for (String filePattern : files) {
                 Path matchingPath = Paths.get(filePattern);
                 if (Files.isDirectory(matchingPath)) {
-                    Files.list(matchingPath).forEach(path -> processFile(path, backend, messageHandler, fs, codebaseManager));
+                    Files.list(matchingPath).forEach(this::processFile);
                 } else {
-                    processFile(matchingPath, backend, messageHandler, fs, codebaseManager);
+                    processFile(matchingPath);
                 }
             }
         } catch (IOException e) {
@@ -49,7 +53,7 @@ public record AddCommand(Context context) implements Command {
         }
     }
 
-    private void processFile(Path filePath, Backend backend, MessageHandler messageHandler, FileSystem fs, CodebaseManager codebaseManager) {
+    private void processFile(Path filePath) {
         codebaseManager.trackFile(filePath.toString()).thenRun(() -> messageHandler.addMessage("system", "Added and staged " + filePath)).exceptionally(e -> {
             e.printStackTrace();
             messageHandler.addMessage("system", "Error adding file: " + filePath);

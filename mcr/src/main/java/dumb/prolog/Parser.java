@@ -15,29 +15,50 @@ public class Parser {
             text = text.substring(0, text.length() - 1);
         }
 
-        String[] parts = text.split(":-");
+        String[] parts = text.split(":-", 2);
         Structure head = (Structure) parseTerm(parts[0].trim());
         List<Term> body = new ArrayList<>();
         if (parts.length > 1) {
-            String[] bodyParts = parts[1].trim().split(",");
-            for (String part : bodyParts) {
-                body.add(parseTerm(part.trim()));
+            String bodyString = parts[1].trim();
+            if (!bodyString.isEmpty()) {
+                body = parseBody(bodyString);
             }
         }
         return new Clause(head, body);
+    }
+
+    private static List<Term> parseBody(String bodyString) {
+        List<Term> body = new ArrayList<>();
+        int parenCount = 0;
+        int start = 0;
+        for (int i = 0; i < bodyString.length(); i++) {
+            char c = bodyString.charAt(i);
+            if (c == '(') {
+                parenCount++;
+            } else if (c == ')') {
+                parenCount--;
+            } else if (c == ',' && parenCount == 0) {
+                body.add(parseTerm(bodyString.substring(start, i).trim()));
+                start = i + 1;
+            }
+        }
+        body.add(parseTerm(bodyString.substring(start).trim()));
+        return body;
     }
 
     public static Term parseTerm(String text) {
         text = text.trim();
         if (text.endsWith(")")) {
             int openParen = text.indexOf('(');
+            if (openParen == -1) {
+                throw new IllegalArgumentException("Invalid term format: " + text);
+            }
             String functorName = text.substring(0, openParen);
             Atom functor = new Atom(functorName);
             String argsStr = text.substring(openParen + 1, text.length() - 1);
             List<Term> args = new ArrayList<>();
-            // This is a very simple arg parser, doesn't handle nested structures well
-            for (String argStr : argsStr.split(",")) {
-                args.add(parseTerm(argStr.trim()));
+            if (!argsStr.isEmpty()) {
+                args = parseBody(argsStr);
             }
             return new Structure(functor, args);
         } else if (VARIABLE_PATTERN.matcher(text).matches()) {

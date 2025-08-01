@@ -10,15 +10,14 @@ import java.io.InputStreamReader;
 
 public class RunCommand implements Command {
     private final Context context;
-    private final MessageHandler messageHandler;
 
     public RunCommand(Context context) {
         this.context = context;
-        this.messageHandler = context.messageHandler;
     }
 
     @Override
     public void execute(String[] args) {
+        MessageHandler messageHandler = context.getMessageHandler();
         if (args.length == 0) {
             messageHandler.addMessage("system", "Usage: /run <command>");
             return;
