@@ -88,7 +88,7 @@ public class PijulBackend implements Backend {
 
     @Override
     public CompletableFuture<Void> initialize() {
-        return CompletableFuture.completedFuture(null);
+        return executeCommand("pijul", "init");
     }
 
     @Override
@@ -101,46 +101,34 @@ public class PijulBackend implements Backend {
     }
 
     private CompletableFuture<Void> executeCommand(String... commands) {
-        return CompletableFuture.supplyAsync(() -> {
+        return CompletableFuture.runAsync(() -> {
             try {
-                ProcessBuilder pb = new ProcessBuilder(commands)
-                        .redirectErrorStream(true);
+                ProcessBuilder pb = new ProcessBuilder(commands).redirectErrorStream(true);
                 Process process = pb.start();
                 int exitCode = process.waitFor();
                 if (exitCode != 0) {
-                    throw new RuntimeException("Command failed: " + String.join(" ", commands));
+                    String output = new String(process.getInputStream().readAllBytes());
+                    throw new PijulException("Command failed: " + String.join(" ", commands) + "\n" + output);
                 }
-                return null;
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new PijulException("Failed to execute command: " + String.join(" ", commands), e);
             }
-        }).thenApply(result -> null);
+        });
     }
 
     private CompletableFuture<String> executeCommandWithOutput(String... commands) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                ProcessBuilder pb = new ProcessBuilder(commands)
-                        .redirectErrorStream(true);
+                ProcessBuilder pb = new ProcessBuilder(commands).redirectErrorStream(true);
                 Process process = pb.start();
-
-                // Read output
-                InputStream inputStream = process.getInputStream();
-                ByteArrayOutputStream result = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    result.write(buffer, 0, bytesRead);
-                }
-                String output = result.toString().trim();
-
+                String output = new String(process.getInputStream().readAllBytes());
                 int exitCode = process.waitFor();
                 if (exitCode != 0) {
-                    throw new RuntimeException("Command failed: " + String.join(" ", commands));
+                    throw new PijulException("Command failed: " + String.join(" ", commands) + "\n" + output);
                 }
-                return output;
+                return output.trim();
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new PijulException("Failed to execute command: " + String.join(" ", commands), e);
             }
         });
     }

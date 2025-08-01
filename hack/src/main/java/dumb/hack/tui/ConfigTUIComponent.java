@@ -10,7 +10,8 @@ public class ConfigTUIComponent implements TUIComponent {
     }
 
     @Override
-    public Panel createPanel(App app) {
+    public Panel createPanel(App app, BreadcrumbManager breadcrumbManager) {
+        // TODO: Pass breadcrumbManager to ConfigTUI and have it update the breadcrumbs
         ConfigTUI configTUI = new ConfigTUI(app.getConfigManager());
         return configTUI.createPanel();
     }

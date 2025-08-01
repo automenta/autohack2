@@ -5,8 +5,8 @@ import dumb.code.CommandManager;
 public class Terminal {
     private final TerminalPanel terminalPanel;
 
-    public Terminal(CommandManager commandManager) {
-        this.terminalPanel = new TerminalPanel(commandManager);
+    public Terminal(CommandManager commandManager, IBreadcrumbManager breadcrumbManager) {
+        this.terminalPanel = new TerminalPanel(commandManager, breadcrumbManager);
     }
 
     public TerminalPanel getTerminalPanel() {

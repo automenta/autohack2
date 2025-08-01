@@ -2,17 +2,20 @@ package dumb.code;
 
 import com.googlecode.lanterna.gui2.Panel;
 import dumb.code.tui.Terminal;
+import dumb.code.tui.IBreadcrumbManager;
 
 public class CodeUI {
     private final Code code;
+    private final IBreadcrumbManager breadcrumbManager;
     private Terminal tui;
 
-    public CodeUI(Code code) {
+    public CodeUI(Code code, IBreadcrumbManager breadcrumbManager) {
         this.code = code;
+        this.breadcrumbManager = breadcrumbManager;
     }
 
     public Panel createPanel() {
-        this.tui = new Terminal(code.commandManager);
+        this.tui = new Terminal(code.commandManager, breadcrumbManager);
         code.setTerminal(tui); // Set the terminal in the container
         return tui.getTerminalPanel();
     }

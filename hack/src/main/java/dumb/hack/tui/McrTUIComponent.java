@@ -18,8 +18,9 @@ public class McrTUIComponent implements TUIComponent {
     }
 
     @Override
-    public Panel createPanel(App app) {
+    public Panel createPanel(App app, BreadcrumbManager breadcrumbManager) {
         try {
+            // TODO: Pass breadcrumbManager to McrTUI and have it update the breadcrumbs
             ProviderFactory factory = new ProviderFactory(app.getLmOptions());
             ChatModel model = factory.create();
             LMClient lmClient = new LMClient(model);

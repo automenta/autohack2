@@ -17,13 +17,13 @@ public class CodeTUIComponent implements TUIComponent {
     }
 
     @Override
-    public Panel createPanel(App app) {
+    public Panel createPanel(App app, BreadcrumbManager breadcrumbManager) {
         try {
             ProviderFactory factory = new ProviderFactory(app.getLmOptions());
             ChatModel model = factory.create();
             LMClient lmClient = new LMClient(model);
             Code code = new Code(null, null, new dumb.code.LMManager(lmClient));
-            CodeUI codeUI = new CodeUI(code);
+            CodeUI codeUI = new CodeUI(code, breadcrumbManager);
             return codeUI.createPanel();
         } catch (MissingApiKeyException e) {
             Panel errorPanel = new Panel();

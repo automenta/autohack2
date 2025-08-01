@@ -19,12 +19,16 @@ public class HackTUI {
     private final App app;
     private Panel contentPanel;
     private Label statusBar;
+    private final BreadcrumbManager breadcrumbManager;
+    private final KeybindingManager keybindingManager;
 
     private final List<TUIComponent> tuiComponents = new ArrayList<>();
     private final Map<String, Panel> panelCache = new HashMap<>();
 
     public HackTUI(App app) {
         this.app = app;
+        this.breadcrumbManager = new BreadcrumbManager();
+        this.keybindingManager = new KeybindingManager();
         tuiComponents.add(new CodeTUIComponent());
         tuiComponents.add(new McrTUIComponent());
         tuiComponents.add(new ConfigTUIComponent());
@@ -53,24 +57,16 @@ public class HackTUI {
                 }
             });
 
+            keybindingManager.register(new KeyStroke('c', true, false, false), () -> radioBoxList.setCheckedItemIndex(0));
+            keybindingManager.register(new KeyStroke('m', true, false, false), () -> radioBoxList.setCheckedItemIndex(1));
+            keybindingManager.register(new KeyStroke('o', true, false, false), () -> radioBoxList.setCheckedItemIndex(2));
+            keybindingManager.register(new KeyStroke('s', true, false, false), () -> statusBar.setText("Saved."));
+
             window.addWindowListener(new WindowListenerAdapter() {
                 @Override
                 public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
-                    if (keyStroke.isCtrlDown() && keyStroke.getCharacter() != null) {
-                        switch (keyStroke.getCharacter()) {
-                            case 'c':
-                                radioBoxList.setCheckedItemIndex(0);
-                                deliverEvent.set(false);
-                                break;
-                            case 'm':
-                                radioBoxList.setCheckedItemIndex(1);
-                                deliverEvent.set(false);
-                                break;
-                            case 'o':
-                                radioBoxList.setCheckedItemIndex(2);
-                                deliverEvent.set(false);
-                                break;
-                        }
+                    if (keybindingManager.handle(keyStroke)) {
+                        deliverEvent.set(false);
                     }
                 }
             });
@@ -80,7 +76,8 @@ public class HackTUI {
             topPanel.addComponent(new Button("Exit", window::close));
 
             Panel navigationPanel = new Panel(new LinearLayout(Direction.VERTICAL));
-            Label breadcrumbs = new Label("Home");
+            Label breadcrumbs = new Label("");
+            breadcrumbManager.setListener(breadcrumbs::setText);
             navigationPanel.addComponent(topPanel.withBorder(Borders.singleLine("Tabs (Ctrl+C/M/O)")));
             navigationPanel.addComponent(breadcrumbs.withBorder(Borders.singleLine("Breadcrumbs")));
 
@@ -107,9 +104,9 @@ public class HackTUI {
 
     private void showTUI(TUIComponent component) {
         contentPanel.removeAllComponents();
-        Panel panel = panelCache.computeIfAbsent(component.getName(), (name) -> component.createPanel(app));
+        Panel panel = panelCache.computeIfAbsent(component.getName(), (name) -> component.createPanel(app, breadcrumbManager));
         contentPanel.addComponent(panel);
         statusBar.setText("Mode: " + component.getName());
-        // TODO: Update breadcrumbs
+        breadcrumbManager.setPath(component.getName());
     }
 }
