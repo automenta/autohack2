@@ -25,7 +25,7 @@ public record EditCommand(Context context) implements Command {
             Path path = Paths.get(file);
             String originalContent = new String(Files.readAllBytes(path));
 
-            LMManager lmManager = context.LMManager;
+            LMManager lmManager = context.lmManager;
             String newContent = lmManager.generateResponse("Edit the following file based on the prompt:\n\n" + originalContent + "\n\nPrompt: " + prompt);
 
             Files.write(path, newContent.getBytes());

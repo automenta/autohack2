@@ -33,7 +33,7 @@ public class QueryCommand implements Command {
         String prompt = String.join(" ", args);
         String codebase = context.codebaseManager.getCodebaseRepresentation();
 
-        LMManager lmManager = context.LMManager;
+        LMManager lmManager = context.lmManager;
         String response = lmManager.generateResponse(codebase + "\n\n---\n\n" + prompt);
 
         if (response.startsWith("Error:")) {

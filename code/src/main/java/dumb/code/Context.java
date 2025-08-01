@@ -12,7 +12,7 @@ public class Context {
     public final List<ToolProvider> toolProviders = new CopyOnWriteArrayList<>();
     public final BackendManager backendManager;
     public final FileManager fileManager;
-    public final LMManager LMManager;
+    public final LMManager lmManager;
     public final UIManager uiManager;
     public final CommandManager commandManager;
     public final CodebaseManager codebaseManager;
@@ -23,54 +23,28 @@ public class Context {
     private String diff;
     private Terminal terminal;
 
-    public Context(String[] args) {
-        this(args, null);
+    public Context(String backendType, String provider, String model, String apiKey) {
+        this(backendType, null, new LMManager(provider, model, apiKey));
     }
 
-    public Context(String[] args, FileManager fileManager, MessageHandler messageHandler, LMManager lmManager, IProcessRunner processRunner) {
-        this.messageHandler = (messageHandler != null) ? messageHandler : new MessageHandler(this);
+    public Context(String backendType, FileManager fileManager, LMManager lmManager) {
+        this.messageHandler = new MessageHandler(this);
         this.backendManager = new BackendManager(this);
-        this.processRunner = (processRunner != null) ? processRunner : new ProcessRunner();
+        this.processRunner = new ProcessRunner();
 
-        initializeBackend(args);
-
-        this.fileManager = (fileManager != null) ? fileManager : new FileManager();
-        this.LMManager = (lmManager != null) ? lmManager : new LMManager();
-        this.uiManager = new UIManager(this);
-        this.codebaseManager = new CodebaseManager(this);
-        this.files = new FileSystem();
-        this.commandManager = new CommandManager(this); // Initialize CommandManager after other dependencies
-    }
-
-    public Context(String[] args, FileManager fileManager, MessageHandler messageHandler, LMManager lmManager) {
-        this(args, fileManager, messageHandler, lmManager, null);
-    }
-
-    public Context(String[] args, FileManager fileManager, MessageHandler messageHandler) {
-        this(args, fileManager, messageHandler, null, null);
-    }
-
-    public Context(String[] args, FileManager fileManager) {
-        this(args, fileManager, null, null, null);
-    }
-
-    private void initializeBackend(String[] args) {
-        String backendType = parseBackendFromArgs(args);
         if (backendType != null) {
             backendManager.setBackend(backendType);
         } else {
             backendManager.autodetectBackend();
         }
         this.backend = backendManager.getBackend();
-    }
 
-    private String parseBackendFromArgs(String[] args) {
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("--backend") && i + 1 < args.length) {
-                return args[i + 1];
-            }
-        }
-        return null;
+        this.fileManager = (fileManager != null) ? fileManager : new FileManager();
+        this.lmManager = lmManager;
+        this.uiManager = new UIManager(this);
+        this.codebaseManager = new CodebaseManager(this);
+        this.files = new FileSystem();
+        this.commandManager = new CommandManager(this);
     }
 
     public Backend getBackend() {
