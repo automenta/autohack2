@@ -1,9 +1,9 @@
 package dumb.hack.provider;
 
-import dumb.hack.LMOptions;
 import dev.langchain4j.model.chat.ChatModel;
-import dumb.lm.mock.MockChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import dumb.hack.LMOptions;
+import dumb.lm.mock.MockChatModel;
 
 import java.util.Objects;
 
@@ -17,14 +17,15 @@ public class ProviderFactory {
 
     public ChatModel create() {
         String provider = options.getProvider();
-        switch (provider.toLowerCase()) {
-            case "openai":
-                return createOpenAiModel();
-            case "mock":
-                return new MockChatModel();
-            default:
-                throw new IllegalArgumentException("Unsupported provider: " + provider + ". Please choose 'openai' or 'mock'.");
-        }
+
+        if (provider == null) provider = "mock"; //HACK
+
+        return switch (provider.toLowerCase()) {
+            case "openai" -> createOpenAiModel();
+            case "mock" -> new MockChatModel();
+            default ->
+                    throw new IllegalArgumentException("Unsupported provider: " + provider + ". Please choose 'openai' or 'mock'.");
+        };
     }
 
     private ChatModel createOpenAiModel() {

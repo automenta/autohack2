@@ -7,7 +7,7 @@ import dumb.prolog.Variable;
 import java.util.Map;
 
 public class MCRExample {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         // 1. Configure MCR
         LMClient lmClient = new LMClient("mock", "mock", "mock");
         MCR mcr = new MCR(lmClient);

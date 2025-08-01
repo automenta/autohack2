@@ -2,8 +2,6 @@ package dumb.code;
 
 import dumb.code.tui.Terminal;
 
-import java.io.IOException;
-
 public class UIManager {
     private final Code code;
     private Terminal terminal;

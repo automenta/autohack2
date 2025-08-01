@@ -1,9 +1,9 @@
 package dumb.code;
 
-import dumb.lm.mock.MockChatModel;
 import dumb.lm.LMClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CodeDevelopmentTest {

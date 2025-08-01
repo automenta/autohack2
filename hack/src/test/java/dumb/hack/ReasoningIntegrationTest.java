@@ -1,15 +1,10 @@
 package dumb.hack;
 
-import dumb.code.Code;
-import dumb.code.CodebaseManager;
-import dumb.code.IFileManager;
-import dumb.code.InMemoryFileManager;
-import dumb.code.MessageHandler;
+import dumb.code.*;
 import dumb.hack.commands.ReasonCommand;
 import dumb.hack.tools.CodeModificationTool;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
-import dumb.mcr.step.StepResult;
 import dumb.mcr.step.ToolStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

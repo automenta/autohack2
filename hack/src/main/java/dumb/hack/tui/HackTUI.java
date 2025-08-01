@@ -1,14 +1,11 @@
 package dumb.hack.tui;
 
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.input.KeyStroke;
-import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
-import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import dev.langchain4j.model.chat.ChatModel;
 import dumb.code.Code;
 import dumb.code.CodeUI;
-import dumb.code.tui.TerminalPanel;
 import dumb.hack.App;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
@@ -16,11 +13,9 @@ import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 import dumb.mcr.McrTUI;
 import dumb.mcr.Session;
-import dev.langchain4j.model.chat.ChatModel;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HackTUI {
 

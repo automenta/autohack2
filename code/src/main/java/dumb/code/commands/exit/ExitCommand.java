@@ -2,7 +2,6 @@ package dumb.code.commands.exit;
 
 import dumb.code.Code;
 import dumb.code.commands.Command;
-import dumb.code.tui.Terminal;
 
 public record ExitCommand(Code code) implements Command {
 

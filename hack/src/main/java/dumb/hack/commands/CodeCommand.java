@@ -1,23 +1,16 @@
 package dumb.hack.commands;
 
+import dev.langchain4j.model.chat.ChatModel;
+import dumb.code.*;
 import dumb.hack.App;
-import dumb.code.Code;
-import dumb.code.CodeUI;
-import dumb.code.CodebaseManager;
-import dumb.code.CommandManager;
-import dumb.code.LMManager;
-import dumb.code.MessageHandler;
-import dumb.hack.LMOptions;
-import dumb.hack.provider.ProviderFactory;
 import dumb.hack.provider.MissingApiKeyException;
+import dumb.hack.provider.ProviderFactory;
 import dumb.hack.tools.CodeToolProvider;
 import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 import dumb.mcr.Session;
-import dev.langchain4j.model.chat.ChatModel;
 import picocli.CommandLine;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "code", mixinStandardHelpOptions = true,
@@ -37,7 +30,7 @@ public class CodeCommand implements Callable<Integer> {
     private App app;
 
     @Override
-    public Integer call() throws IOException {
+    public Integer call() {
         ProviderFactory factory = new ProviderFactory(app.getLmOptions());
         ChatModel model;
         try {
@@ -91,12 +84,4 @@ public class CodeCommand implements Callable<Integer> {
         return new CodeServices(code, reasonCommand);
     }
 
-    private CodeUI aider(ChatModel model, boolean interactive) {
-        CodeServices services = setup(model, interactive);
-        CodeUI codeUI = new CodeUI(services.code());
-        // Since we are not in the integrated HackTUI, we create our own screen
-        // In the integrated TUI, the screen is managed by HackTUI
-        // The UI is now started by HackTUI
-        return codeUI;
-    }
 }

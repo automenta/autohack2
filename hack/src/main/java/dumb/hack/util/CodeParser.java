@@ -32,7 +32,7 @@ public class CodeParser {
             // If parsing fails, treat it as a generic file
             facts.addAll(parseGenericFile(path, content));
             String errorMessage = escape(e.getMessage());
-            if(errorMessage != null && !errorMessage.isBlank()) {
+            if (!errorMessage.isBlank()) {
                 facts.add("parsing_error('" + escape(normalizedPath) + "', '" + errorMessage + "').");
             }
         }
