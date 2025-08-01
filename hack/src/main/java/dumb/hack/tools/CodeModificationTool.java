@@ -16,7 +16,7 @@ public record CodeModificationTool(FileManager fileManager, CodebaseManager code
 
     @Override
     public String description() {
-        return "Proposes a modification to a file. Arguments: FilePath (String), NewContent (String). Returns a special string that represents the proposed change.";
+        return "Directly modifies a file with new content. Arguments: FilePath (String), NewContent (String). Returns a confirmation message.";
     }
 
     @Override
@@ -27,9 +27,12 @@ public record CodeModificationTool(FileManager fileManager, CodebaseManager code
         String filePath = (String) args.get("FilePath");
         String newContent = (String) args.get("NewContent");
 
-        // Instead of writing the file, return a special string with the proposed change.
-        // The format is "diff:filepath:base64_encoded_new_content"
-        String encodedContent = Base64.getEncoder().encodeToString(newContent.getBytes());
-        return "diff:" + filePath + ":" + encodedContent;
+        try {
+            fileManager.writeFile(filePath, newContent);
+            codebaseManager.trackFile(filePath).join(); // Ensure the change is tracked
+            return "Successfully modified file: " + filePath;
+        } catch (java.io.IOException e) {
+            return "Error modifying file " + filePath + ": " + e.getMessage();
+        }
     }
 }

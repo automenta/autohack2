@@ -26,6 +26,9 @@ public class CodeCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"--backend"}, description = "Specify the version control backend (git, pijul, or files).")
     private String backend;
 
+    @CommandLine.Option(names = {"--interactive"}, description = "Enable interactive mode.", defaultValue = "true", fallbackValue = "true")
+    private boolean interactive;
+
     @CommandLine.Mixin
     private LMOptions lmOptions;
 
@@ -40,13 +43,13 @@ public class CodeCommand implements Callable<Integer> {
             return 1;
         }
 
-        var aider = aider(model);
+        var aider = aider(model, interactive);
         aider.start();
 
         return 0;
     }
 
-    private CodeUI aider(ChatModel model) {
+    private CodeUI aider(ChatModel model, boolean interactive) {
         LMClient lmClient = new LMClient(model);
         LMManager lmManager = new LMManager(lmClient);
         Code code = new Code(backend, null, lmManager);
@@ -60,7 +63,7 @@ public class CodeCommand implements Callable<Integer> {
         MCR mcr = new MCR(lmClient);
         Session mcrSession = mcr.createSession(toolProvider);
 
-        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager);
+        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager, interactive);
         commandManager.registerCommand("/reason", reasonCommand);
 
         return new CodeUI(code);

@@ -55,14 +55,7 @@ class CodeModificationToolTest {
 
         String result = tool.run(args);
 
-        String expectedPrefix = "diff:" + filePath + ":";
-        assertTrue(result.startsWith(expectedPrefix));
-
-        String encodedContent = result.substring(expectedPrefix.length());
-        String decodedContent = new String(Base64.getDecoder().decode(encodedContent));
-        assertEquals(newContent, decodedContent);
-
-        // The tool should not modify the file directly anymore
-        assertEquals("initial content", new String(Files.readAllBytes(tempFile)));
+        assertEquals("Successfully modified file: " + filePath, result);
+        assertEquals(newContent, new String(Files.readAllBytes(tempFile)));
     }
 }
