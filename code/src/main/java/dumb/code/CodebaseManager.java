@@ -18,7 +18,7 @@ public class CodebaseManager {
     private String codebasePath;
     private List<String> files = new ArrayList<>();
 
-    private final FileManager fileManager;
+    private final IFileManager fileManager;
 
     public CodebaseManager(Code code) {
         this.versioningBackend = code.getBackend();

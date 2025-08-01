@@ -12,20 +12,29 @@ import java.util.concurrent.CompletableFuture;
 
 public class FileBackend implements Backend {
     private final Map<String, String> files = new HashMap<>();
+    private final String rootPath;
+
+    public FileBackend() {
+        this.rootPath = ".";
+    }
+
+    public FileBackend(String rootPath) {
+        this.rootPath = rootPath;
+    }
 
     @Override
     public CompletableFuture<Void> add(String file) {
         return CompletableFuture.runAsync(() -> {
             try {
-                Path filePath = Paths.get(file);
+                Path filePath = Paths.get(rootPath, file);
                 if (Files.exists(filePath)) {
                     if (!files.containsKey(file)) {
-                        String backupFile = file + "." + System.currentTimeMillis() + ".bak";
-                        Files.copy(filePath, Paths.get(backupFile), StandardCopyOption.REPLACE_EXISTING);
-                        files.put(file, backupFile);
+                        Path backupFilePath = filePath.getParent().resolve(filePath.getFileName().toString() + "." + System.currentTimeMillis() + ".bak");
+                        Files.copy(filePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
+                        files.put(file, backupFilePath.toString());
                     }
                 } else {
-                    throw new RuntimeException("File not found: " + file);
+                    throw new RuntimeException("File not found: " + filePath);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -90,7 +99,7 @@ public class FileBackend implements Backend {
             String backupFile = files.get(file);
             if (backupFile != null) {
                 try {
-                    Files.copy(Paths.get(backupFile), Paths.get(file), StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(Paths.get(backupFile), Paths.get(rootPath, file), StandardCopyOption.REPLACE_EXISTING);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

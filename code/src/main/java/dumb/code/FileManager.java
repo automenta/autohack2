@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class FileManager {
+public class FileManager implements IFileManager {
     private final Path root;
 
     public FileManager() {
@@ -35,6 +35,10 @@ public class FileManager {
     public boolean fileExists(String filePath) {
         Path path = resolve(filePath);
         return Files.exists(path);
+    }
+
+    public String getRootDir() {
+        return root.toString();
     }
 
     // Add more methods as needed

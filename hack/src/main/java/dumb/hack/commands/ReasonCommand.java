@@ -3,7 +3,7 @@ package dumb.hack.commands;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
 import dumb.code.CodebaseManager;
-import dumb.code.FileManager;
+import dumb.code.IFileManager;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 import dumb.hack.util.CodeParser;
@@ -19,7 +19,7 @@ public record ReasonCommand(
         Session mcrSession,
         CodebaseManager codebaseManager,
         MessageHandler messageHandler,
-        FileManager fileManager, // Added FileManager
+        IFileManager fileManager, // Added FileManager
         boolean interactive
 ) implements Command {
 
@@ -70,9 +70,12 @@ public record ReasonCommand(
         for (String file : files) {
             String content = codebaseManager.getFileContent(file);
             if (content != null) {
-                java.util.List<String> facts = codeParser.parse(java.nio.file.Paths.get(file), content);
+                java.nio.file.Path filePath = java.nio.file.Paths.get(fileManager.getRootDir(), file);
+                java.util.List<String> facts = codeParser.parse(filePath, content);
                 for (String fact : facts) {
-                    mcrSession.assertProlog(fact);
+                    if (fact != null && !fact.isBlank() && fact.matches("^[a-z_]+\\(.*\\)\\.$")) {
+                        mcrSession.assertProlog(fact);
+                    }
                 }
             }
         }

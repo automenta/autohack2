@@ -50,7 +50,7 @@ public class CodeCommand implements Callable<Integer> {
     }
 
     private CodeUI aider(ChatModel model, boolean interactive) {
-        LMClient lmClient = new LMClient(model);
+        LMClient lmClient = new LMClient(model); // Create a single LMClient
         LMManager lmManager = new LMManager(lmClient);
         Code code = new Code(backend, null, lmManager);
 
@@ -60,7 +60,7 @@ public class CodeCommand implements Callable<Integer> {
 
         CodeToolProvider toolProvider = new CodeToolProvider(code.fileManager, codebaseManager);
 
-        MCR mcr = new MCR(lmClient);
+        MCR mcr = new MCR(lmClient); // Reuse the same LMClient for MCR
         Session mcrSession = mcr.createSession(toolProvider);
 
         ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager, interactive);

@@ -127,11 +127,11 @@ public class Session {
         String prompt = buildNQueryPrompt(naturalLanguageQuery);
         LMResponse response = LMClient.generate(prompt);
 
-        if (!response.isSuccess()) {
-            return new QueryResult(false, naturalLanguageQuery, null, "LLM query translation failed: " + response.getError());
+        if (!response.success()) {
+            return new QueryResult(false, naturalLanguageQuery, null, "LLM query translation failed: " + response.error());
         }
 
-        String prologQuery = response.getContent().trim();
+        String prologQuery = response.content().trim();
         // Optional: Add some basic validation for the generated prolog query
         if (!prologQuery.endsWith(".")) {
             prologQuery += ".";
@@ -156,11 +156,11 @@ public class Session {
             String prompt = buildReasoningPrompt(history);
             LMResponse response = LMClient.generate(prompt);
 
-            if (!response.isSuccess()) {
-                return new ReasoningResult("LLM reasoning failed: " + response.getError(), history);
+            if (!response.success()) {
+                return new ReasoningResult("LLM reasoning failed: " + response.error(), history);
             }
 
-            String prologGoal = response.getContent().trim();
+            String prologGoal = response.content().trim();
             history.add("LLM goal: " + prologGoal);
 
             try {
@@ -171,7 +171,7 @@ public class Session {
                 if (parsedGoal instanceof Structure goalStructure) {
                     if (goalStructure.getFunctor().getName().equals("conclude")) {
                         return new ReasoningResult(
-                                result.success() && result.getBindings() != null && !result.getBindings().isEmpty() ? firstAnswer(result) : "Concluded, but no specific answer found.",
+                                result.success() && result.bindings() != null && !result.bindings().isEmpty() ? firstAnswer(result) : "Concluded, but no specific answer found.",
                                 history);
                     }
                 }
@@ -185,7 +185,7 @@ public class Session {
 
     /** Extract the answer from the first solution */
     private String firstAnswer(QueryResult result) {
-        var firstSolution = result.getBindings().getFirst();
+        var firstSolution = result.bindings().get(0);
         return firstSolution.values().stream().findFirst().map(Object::toString).orElse("Concluded without a specific answer.");
     }
 
@@ -200,9 +200,9 @@ public class Session {
         } else {
             sb.append("Success with ").append(result.bindings().size()).append(" solution(s).\n");
             // Using the raw bindings here to avoid the string conversion in getBindings()
-            List<Map<String, String>> bindings = result.getBindings();
+            List<Map<Variable, Term>> bindings = result.bindings();
             for (int i = 0; i < bindings.size(); i++) {
-                sb.append("  Solution ").append(i + 1).append(": ").append(bindings.get(i));
+                sb.append("  Solution ").append(i + 1).append(": ").append(result.getBindings().get(i));
                 if (i < bindings.size() - 1) {
                     sb.append("\n");
                 }

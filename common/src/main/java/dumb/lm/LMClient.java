@@ -47,22 +47,18 @@ public class LMClient implements ILMClient {
     }
 
     public LMResponse generate(String prompt) {
-        LMResponse LMResponse = new LMResponse();
         try {
             ChatResponse response = model.chat(UserMessage.from(prompt));
-            LMResponse.setContent(response.aiMessage().text());
-            LMUsage usage = new LMUsage();
-            usage.setPromptTokens(response.tokenUsage().inputTokenCount());
-            usage.setCompletionTokens(response.tokenUsage().outputTokenCount());
-            usage.setTotalTokens(response.tokenUsage().totalTokenCount());
-            LMResponse.setUsage(usage);
-            LMResponse.setSuccess(true);
+            LMUsage usage = new LMUsage(
+                    response.tokenUsage().inputTokenCount(),
+                    response.tokenUsage().outputTokenCount(),
+                    response.tokenUsage().totalTokenCount()
+            );
+            return new LMResponse(response.aiMessage().text(), usage, true, null);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in LLM generation", e);
-            LMResponse.setSuccess(false);
-            LMResponse.setError("LLM generation failed: " + e.getMessage());
+            return new LMResponse(null, null, false, "LLM generation failed: " + e.getMessage());
         }
-        return LMResponse;
     }
 
     public ChatModel getChatModel() {

@@ -50,7 +50,7 @@ public class McrCommand implements Callable<Integer> {
         if (result.success()) {
             System.out.println("Success!");
             System.out.println("Original Query: " + result.originalQuery());
-            if (result.getBindings() != null && !result.getBindings().isEmpty()) {
+            if (result.bindings() != null && !result.bindings().isEmpty()) {
                 System.out.println("Solutions:");
                 result.getBindings().forEach(solution -> System.out.println("  " + solution));
             } else {

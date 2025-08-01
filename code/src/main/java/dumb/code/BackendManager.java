@@ -10,9 +10,11 @@ import java.io.IOException;
 public class BackendManager {
     private final Code code;
     private Backend backend;
+    private final IFileManager fileManager;
 
-    public BackendManager(Code code) {
+    public BackendManager(Code code, IFileManager fileManager) {
         this.code = code;
+        this.fileManager = fileManager;
         // The backend is now initialized by the Container,
         // which calls either setBackend or autodetectBackend.
         // We can leave the field null here initially.
@@ -50,9 +52,14 @@ public class BackendManager {
     }
 
     public void setBackend(String backendType) {
+        if (fileManager instanceof InMemoryFileManager) {
+            this.backend = new dumb.code.versioning.InMemoryBackend((InMemoryFileManager) fileManager);
+            return;
+        }
+
         switch (backendType.toLowerCase()) {
             case "file":
-                this.backend = new FileBackend();
+                this.backend = new FileBackend(fileManager.getRootDir());
                 break;
             case "git":
                 this.backend = new GitBackend();

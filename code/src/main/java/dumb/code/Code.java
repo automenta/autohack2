@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Code {
     public final List<ToolProvider> toolProviders = new CopyOnWriteArrayList<>();
     public final BackendManager backendManager;
-    public final FileManager fileManager;
+    public final IFileManager fileManager;
     public final LMManager lmManager;
     public final UIManager uiManager;
     public final CommandManager commandManager;
@@ -29,9 +29,10 @@ public class Code {
         this(backendType, null, new LMManager(provider, model, apiKey));
     }
 
-    public Code(String backendType, FileManager fileManager, LMManager lmManager) {
+    public Code(String backendType, IFileManager fileManager, LMManager lmManager) {
+        this.fileManager = (fileManager != null) ? fileManager : new FileManager();
         this.messageHandler = new MessageHandler(this);
-        this.backendManager = new BackendManager(this);
+        this.backendManager = new BackendManager(this, this.fileManager);
         this.processRunner = new ProcessRunner();
 
         if (backendType != null) {
@@ -41,7 +42,6 @@ public class Code {
         }
         this.backend = backendManager.getBackend();
 
-        this.fileManager = (fileManager != null) ? fileManager : new FileManager();
         this.lmManager = lmManager;
         this.uiManager = new UIManager(this);
         this.codebaseManager = new CodebaseManager(this);
