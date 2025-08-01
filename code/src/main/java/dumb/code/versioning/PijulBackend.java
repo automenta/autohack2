@@ -25,8 +25,17 @@ public class PijulBackend implements Backend {
         return executeCommand("pijul", "unrecord", hash);
     }
 
-    public CompletableFuture<Void> channel(String subcommand, String name) {
-        return executeCommand("pijul", "channel", subcommand, name);
+    public CompletableFuture<Void> channel(String subcommand, String... args) {
+        String[] command = new String[args.length + 3];
+        command[0] = "pijul";
+        command[1] = "channel";
+        command[2] = subcommand;
+        System.arraycopy(args, 0, command, 3, args.length);
+        return executeCommand(command);
+    }
+
+    public CompletableFuture<String> channelList() {
+        return executeCommandWithOutput("pijul", "channel");
     }
 
     public CompletableFuture<Void> patch(String subcommand, String name) {

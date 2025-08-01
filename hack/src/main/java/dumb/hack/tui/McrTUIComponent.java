@@ -23,7 +23,8 @@ public class McrTUIComponent implements TUIComponent {
             ProviderFactory factory = new ProviderFactory(app.getLmOptions());
             ChatModel model = factory.create();
             LMClient lmClient = new LMClient(model);
-            MCR mcr = new MCR(lmClient);
+            String promptsPath = app.getConfigManager().getProperty("prompts.path", null);
+            MCR mcr = new MCR(lmClient, promptsPath);
             Session session = mcr.createSession();
             session.assertProlog("is_a(tweety, canary).");
             session.assertProlog("bird(X) :- is_a(X, canary).");

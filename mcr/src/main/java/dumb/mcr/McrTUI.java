@@ -14,7 +14,7 @@ public class McrTUI {
         Panel contentPanel = new Panel(new LinearLayout(Direction.VERTICAL));
 
         contentPanel.addComponent(new Label("Enter your query:"));
-        TextBox queryBox = new TextBox(new TerminalSize(50, 1));
+        TextBox queryBox = new TextBox(new TerminalSize(50, 5));
         contentPanel.addComponent(queryBox);
 
         Panel resultsPanel = new Panel();

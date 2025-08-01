@@ -25,17 +25,37 @@ public class Session {
     private Ontology ontology;
     private final ToolProvider toolProvider;
     private Solver solver;
+    private final String promptsPath;
 
-    public Session(LMClient lmClient, ToolProvider toolProvider) {
+    public Session(LMClient lmClient, ToolProvider toolProvider, String promptsPath) {
         this.lmClient = lmClient;
         this.knowledgeGraph = new KnowledgeGraph();
         this.ontology = new Ontology();
         this.toolProvider = toolProvider;
+        this.promptsPath = promptsPath;
         resetSolver();
         assertToolFacts();
     }
 
+    public Session(LMClient lmClient, ToolProvider toolProvider) {
+        this(lmClient, toolProvider, null);
+    }
+
     private String loadPrompt(String name) {
+        // Try loading from custom path first
+        if (promptsPath != null && !promptsPath.isBlank()) {
+            File customPromptFile = new File(promptsPath, name);
+            if (customPromptFile.exists()) {
+                try {
+                    return new String(java.nio.file.Files.readAllBytes(customPromptFile.toPath()));
+                } catch (IOException e) {
+                    // Log the error and fall back to the default prompt
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // Fallback to classpath resource
         String resourcePath = "/prompts/" + name;
         try (InputStream inputStream = Session.class.getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
@@ -247,11 +267,11 @@ public class Session {
         }
     }
 
-    public static Session load(String path, LMClient lmClient, ToolProvider toolProvider) throws IOException, ClassNotFoundException {
+    public static Session load(String path, LMClient lmClient, ToolProvider toolProvider, String promptsPath) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
             KnowledgeGraph knowledgeGraph = (KnowledgeGraph) ois.readObject();
             Ontology ontology = (Ontology) ois.readObject();
-            Session session = new Session(lmClient, toolProvider);
+            Session session = new Session(lmClient, toolProvider, promptsPath);
             session.knowledgeGraph = knowledgeGraph;
             session.ontology = ontology;
             session.resetSolver();

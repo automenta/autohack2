@@ -28,7 +28,7 @@ public class SessionPersistenceTest {
 
         // Act
         session1.save(sessionFile.toString());
-        Session session2 = Session.load(sessionFile.toString(), lmClient, null);
+        Session session2 = Session.load(sessionFile.toString(), lmClient, null, null);
 
         // Assert
         assertTrue(session2.getOntology().hasType("bird"));

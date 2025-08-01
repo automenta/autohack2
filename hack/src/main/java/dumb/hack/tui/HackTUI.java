@@ -78,7 +78,13 @@ public class HackTUI {
             Panel topPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
             topPanel.addComponent(radioBoxList);
             topPanel.addComponent(new Button("Exit", window::close));
-            mainPanel.addComponent(topPanel.withBorder(Borders.singleLine("Navigation (Ctrl+C/M/O)")));
+
+            Panel navigationPanel = new Panel(new LinearLayout(Direction.VERTICAL));
+            Label breadcrumbs = new Label("Home");
+            navigationPanel.addComponent(topPanel.withBorder(Borders.singleLine("Tabs (Ctrl+C/M/O)")));
+            navigationPanel.addComponent(breadcrumbs.withBorder(Borders.singleLine("Breadcrumbs")));
+
+            mainPanel.addComponent(navigationPanel);
             mainPanel.addComponent(contentPanel.withBorder(Borders.singleLine("Content")));
 
             statusBar = new Label("Ready");
@@ -104,5 +110,6 @@ public class HackTUI {
         Panel panel = panelCache.computeIfAbsent(component.getName(), (name) -> component.createPanel(app));
         contentPanel.addComponent(panel);
         statusBar.setText("Mode: " + component.getName());
+        // TODO: Update breadcrumbs
     }
 }

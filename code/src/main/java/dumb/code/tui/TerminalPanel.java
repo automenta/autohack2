@@ -13,15 +13,16 @@ public class TerminalPanel extends Panel {
     private final CommandManager commandManager;
 
     public TerminalPanel(CommandManager commandManager) {
-        super(new LinearLayout(com.googlecode.lanterna.gui2.Direction.VERTICAL));
+        super(new LinearLayout(com.googlecode.lanterna.gui2.Direction.HORIZONTAL));
         this.commandManager = commandManager;
 
-        outputBox = new TextBox(new TerminalSize(100, 20), TextBox.Style.MULTI_LINE);
+        // Split view for LLM response vs code/input
+        outputBox = new TextBox(new TerminalSize(50, 35), TextBox.Style.MULTI_LINE);
         outputBox.setReadOnly(true);
-        addComponent(outputBox.withBorder(Borders.singleLine("Output")));
+        addComponent(outputBox.withBorder(Borders.singleLine("LLM Response")));
 
-        inputBox = new TextBox(new TerminalSize(100, 15), TextBox.Style.MULTI_LINE);
-        addComponent(inputBox.withBorder(Borders.singleLine("Input")));
+        inputBox = new TextBox(new TerminalSize(50, 35), TextBox.Style.MULTI_LINE);
+        addComponent(inputBox.withBorder(Borders.singleLine("Code / Input")));
     }
 
     public void addMessage(String message) {
