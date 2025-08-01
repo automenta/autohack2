@@ -1,8 +1,13 @@
 package dumb.hack.commands;
 
+import dumb.hack.LMOptions;
+import dumb.hack.provider.ProviderFactory;
+import dumb.hack.provider.MissingApiKeyException;
+import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 import dumb.mcr.QueryResult;
 import dumb.mcr.Session;
+import dev.langchain4j.model.chat.ChatModel;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -14,18 +19,22 @@ public class McrCommand implements Callable<Integer> {
     @CommandLine.Parameters(index = "0", description = "The natural language query to send to the MCR.")
     private String query;
 
+    @CommandLine.Mixin
+    private LMOptions lmOptions;
+
     @Override
     public Integer call() {
-        String provider = System.getProperty("llm.provider", "openai");
-        String apiKey = System.getenv(provider.toUpperCase() + "_API_KEY");
-        String model = "gpt-4o-mini";
-
-        if (apiKey == null || apiKey.isEmpty()) {
-            System.err.println("Warning: No API key found for provider '" + provider + "'. MCR may not function as expected.");
-            provider = "mock";
+        ProviderFactory factory = new ProviderFactory(lmOptions);
+        ChatModel model;
+        try {
+            model = factory.create();
+        } catch (MissingApiKeyException e) {
+            System.err.println(e.getMessage());
+            return 1;
         }
 
-        MCR mcr = new MCR(provider, model, apiKey);
+        LMClient lmClient = new LMClient(model);
+        MCR mcr = new MCR(lmClient);
         Session session = mcr.createSession();
 
         // For this example, we'll assert some basic knowledge.

@@ -11,10 +11,6 @@ public class MCR {
         this.lmClient = lmClient;
     }
 
-    public MCR(String provider, String model, String apiKey) {
-        this.lmClient = new LMClient(provider, model, apiKey);
-    }
-
     public Session createSession(ToolProvider toolProvider) {
         return new Session(lmClient, toolProvider);
     }

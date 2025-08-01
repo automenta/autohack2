@@ -15,6 +15,10 @@ public class LMClient implements ILMClient {
     private static final Logger logger = Logger.getLogger(LMClient.class.getName());
     private final ChatModel model;
 
+    public LMClient(ChatModel model) {
+        this.model = model;
+    }
+
     public LMClient(String provider, String modelName, String apiKey) {
         switch (provider.toLowerCase()) {
             case "ollama":

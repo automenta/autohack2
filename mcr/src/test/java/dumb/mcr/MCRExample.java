@@ -1,5 +1,6 @@
 package dumb.mcr;
 
+import dumb.lm.LMClient;
 import dumb.prolog.Term;
 import dumb.prolog.Variable;
 
@@ -8,7 +9,8 @@ import java.util.Map;
 public class MCRExample {
     static void main(String[] args) {
         // 1. Configure MCR
-        MCR mcr = new MCR("mock", "mock", "mock");
+        LMClient lmClient = new LMClient("mock", "mock", "mock");
+        MCR mcr = new MCR(lmClient);
 
         // 2. Create a Session
         Session session = mcr.createSession();
