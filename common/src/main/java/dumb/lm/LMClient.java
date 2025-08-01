@@ -11,7 +11,7 @@ import dumb.lm.mock.MockChatModel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LMClient {
+public class LMClient implements ILMClient {
     private static final Logger logger = Logger.getLogger(LMClient.class.getName());
     private final ChatModel model;
 

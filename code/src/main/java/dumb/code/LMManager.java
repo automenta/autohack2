@@ -3,12 +3,21 @@ package dumb.code;
 import dumb.lm.LMClient;
 import dumb.lm.LMResponse;
 
+import dumb.lm.ILMClient;
+import dumb.lm.LMClient;
+import dumb.lm.LMResponse;
+
 public class LMManager {
-    private LMClient LMClient;
+    private ILMClient lmClient;
 
     public LMManager() {
-        // Constructor
+        // Initialize with the real client
         initialize();
+    }
+
+    public LMManager(ILMClient lmClient) {
+        // Initialize with a mock client for testing
+        this.lmClient = lmClient;
     }
 
     public void initialize() {
@@ -28,9 +37,9 @@ public class LMManager {
 
         if (apiKey == null || apiKey.isEmpty()) {
             System.err.println("WARNING: OPENAI_API_KEY environment variable not set. LLM functionality will be disabled.");
-            this.LMClient = null;
+            this.lmClient = null;
         } else {
-            this.LMClient = new LMClient(provider, model, apiKey);
+            this.lmClient = new LMClient(provider, model, apiKey);
         }
     }
 
@@ -40,11 +49,11 @@ public class LMManager {
 
 
     public String generateResponse(String prompt) {
-        if (LMClient == null) {
+        if (lmClient == null) {
             return "Error: LLM not initialized. Please set the OPENAI_API_KEY environment variable.";
         }
         // Generate response from LLM
-        LMResponse response = LMClient.generate(prompt);
+        LMResponse response = lmClient.generate(prompt);
         if (response.isSuccess()) {
             return response.getContent();
         } else {

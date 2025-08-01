@@ -1,5 +1,6 @@
 package dumb.prolog;
 
+import dumb.mcr.exceptions.ToolExecutionException;
 import dumb.mcr.tools.Tool;
 import dumb.mcr.tools.ToolProvider;
 
@@ -58,29 +59,31 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
     }
 
     private void executeTool(Structure toolQuery, Map<Variable, Term> substitution, List<Map<Variable, Term>> solutions) {
-        if (toolProvider == null) {
-            return; // No tool provider, cannot execute.
-        }
+        try {
+            if (toolProvider == null) {
+                throw new ToolExecutionException("No tool provider configured.");
+            }
 
-        // use_tool(ToolName, [prop(K,V), ...], ResultVar)
-        Term toolNameTerm = toolQuery.getArgs().get(0);
-        Term argsListTerm = toolQuery.getArgs().get(1);
-        Term resultVariable = toolQuery.getArgs().get(2);
+            // use_tool(ToolName, [prop(K,V), ...], ResultVar)
+            Term toolNameTerm = toolQuery.getArgs().get(0);
+            Term argsListTerm = toolQuery.getArgs().get(1);
+            Term resultVariable = toolQuery.getArgs().get(2);
 
-        if (!(toolNameTerm instanceof Atom toolNameAtom)) {
-            // Tool name must be an atom.
-            return;
-        }
-        String toolName = toolNameAtom.getName();
+            if (!(toolNameTerm instanceof Atom toolNameAtom)) {
+                throw new ToolExecutionException("Tool name must be an atom.");
+            }
+            String toolName = toolNameAtom.getName();
 
-        Map<String, Object> args = parseArgs(argsListTerm);
-        if (args == null) {
-            // Argument parsing failed.
-            return;
-        }
+            Map<String, Object> args = parseArgs(argsListTerm);
+            if (args == null) {
+                throw new ToolExecutionException("Invalid tool arguments.");
+            }
 
-        Tool tool = toolProvider.getTools().get(toolName);
-        if (tool != null) {
+            Tool tool = toolProvider.getTools().get(toolName);
+            if (tool == null) {
+                throw new ToolExecutionException("Tool not found: " + toolName);
+            }
+
             String result = tool.run(args);
             // The result from a tool is always a string, so we create an Atom.
             // In a more advanced system, tools might return structured terms.
@@ -89,6 +92,8 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
                 // The tool call was successful and the result was unified.
                 solutions.add(newSubst);
             }
+        } catch (dumb.mcr.exceptions.PrologParseException e) {
+            throw new ToolExecutionException(e.getMessage());
         }
     }
 

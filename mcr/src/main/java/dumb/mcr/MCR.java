@@ -3,26 +3,20 @@ package dumb.mcr;
 import dumb.lm.LMClient;
 import dumb.mcr.tools.ToolProvider;
 
-import java.util.Properties;
-
 public class MCR {
 
-    private final LMClient LMClient;
+    private final LMClient lmClient;
 
-    public MCR(LMClient LMClient) {
-        this.LMClient = LMClient;
+    public MCR(LMClient lmClient) {
+        this.lmClient = lmClient;
     }
 
-    public MCR(Properties config) {
-        this.LMClient = new LMClient(
-                config.getProperty("llm.provider", "openai"),
-                config.getProperty("llm.model", "gpt-4o-mini"),
-                config.getProperty("llm.apiKey")
-        );
+    public MCR(String provider, String model, String apiKey) {
+        this.lmClient = new LMClient(provider, model, apiKey);
     }
 
     public Session createSession(ToolProvider toolProvider) {
-        return new Session(LMClient, toolProvider);
+        return new Session(lmClient, toolProvider);
     }
 
     public Session createSession() {

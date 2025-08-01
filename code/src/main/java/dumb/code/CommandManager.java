@@ -27,6 +27,9 @@ import dumb.code.commands.speech.SpeechCommand;
 import dumb.code.commands.status.StatusCommand;
 import dumb.code.commands.test.TestCommand;
 import dumb.code.commands.undo.UndoCommand;
+import dumb.code.commands.debug.DebugCommand;
+import dumb.code.commands.doc.DocCommand;
+import dumb.code.commands.refactor.RefactorCommand;
 import dumb.code.commands.unrecord.UnrecordCommand;
 
 import java.util.HashMap;
@@ -68,6 +71,11 @@ public class CommandManager {
         registerCommand("test", new TestCommand(context));
         registerCommand("undo", new UndoCommand(context));
         registerCommand("unrecord", new UnrecordCommand(context));
+
+        // Stubs for future commands
+        registerCommand("refactor", new RefactorCommand(context));
+        registerCommand("debug", new DebugCommand(context));
+        registerCommand("doc", new DocCommand(context));
     }
 
     public void registerCommand(String name, Command command) {

@@ -70,23 +70,9 @@ of the autonomous agent, interacting with the codebase and the development envir
 
 ## Building and Running
 
-### Building
+To build the project, run `mvn clean install` from the root directory.
 
-To build the project, run the following command from the project's root directory:
-
-```bash
-mvn clean install
-```
-
-This will build all modules and create the executable JAR file in the `code/target/` directory.
-
-### Running AutoHack
-
-To run the AutoHack application, execute the following command from the project's root directory:
-
-```bash
-java -jar code/target/code-1.0-SNAPSHOT.jar
-```
+To run the application, see the instructions in the main `README.md` file.
 
 ## Features
 

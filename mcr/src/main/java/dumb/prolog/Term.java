@@ -1,5 +1,7 @@
 package dumb.prolog;
 
-public abstract class Term {
+import java.io.Serializable;
+
+public abstract class Term implements Serializable {
     public abstract boolean isVariable();
 }

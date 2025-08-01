@@ -1,9 +1,10 @@
 package dumb.mcr;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Ontology {
+public class Ontology implements Serializable {
 
     private final Set<String> types = new HashSet<>();
     private final Set<String> relationships = new HashSet<>();

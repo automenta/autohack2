@@ -3,10 +3,11 @@ package dumb.mcr;
 import dumb.prolog.Clause;
 import dumb.prolog.Parser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KnowledgeGraph {
+public class KnowledgeGraph implements Serializable {
 
     private final List<Clause> clauses = new ArrayList<>();
 

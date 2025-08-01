@@ -2,45 +2,47 @@ package dumb.code.commands.run;
 
 import dumb.code.Context;
 import dumb.code.MessageHandler;
-import org.junit.jupiter.api.BeforeEach;
+import dumb.code.util.IProcessRunner;
+import dumb.code.util.ProcessResult;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.*;
 
 public class RunCommandTest {
 
-    @Mock
-    private Context context;
-
-    @Mock
-    private MessageHandler messageHandler;
-
-    private RunCommand runCommand;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        when(context.getMessageHandler()).thenReturn(messageHandler);
-        runCommand = new RunCommand(context);
-    }
-
     @Test
     public void testRunCommand_withValidCommand_executesCommandAndPrintsOutput() {
-        String[] command = {"echo", "hello world"};
+        // Arrange
+        IProcessRunner mockProcessRunner = mock(IProcessRunner.class);
+        when(mockProcessRunner.run(new String[]{"echo", "hello", "world"})).thenReturn(new ProcessResult(0, "hello world\n"));
 
-        runCommand.execute(command);
+        MessageHandler messageHandler = mock(MessageHandler.class);
+        Context context = new Context(new String[]{}, null, messageHandler, null, mockProcessRunner);
 
-        verify(messageHandler, times(1)).addMessage(eq("system"), anyString());
+        RunCommand runCommand = new RunCommand(context);
+
+        // Act
+        runCommand.execute(new String[]{"echo", "hello", "world"});
+
+        // Assert
+        verify(messageHandler).addMessage("system", "Command finished with exit code 0:\nhello world\n");
     }
 
     @Test
     public void testRunCommand_withInvalidCommand_printsErrorMessage() {
-        String[] command = {"invalid_command"};
+        // Arrange
+        IProcessRunner mockProcessRunner = mock(IProcessRunner.class);
+        when(mockProcessRunner.run(new String[]{"invalid_command"})).thenReturn(new ProcessResult(-1, "Error message"));
 
-        runCommand.execute(command);
+        MessageHandler messageHandler = mock(MessageHandler.class);
+        Context context = new Context(new String[]{}, null, messageHandler, null, mockProcessRunner);
 
-        verify(messageHandler, times(1)).addMessage(eq("system"), anyString());
+        RunCommand runCommand = new RunCommand(context);
+
+        // Act
+        runCommand.execute(new String[]{"invalid_command"});
+
+        // Assert
+        verify(messageHandler).addMessage("system", "Command finished with exit code -1:\nError message");
     }
 }

@@ -1,10 +1,11 @@
 package dumb.prolog;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Structure extends Term {
+public class Structure extends Term implements Serializable {
     private final Atom functor;
     private final List<Term> args;
 

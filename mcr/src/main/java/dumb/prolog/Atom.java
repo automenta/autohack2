@@ -1,8 +1,9 @@
 package dumb.prolog;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Atom extends Term {
+public class Atom extends Term implements Serializable {
     private final String name;
 
     public Atom(String name) {

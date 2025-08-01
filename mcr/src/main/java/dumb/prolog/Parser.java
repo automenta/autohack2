@@ -2,6 +2,8 @@ package dumb.prolog;
 
 import java.util.ArrayList;
 import java.util.List;
+import dumb.mcr.exceptions.PrologParseException;
+
 import java.util.regex.Pattern;
 
 public class Parser {
@@ -51,7 +53,7 @@ public class Parser {
         if (text.endsWith(")")) {
             int openParen = text.indexOf('(');
             if (openParen == -1) {
-                throw new IllegalArgumentException("Invalid term format: " + text);
+                throw new PrologParseException("Invalid term format: " + text);
             }
             String functorName = text.substring(0, openParen);
             Atom functor = new Atom(functorName);
@@ -68,7 +70,7 @@ public class Parser {
         } else if (ATOM_PATTERN.matcher(text).matches()) {
             return new Atom(text);
         } else {
-            throw new IllegalArgumentException("Cannot parse term: " + text);
+            throw new PrologParseException("Cannot parse term: " + text);
         }
     }
 }

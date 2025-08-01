@@ -36,7 +36,14 @@ public record ReasonCommand(
         String task = String.join(" ", args);
         messageHandler.addMessage("system", "Reasoning about task: " + task);
 
-        // --- New logic using CodeParser ---
+        // Add codebase context to the MCR session
+        addCodebaseContext();
+
+        ReasoningResult result = mcrSession.reason(task);
+    }
+
+    private void addCodebaseContext() {
+        // Add file information
         dumb.mcr.code.CodeParser codeParser = new dumb.mcr.code.CodeParser();
         java.util.List<String> files = codebaseManager.getFiles();
         for (String file : files) {
@@ -48,9 +55,10 @@ public record ReasonCommand(
                 }
             }
         }
-        // --- End of new logic ---
 
-        ReasoningResult result = mcrSession.reason(task);
+        // Add git status information
+        String status = codebaseManager.getVersioningBackend().status().get();
+        mcrSession.assertProlog("git_status(\"" + status + "\").");
 
         messageHandler.addMessage("system", "\n--- Reasoning History ---");
         for (String step : result.history()) {

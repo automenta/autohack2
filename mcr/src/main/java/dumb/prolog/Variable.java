@@ -1,8 +1,9 @@
 package dumb.prolog;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Variable extends Term {
+public class Variable extends Term implements Serializable {
     private final String name;
 
     public Variable(String name) {

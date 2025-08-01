@@ -20,18 +20,14 @@ public class App {
 
             // --- Integration Logic ---
             // 1. Create MCR instance
-            Properties mcrProps = new Properties();
             String provider = System.getProperty("llm.provider", "openai");
             // A simple way to get API key. In a real app, use a secure vault.
             String apiKey = System.getenv(provider.toUpperCase() + "_API_KEY");
+            String model = "gpt-4o-mini";
 
             if (apiKey == null || apiKey.isEmpty()) {
-                mcrProps.setProperty("llm.provider", "mock");
-            } else {
-                mcrProps.setProperty("llm.provider", provider);
-                mcrProps.setProperty("llm.apiKey", apiKey);
+                provider = "mock";
             }
-            mcrProps.setProperty("llm.model", "gpt-4o-mini");
 
             // 2. Get necessary components from autohack's context
             CommandManager commandManager = context.commandManager;
@@ -41,7 +37,7 @@ public class App {
             // Create a ToolProvider with the code modification tools
             dumb.hack.tools.CodeToolProvider toolProvider = new dumb.hack.tools.CodeToolProvider(context.fileManager, codebaseManager);
 
-            MCR mcr = new MCR(mcrProps);
+            MCR mcr = new MCR(provider, model, apiKey);
             Session mcrSession = mcr.createSession(toolProvider);
 
 

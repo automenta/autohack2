@@ -1,40 +1,38 @@
 package dumb.code.commands.edit;
 
-import dumb.code.Backend;
 import dumb.code.Context;
 import dumb.code.commands.Command;
+import dumb.code.LMManager;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public record EditCommand(Context context) implements Command {
 
     @Override
     public void execute(String[] args) {
-        if (args.length == 0) {
-            context.messageHandler.addMessage("system", "Please specify a file to edit.");
+        if (args.length < 2) {
+            context.messageHandler.addMessage("system", "Usage: /edit <file> <prompt>");
             return;
         }
 
         String file = args[0];
+        String prompt = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+
         try {
-            // In a real implementation, this would open an editor
-            // For now, we'll just simulate by reading the file
             Path path = Paths.get(file);
-            String content = new String(Files.readAllBytes(path));
+            String originalContent = new String(Files.readAllBytes(path));
 
-            // Simulate editing by updating the container
-            context.messageHandler.addMessage("system", "Editing " + file);
+            LMManager lmManager = context.LMManager;
+            String newContent = lmManager.generateResponse("Edit the following file based on the prompt:\n\n" + originalContent + "\n\nPrompt: " + prompt);
 
-            // After editing, show diff
-            Backend backend = context.getBackend();
-            String diff = backend.diff().get();
-            context.setDiff(diff);
+            Files.write(path, newContent.getBytes());
+
             context.messageHandler.addMessage("system", "Finished editing " + file);
         } catch (Exception e) {
             context.messageHandler.addMessage("system", "Error: " + e.getMessage());
         }
     }
-
 }

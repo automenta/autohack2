@@ -13,12 +13,7 @@ import java.util.Properties;
 public class MCRExample {
     public static void main(String[] args) {
         // 1. Configure MCR
-        Properties config = new Properties();
-        config.setProperty("llm.provider", "mock");
-        config.setProperty("llm.apiKey", "mock");
-        config.setProperty("llm.model", "mock");
-
-        MCR mcr = new MCR(config);
+        MCR mcr = new MCR("mock", "mock", "mock");
 
         // 2. Create a Session
         Session session = mcr.createSession();

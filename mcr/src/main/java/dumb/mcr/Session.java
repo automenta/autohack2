@@ -12,12 +12,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 public class Session {
 
     private final LMClient LMClient;
-    private final KnowledgeGraph knowledgeGraph;
-    private final Ontology ontology;
+    private KnowledgeGraph knowledgeGraph;
+    private Ontology ontology;
     private final ToolProvider toolProvider;
     private Solver solver;
 
@@ -118,6 +123,8 @@ public class Session {
             Term queryTerm = Parser.parseTerm(prologQuery);
             List<Map<Variable, Term>> solutions = solver.solve(queryTerm);
             return new QueryResult(!solutions.isEmpty(), prologQuery, solutions, null);
+        } catch (dumb.mcr.exceptions.PrologParseException e) {
+            return new QueryResult(false, prologQuery, null, e.getMessage());
         } catch (Exception e) {
             return new QueryResult(false, prologQuery, null, e.getMessage());
         }
@@ -213,6 +220,25 @@ public class Session {
 
     public ReasoningResult reason(String taskDescription) {
         return reason(taskDescription, 10); // Default to 10 steps
+    }
+
+    public void save(String path) throws IOException {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path))) {
+            oos.writeObject(knowledgeGraph);
+            oos.writeObject(ontology);
+        }
+    }
+
+    public static Session load(String path, LMClient lmClient, ToolProvider toolProvider) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
+            KnowledgeGraph knowledgeGraph = (KnowledgeGraph) ois.readObject();
+            Ontology ontology = (Ontology) ois.readObject();
+            Session session = new Session(lmClient, toolProvider);
+            session.knowledgeGraph = knowledgeGraph;
+            session.ontology = ontology;
+            session.resetSolver();
+            return session;
+        }
     }
 
     private String buildReasoningPrompt(List<String> history) {

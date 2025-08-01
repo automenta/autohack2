@@ -29,20 +29,12 @@ mvn clean install
 
 This will build all three modules and install them into your local Maven repository.
 
-## Running the Applications
+## Running the Application
 
-### AutoHack
-
-To run the AutoHack application, execute the following command:
+To run the application, execute the following command from the root directory:
 
 ```bash
-java -jar code/target/code-1.0-SNAPSHOT.jar
+java -jar hack/target/hack-1.0-SNAPSHOT.jar
 ```
 
-### MCR
-
-To run the MCR application, execute the following command:
-
-```bash
-java -jar mcr/target/mcr-1.0.jar
-```
+This will start the AutoHack terminal UI, with the MCR reasoning engine integrated.

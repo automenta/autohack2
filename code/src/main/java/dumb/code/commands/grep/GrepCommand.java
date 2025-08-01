@@ -4,13 +4,14 @@ import dumb.code.Context;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class GrepCommand implements Command {
     private final Context context;
@@ -23,40 +24,36 @@ public class GrepCommand implements Command {
     public void execute(String[] args) {
         MessageHandler messageHandler = context.messageHandler;
         if (args.length < 1) {
-            messageHandler.addMessage("system", "Usage: /grep <pattern> [files...]");
+            messageHandler.addMessage("system", "Usage: /grep <pattern> [file...]");
             return;
         }
 
-        String pattern = args[0];
-        List<String> files = new ArrayList<>(Arrays.asList(args).subList(1, args.length));
+        Pattern pattern = Pattern.compile(args[0]);
+        Path startPath = Paths.get(args.length > 1 ? args[1] : "").toAbsolutePath();
+        StringBuilder output = new StringBuilder();
 
-        try {
-            List<String> command = new ArrayList<>();
-            command.add("grep");
-            command.add("-r");
-            command.add(pattern);
-            command.addAll(files);
-
-            ProcessBuilder pb = new ProcessBuilder(command);
-            pb.directory(new File(System.getProperty("user.dir")));
-            Process process = pb.start();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                messageHandler.addMessage("system", output.toString());
-            } else {
-                messageHandler.addMessage("system", "No matches found");
-            }
-        } catch (IOException | InterruptedException e) {
+        try (Stream<Path> paths = Files.walk(startPath)) {
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     try {
+                         String content = new String(Files.readAllBytes(path));
+                         Matcher matcher = pattern.matcher(content);
+                         if (matcher.find()) {
+                             output.append(path.toString()).append("\n");
+                         }
+                     } catch (IOException e) {
+                         // Ignore files that can't be read
+                     }
+                 });
+        } catch (IOException e) {
             messageHandler.addMessage("system", "Error: " + e.getMessage());
+            return;
+        }
+
+        if (output.length() > 0) {
+            messageHandler.addMessage("system", output.toString());
+        } else {
+            messageHandler.addMessage("system", "No matches found");
         }
     }
-
 }
