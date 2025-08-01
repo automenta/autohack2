@@ -1,45 +1,47 @@
 package dumb.hack.commands;
 
-import dumb.hack.HackContext;
+import dumb.code.CodebaseManager;
+import dumb.code.MessageHandler;
+import dumb.code.commands.Command;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
 
-public record ReasonCommand(HackContext context) implements Command {
+public record ReasonCommand(
+        Session mcrSession,
+        CodebaseManager codebaseManager,
+        MessageHandler messageHandler
+) implements Command {
 
     @Override
     public void execute(String[] args) {
         if (args.length == 0) {
-            context.getMessageHandler().handleMessage("Usage: /reason <your task>");
+            messageHandler.addMessage("system", "Usage: /reason <your task>");
             return;
         }
 
-        Session mcrSession = context.getMcrSession();
         if (mcrSession == null) {
-            context.getMessageHandler().handleMessage("MCR Session not initialized.");
+            messageHandler.addMessage("system", "MCR Session not initialized.");
             return;
         }
 
         String task = String.join(" ", args);
-        context.getMessageHandler().handleMessage("Reasoning about task: " + task);
+        messageHandler.addMessage("system", "Reasoning about task: " + task);
+
+        // Add the codebase context to the MCR session
+        String codebase = codebaseManager.getCodebaseRepresentation();
+        if (codebase != null && !codebase.isEmpty()) {
+            // Escape the codebase string to be a valid Prolog atom
+            String escapedCodebase = codebase.replace("\\", "\\\\").replace("'", "\\'");
+            mcrSession.assertProlog("codebase('" + escapedCodebase + "').");
+        }
 
         ReasoningResult result = mcrSession.reason(task);
 
-        context.getMessageHandler().handleMessage("\n--- Reasoning History ---");
+        messageHandler.addMessage("system", "\n--- Reasoning History ---");
         for (String step : result.history()) {
-            context.getMessageHandler().handleMessage(step);
+            messageHandler.addMessage("system", step);
         }
-        context.getMessageHandler().handleMessage("--- End of History ---\n");
-
-        context.getMessageHandler().handleMessage("Final Answer: " + result.answer());
-    }
-
-    @Override
-    public void init() {
-        // Nothing to initialize
-    }
-
-    @Override
-    public void cleanup() {
-        // Nothing to clean up
+        messageHandler.addMessage("system", "--- End of History ---\n");
+        messageHandler.addMessage("system", "Final Answer: " + result.answer());
     }
 }

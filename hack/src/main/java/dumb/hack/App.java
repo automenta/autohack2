@@ -1,35 +1,59 @@
 package dumb.hack;
 
+import dumb.code.CodebaseManager;
+import dumb.code.CommandManager;
+import dumb.code.Context;
+import dumb.code.MessageHandler;
+import dumb.code.PijulAider;
+import dumb.hack.commands.ReasonCommand;
+import dumb.mcr.MCR;
+import dumb.mcr.Session;
+
 import java.io.IOException;
+import java.util.Properties;
 
 public class App {
     public static void main(String[] args) {
-        if (args.length > 0 && "--execute".equals(args[0])) {
-            if (args.length < 2) {
-                System.err.println("Usage: --execute <command>");
-                System.exit(1);
+        try {
+            // Initialize container for dependency injection
+            Context context = new Context(args);
+
+            // --- Integration Logic ---
+            // 1. Create MCR instance
+            Properties mcrProps = new Properties();
+            String provider = System.getProperty("llm.provider", "openai");
+            // A simple way to get API key. In a real app, use a secure vault.
+            String apiKey = System.getenv(provider.toUpperCase() + "_API_KEY");
+
+            if (apiKey == null || apiKey.isEmpty()) {
+                mcrProps.setProperty("llm.provider", "mock");
+            } else {
+                mcrProps.setProperty("llm.provider", provider);
+                mcrProps.setProperty("llm.apiKey", apiKey);
             }
-            String command = args[1];
-            try {
-                HackContext context = new HackContext();
-                context.setMessageHandler(System.out::println);
-                context.init();
-                context.getCommands().processInput(command);
-            } catch (Exception e) {
-                System.err.println("Error executing command: " + e.getMessage());
-                e.printStackTrace();
-                System.exit(1);
-            }
-        } else {
-            try {
-                HackContext context = new HackContext();
-                HackIDE ide = new HackIDE(context);
-                ide.start();
-            } catch (IOException e) {
-                System.err.println("Error initializing application: " + e.getMessage());
-                e.printStackTrace();
-                System.exit(1);
-            }
+            mcrProps.setProperty("llm.model", "gpt-4o-mini");
+            MCR mcr = new MCR(mcrProps);
+            Session mcrSession = mcr.createSession();
+
+            // 2. Get necessary components from autohack's context
+            CommandManager commandManager = context.commandManager;
+            CodebaseManager codebaseManager = context.getCodebaseManager();
+            MessageHandler messageHandler = context.getMessageHandler();
+
+            // 3. Create and register the ReasonCommand
+            ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler);
+            commandManager.registerCommand("/reason", reasonCommand);
+            // --- End of Integration Logic ---
+
+
+            // Create and start the main application
+            PijulAider aider = new PijulAider(context);
+            aider.start();
+
+        } catch (IOException e) {
+            System.err.println("Error initializing application: " + e.getMessage());
+            e.printStackTrace(); // Also print stack trace for debugging
+            System.exit(1);
         }
     }
 }
