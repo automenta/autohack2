@@ -4,7 +4,6 @@ import dumb.code.CodebaseManager;
 import dumb.code.IFileManager;
 import dumb.mcr.tools.Tool;
 
-import java.util.Base64;
 import java.util.Map;
 
 public record CodeModificationTool(IFileManager fileManager, CodebaseManager codebaseManager) implements Tool {

@@ -17,7 +17,7 @@ import picocli.CommandLine;
 public class App {
 
     @CommandLine.Mixin
-    private LMOptions lmOptions = new LMOptions();
+    private final LMOptions lmOptions = new LMOptions();
 
     public LMOptions getLmOptions() {
         return lmOptions;

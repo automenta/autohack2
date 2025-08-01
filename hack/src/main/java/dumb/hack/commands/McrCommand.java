@@ -1,14 +1,13 @@
 package dumb.hack.commands;
 
+import dev.langchain4j.model.chat.ChatModel;
 import dumb.hack.App;
-import dumb.hack.LMOptions;
-import dumb.hack.provider.ProviderFactory;
 import dumb.hack.provider.MissingApiKeyException;
+import dumb.hack.provider.ProviderFactory;
 import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 import dumb.mcr.QueryResult;
 import dumb.mcr.Session;
-import dev.langchain4j.model.chat.ChatModel;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;

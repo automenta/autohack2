@@ -6,13 +6,15 @@ import dumb.mcr.step.PrologStep;
 import dumb.mcr.step.StepResult;
 import dumb.mcr.tools.Tool;
 import dumb.mcr.tools.ToolProvider;
-import dumb.prolog.*;
+import dumb.prolog.Parser;
+import dumb.prolog.Solver;
+import dumb.prolog.Structure;
+import dumb.prolog.Term;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -175,7 +177,7 @@ public class Session {
                 if (parsedGoal instanceof Structure goalStructure && "conclude".equals(goalStructure.getFunctor().getName())) {
                     if (!goalStructure.getArgs().isEmpty()) {
                         // Return the first argument as the final answer.
-                        String answer = goalStructure.getArgs().get(0).toString();
+                        String answer = goalStructure.getArgs().getFirst().toString();
                         return new ReasoningResult(answer, history);
                     } else {
                         return new ReasoningResult("Concluded.", history);
@@ -206,15 +208,14 @@ public class Session {
     }
 
     private String firstAnswer(QueryResult result) {
-        var firstSolution = result.bindings().get(0);
+        var firstSolution = result.bindings().getFirst();
         return firstSolution.values().stream().findFirst().map(Object::toString).orElse("Concluded without a specific answer.");
     }
 
     private String formatStepResultForPrompt(StepResult step) {
-        if (step instanceof PrologStep prologStep) {
-            QueryResult result = prologStep.result();
+        if (step instanceof PrologStep(String goal, QueryResult result)) {
             StringBuilder sb = new StringBuilder();
-            sb.append("Goal '").append(prologStep.goal()).append("' result: ");
+            sb.append("Goal '").append(goal).append("' result: ");
 
             if (!result.success()) {
                 sb.append("Failed. Error: ").append(result.error());
@@ -229,8 +230,8 @@ public class Session {
             }
             return sb.toString();
         }
-        if (step instanceof dumb.mcr.step.ToolStep toolStep) {
-            return "Tool '" + toolStep.toolName() + "' was called with args " + toolStep.args() + " and returned: " + toolStep.result();
+        if (step instanceof dumb.mcr.step.ToolStep(String name, java.util.Map<String, Object> args, String result)) {
+            return "Tool '" + name + "' was called with args " + args + " and returned: " + result;
         }
         return "Unknown step type.";
     }

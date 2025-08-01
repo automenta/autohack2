@@ -1,20 +1,14 @@
 package dumb.hack.commands;
 
+import dev.langchain4j.model.chat.ChatModel;
+import dumb.code.*;
 import dumb.hack.App;
-import dumb.code.Code;
-import dumb.code.CodeUI;
-import dumb.code.CodebaseManager;
-import dumb.code.CommandManager;
-import dumb.code.LMManager;
-import dumb.code.MessageHandler;
-import dumb.hack.LMOptions;
-import dumb.hack.provider.ProviderFactory;
 import dumb.hack.provider.MissingApiKeyException;
+import dumb.hack.provider.ProviderFactory;
 import dumb.hack.tools.CodeToolProvider;
 import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 import dumb.mcr.Session;
-import dev.langchain4j.model.chat.ChatModel;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -60,13 +54,12 @@ public class CodeCommand implements Callable<Integer> {
             services.reasonCommand().execute(new String[]{task});
 
             System.out.println("Non-interactive task completed.");
-            return 0;
         } else {
             // Existing interactive mode logic
-            var aider = aider(model, !nonInteractive); // Pass true for interactive
+            var aider = aider(model, true); // Pass true for interactive
             aider.start();
-            return 0;
         }
+        return 0;
     }
 
     private record CodeServices(Code code, ReasonCommand reasonCommand) {}

@@ -53,7 +53,7 @@ public class BackendManager {
 
     public void setBackend(String backendType) {
         if (fileManager instanceof InMemoryFileManager) {
-            this.backend = new dumb.code.versioning.InMemoryBackend((InMemoryFileManager) fileManager);
+            this.backend = new dumb.code.versioning.InMemoryBackend(fileManager);
             return;
         }
 
