@@ -1,16 +1,16 @@
 package dumb.code.commands.ls;
 
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 
 public class LsCommand implements Command {
-    private final Context context;
+    private final Code code;
     private final MessageHandler messageHandler;
 
-    public LsCommand(Context context) {
-        this.context = context;
-        this.messageHandler = context.messageHandler;
+    public LsCommand(Code code) {
+        this.code = code;
+        this.messageHandler = code.messageHandler;
     }
 
     @Override

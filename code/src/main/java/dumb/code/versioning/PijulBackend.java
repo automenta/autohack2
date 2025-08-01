@@ -1,4 +1,4 @@
-package dumb.code;
+package dumb.code.versioning;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

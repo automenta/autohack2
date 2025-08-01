@@ -1,17 +1,12 @@
 package dumb.hack;
 
-import dumb.code.CodebaseManager;
-import dumb.code.CommandManager;
-import dumb.code.Context;
-import dumb.code.MessageHandler;
-import dumb.code.PijulAider;
+import dumb.code.*;
 import dumb.hack.commands.ReasonCommand;
 import dumb.mcr.MCR;
 import dumb.mcr.Session;
 import picocli.CommandLine;
 
 import java.io.IOException;
-import java.util.Properties;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "hack", mixinStandardHelpOptions = true, version = "hack 1.0",
@@ -24,7 +19,7 @@ public class App implements Callable<Integer> {
     @CommandLine.Option(names = {"--validate"}, description = "Validate configuration and exit.")
     private boolean validateOnly;
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         int exitCode = new CommandLine(new App()).execute(args);
         System.exit(exitCode);
     }
@@ -54,29 +49,33 @@ public class App implements Callable<Integer> {
 
         // --- Application Startup ---
         // Initialize container for dependency injection
-        Context context = new Context(backend, provider, model, apiKey);
+        var aider = aider(provider, model, apiKey);
+        aider.start();
+
+        return 0;
+    }
+
+    private CodeUI aider(String provider, String model, String apiKey) {
+        Code code = new Code(backend, provider, model, apiKey);
 
         // --- Integration Logic ---
         // 2. Get necessary components from autohack's context
-        CommandManager commandManager = context.commandManager;
-        CodebaseManager codebaseManager = context.getCodebaseManager();
-        MessageHandler messageHandler = context.getMessageHandler();
+        CommandManager commandManager = code.commandManager;
+        CodebaseManager codebaseManager = code.getCodebaseManager();
+        MessageHandler messageHandler = code.getMessageHandler();
 
         // Create a ToolProvider with the code modification tools
-        dumb.hack.tools.CodeToolProvider toolProvider = new dumb.hack.tools.CodeToolProvider(context.fileManager, codebaseManager);
+        dumb.hack.tools.CodeToolProvider toolProvider = new dumb.hack.tools.CodeToolProvider(code.fileManager, codebaseManager);
 
         MCR mcr = new MCR(provider, model, apiKey);
         Session mcrSession = mcr.createSession(toolProvider);
 
         // 3. Create and register the ReasonCommand
-        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, context.fileManager);
+        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager);
         commandManager.registerCommand("/reason", reasonCommand);
         // --- End of Integration Logic ---
 
         // Create and start the main application
-        PijulAider aider = new PijulAider(context);
-        aider.start();
-
-        return 0;
+        return new CodeUI(code);
     }
 }

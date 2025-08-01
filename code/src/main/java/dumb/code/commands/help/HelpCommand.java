@@ -1,6 +1,6 @@
 package dumb.code.commands.help;
 
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 
@@ -8,11 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HelpCommand implements Command {
-    private final Context context;
+    private final Code code;
     private final Map<String, String> commandMap;
 
-    public HelpCommand(Context context) {
-        this.context = context;
+    public HelpCommand(Code code) {
+        this.code = code;
         this.commandMap = new HashMap<>();
         initializeCommandMap();
     }
@@ -47,7 +47,7 @@ public class HelpCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        MessageHandler messageHandler = context.messageHandler;
+        MessageHandler messageHandler = code.messageHandler;
         StringBuilder helpMessage = new StringBuilder("Available commands:\n");
         for (Map.Entry<String, String> entry : commandMap.entrySet()) {
             helpMessage.append("  /")

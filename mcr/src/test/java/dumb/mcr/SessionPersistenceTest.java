@@ -6,7 +6,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,6 +33,6 @@ public class SessionPersistenceTest {
         // Assert
         assertTrue(session2.getOntology().hasType("bird"));
         assertEquals(1, session2.getKnowledgeGraph().getClauses().size());
-        assertEquals("is_a(tweety, canary)", session2.getKnowledgeGraph().getClauses().get(0).head().toString());
+        assertEquals("is_a(tweety, canary)", session2.getKnowledgeGraph().getClauses().getFirst().head().toString());
     }
 }

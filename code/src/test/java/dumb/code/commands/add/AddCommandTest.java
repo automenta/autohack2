@@ -1,7 +1,11 @@
 package dumb.code.commands.add;
 
-import dumb.code.*;
+import dumb.code.Code;
+import dumb.code.CodebaseManager;
+import dumb.code.FileSystem;
+import dumb.code.MessageHandler;
 import dumb.code.commands.AddCommand;
+import dumb.code.versioning.Backend;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 public class AddCommandTest {
 
-    private Context context;
+    private Code code;
     private MessageHandler messageHandler;
     private CodebaseManager codebaseManager;
     private AddCommand addCommand;
@@ -23,21 +27,21 @@ public class AddCommandTest {
 
     @BeforeEach
     public void setUp() {
-        context = mock(Context.class);
+        code = mock(Code.class);
         messageHandler = mock(MessageHandler.class);
         backend = mock(Backend.class);
         fileSystem = mock(FileSystem.class);
         codebaseManager = mock(CodebaseManager.class);
 
-        when(context.getMessageHandler()).thenReturn(messageHandler);
-        when(context.getCodebaseManager()).thenReturn(codebaseManager);
-        when(context.getBackend()).thenReturn(backend);
-        when(context.getFiles()).thenReturn(fileSystem);
+        when(code.getMessageHandler()).thenReturn(messageHandler);
+        when(code.getCodebaseManager()).thenReturn(codebaseManager);
+        when(code.getBackend()).thenReturn(backend);
+        when(code.getFiles()).thenReturn(fileSystem);
         when(backend.add(anyString())).thenReturn(CompletableFuture.completedFuture(null));
         when(codebaseManager.trackFile(anyString())).thenReturn(CompletableFuture.completedFuture(null));
 
 
-        addCommand = new AddCommand(context);
+        addCommand = new AddCommand(code);
     }
 
     @Test

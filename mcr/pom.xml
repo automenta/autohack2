@@ -18,12 +18,12 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Gson for JSON serialization -->
-        <dependency>
-            <groupId>com.google.api-client</groupId>
-            <artifactId>google-api-client</artifactId>
-            <version>2.0.0</version>
-        </dependency>
+        <!--        &lt;!&ndash; Gson for JSON serialization &ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.google.api-client</groupId>-->
+        <!--            <artifactId>google-api-client</artifactId>-->
+        <!--            <version>2.0.0</version>-->
+        <!--        </dependency>-->
 
         <!-- SLF4J for logging -->
         <dependency>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-symbol-solver-core</artifactId>
-            <version>3.25.10</version>
+            <version>3.27.0</version>
         </dependency>
     </dependencies>
 
@@ -65,7 +65,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.5.0</version>
                 <configuration>
                     <mainClass>dumb.mcr.MCRExample</mainClass>
                     <classpathScope>test</classpathScope>

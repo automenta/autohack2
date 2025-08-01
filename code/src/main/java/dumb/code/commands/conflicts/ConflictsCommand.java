@@ -1,22 +1,22 @@
 package dumb.code.commands.conflicts;
 
-import dumb.code.Backend;
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
-import dumb.code.PijulBackend;
 import dumb.code.commands.Command;
+import dumb.code.versioning.Backend;
+import dumb.code.versioning.PijulBackend;
 
 public class ConflictsCommand implements Command {
-    private final Context context;
+    private final Code code;
 
-    public ConflictsCommand(Context context) {
-        this.context = context;
+    public ConflictsCommand(Code code) {
+        this.code = code;
     }
 
     @Override
     public void execute(String[] args) {
-        Backend backend = context.getBackend();
-        MessageHandler messageHandler = context.messageHandler;
+        Backend backend = code.getBackend();
+        MessageHandler messageHandler = code.messageHandler;
 
         if (backend instanceof PijulBackend pijulBackend) {
             try {

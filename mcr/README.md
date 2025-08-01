@@ -143,7 +143,7 @@ public class MCRExample {
 
 ### `Session` Class
 
-Represents an isolated reasoning context and its knowledge graph.
+Represents an isolated reasoning code and its knowledge graph.
 
 * `assertProlog(String clause)`: Directly asserts a Prolog clause into the knowledge graph.
 * `retractProlog(String clause)`: Removes a specific Prolog clause.

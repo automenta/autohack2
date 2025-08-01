@@ -1,17 +1,12 @@
 package dumb.mcr;
 
-import dumb.mcr.MCR;
-import dumb.mcr.QueryResult;
-import dumb.mcr.ReasoningResult;
-import dumb.mcr.Session;
 import dumb.prolog.Term;
 import dumb.prolog.Variable;
 
 import java.util.Map;
-import java.util.Properties;
 
 public class MCRExample {
-    public static void main(String[] args) {
+    static void main(String[] args) {
         // 1. Configure MCR
         MCR mcr = new MCR("mock", "mock", "mock");
 

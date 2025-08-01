@@ -18,17 +18,13 @@ public class ErrorHandlingTest {
 
     @Test
     public void testPrologParseException() {
-        assertThrows(PrologParseException.class, () -> {
-            Parser.parseTerm("a(b,c");
-        });
+        assertThrows(PrologParseException.class, () -> Parser.parseTerm("a(b,c"));
     }
 
     @Test
     public void testToolExecutionException_noProvider() {
         Solver solver = new Solver(new ArrayList<>(), null);
-        assertThrows(PrologParseException.class, () -> {
-            solver.solve(Parser.parseTerm("use_tool(a,b,C)."));
-        });
+        assertThrows(PrologParseException.class, () -> solver.solve(Parser.parseTerm("use_tool(a,b,C).")));
     }
 
     @Test
@@ -36,9 +32,7 @@ public class ErrorHandlingTest {
         ToolProvider mockToolProvider = mock(ToolProvider.class);
         when(mockToolProvider.getTools()).thenReturn(Collections.emptyMap());
         Solver solver = new Solver(new ArrayList<>(), mockToolProvider);
-        assertThrows(PrologParseException.class, () -> {
-            solver.solve(Parser.parseTerm("use_tool(a,b,C)."));
-        });
+        assertThrows(PrologParseException.class, () -> solver.solve(Parser.parseTerm("use_tool(a,b,C).")));
     }
 
     @Test
@@ -46,8 +40,6 @@ public class ErrorHandlingTest {
         ToolProvider mockToolProvider = mock(ToolProvider.class);
         when(mockToolProvider.getTools()).thenReturn(Collections.emptyMap());
         Solver solver = new Solver(new ArrayList<>(), mockToolProvider);
-        assertThrows(ToolExecutionException.class, () -> {
-            solver.solve(Parser.parseTerm("use_tool(a,[],C)"));
-        });
+        assertThrows(ToolExecutionException.class, () -> solver.solve(Parser.parseTerm("use_tool(a,[],C)")));
     }
 }

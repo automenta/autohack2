@@ -1,8 +1,9 @@
 package dumb.code;
 
+import dumb.code.versioning.Backend;
+
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,9 +20,9 @@ public class CodebaseManager {
 
     private final FileManager fileManager;
 
-    public CodebaseManager(Context context) {
-        this.versioningBackend = context.getBackend();
-        this.fileManager = context.fileManager;
+    public CodebaseManager(Code code) {
+        this.versioningBackend = code.getBackend();
+        this.fileManager = code.fileManager;
     }
 
     public CompletableFuture<Void> loadCodebase(String path) {

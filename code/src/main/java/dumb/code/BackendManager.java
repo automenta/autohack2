@@ -1,16 +1,18 @@
 package dumb.code;
 
+import dumb.code.versioning.Backend;
 import dumb.code.versioning.FileBackend;
 import dumb.code.versioning.GitBackend;
+import dumb.code.versioning.PijulBackend;
 
 import java.io.IOException;
 
 public class BackendManager {
-    private final Context context;
+    private final Code code;
     private Backend backend;
 
-    public BackendManager(Context context) {
-        this.context = context;
+    public BackendManager(Code code) {
+        this.code = code;
         // The backend is now initialized by the Container,
         // which calls either setBackend or autodetectBackend.
         // We can leave the field null here initially.

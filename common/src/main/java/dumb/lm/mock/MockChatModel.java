@@ -31,7 +31,7 @@ public class MockChatModel implements ChatModel {
                     .build();
         }
 
-        dev.langchain4j.data.message.ChatMessage lastMessage = chatRequest.messages().get(chatRequest.messages().size() - 1);
+        dev.langchain4j.data.message.ChatMessage lastMessage = chatRequest.messages().getLast();
         if (!(lastMessage instanceof dev.langchain4j.data.message.UserMessage)) {
             // Not a user message, return default
             return ChatResponse.builder()

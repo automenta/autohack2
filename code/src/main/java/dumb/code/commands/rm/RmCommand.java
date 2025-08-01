@@ -1,6 +1,6 @@
 package dumb.code.commands.rm;
 
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 
@@ -10,15 +10,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class RmCommand implements Command {
-    private final Context context;
+    private final Code code;
 
-    public RmCommand(Context context) {
-        this.context = context;
+    public RmCommand(Code code) {
+        this.code = code;
     }
 
     @Override
     public void execute(String[] args) {
-        MessageHandler messageHandler = context.messageHandler;
+        MessageHandler messageHandler = code.messageHandler;
 
         if (args.length < 1) {
             messageHandler.addMessage("system", "Usage: /rm <file1> [file2...]");

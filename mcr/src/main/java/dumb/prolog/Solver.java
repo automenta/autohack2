@@ -41,7 +41,7 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
             return;
         }
 
-        Term firstGoal = body.get(0);
+        Term firstGoal = body.getFirst();
         List<Term> remainingGoals = body.subList(1, body.size());
 
         solve(firstGoal, substitution, (newSolutions) -> {

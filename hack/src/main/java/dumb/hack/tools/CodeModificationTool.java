@@ -4,19 +4,10 @@ import dumb.code.CodebaseManager;
 import dumb.code.FileManager;
 import dumb.mcr.tools.Tool;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.Map;
 
-public class CodeModificationTool implements Tool {
-
-    private final FileManager fileManager;
-    private final CodebaseManager codebaseManager;
-
-    public CodeModificationTool(FileManager fileManager, CodebaseManager codebaseManager) {
-        this.fileManager = fileManager;
-        this.codebaseManager = codebaseManager;
-    }
+public record CodeModificationTool(FileManager fileManager, CodebaseManager codebaseManager) implements Tool {
 
     @Override
     public String name() {

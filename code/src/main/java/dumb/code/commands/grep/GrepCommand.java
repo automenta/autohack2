@@ -1,6 +1,6 @@
 package dumb.code.commands.grep;
 
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 
@@ -8,21 +8,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class GrepCommand implements Command {
-    private final Context context;
+    private final Code code;
 
-    public GrepCommand(Context context) {
-        this.context = context;
+    public GrepCommand(Code code) {
+        this.code = code;
     }
 
     @Override
     public void execute(String[] args) {
-        MessageHandler messageHandler = context.messageHandler;
+        MessageHandler messageHandler = code.messageHandler;
         if (args.length < 1) {
             messageHandler.addMessage("system", "Usage: /grep <pattern> [file...]");
             return;
@@ -39,7 +38,7 @@ public class GrepCommand implements Command {
                          String content = new String(Files.readAllBytes(path));
                          Matcher matcher = pattern.matcher(content);
                          if (matcher.find()) {
-                             output.append(path.toString()).append("\n");
+                             output.append(path).append("\n");
                          }
                      } catch (IOException e) {
                          // Ignore files that can't be read
@@ -50,7 +49,7 @@ public class GrepCommand implements Command {
             return;
         }
 
-        if (output.length() > 0) {
+        if (!output.isEmpty()) {
             messageHandler.addMessage("system", output.toString());
         } else {
             messageHandler.addMessage("system", "No matches found");

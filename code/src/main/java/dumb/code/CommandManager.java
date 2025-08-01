@@ -9,7 +9,9 @@ import dumb.code.commands.codebase.CodebaseCommand;
 import dumb.code.commands.commit.CommitCommand;
 import dumb.code.commands.conflicts.ConflictsCommand;
 import dumb.code.commands.create.CreateCommand;
+import dumb.code.commands.debug.DebugCommand;
 import dumb.code.commands.diff.DiffCommand;
+import dumb.code.commands.doc.DocCommand;
 import dumb.code.commands.drop.DropCommand;
 import dumb.code.commands.edit.EditCommand;
 import dumb.code.commands.exit.ExitCommand;
@@ -21,15 +23,13 @@ import dumb.code.commands.mv.MvCommand;
 import dumb.code.commands.patch.PatchCommand;
 import dumb.code.commands.query.QueryCommand;
 import dumb.code.commands.record.RecordCommand;
+import dumb.code.commands.refactor.RefactorCommand;
 import dumb.code.commands.rm.RmCommand;
 import dumb.code.commands.run.RunCommand;
 import dumb.code.commands.speech.SpeechCommand;
 import dumb.code.commands.status.StatusCommand;
 import dumb.code.commands.test.TestCommand;
 import dumb.code.commands.undo.UndoCommand;
-import dumb.code.commands.debug.DebugCommand;
-import dumb.code.commands.doc.DocCommand;
-import dumb.code.commands.refactor.RefactorCommand;
 import dumb.code.commands.unrecord.UnrecordCommand;
 
 import java.util.HashMap;
@@ -39,43 +39,43 @@ public class CommandManager {
     private final MessageHandler messageHandler;
     private final Map<String, Command> commands;
 
-    public CommandManager(Context context) {
-        this.messageHandler = context.messageHandler;
+    public CommandManager(Code code) {
+        this.messageHandler = code.messageHandler;
         this.commands = new HashMap<>();
-        registerCommand("help", new HelpCommand(context));
-        registerCommand("exit", new ExitCommand(context));
-        registerCommand("add", new AddCommand(context));
-        registerCommand("diff", new DiffCommand(context));
-        registerCommand("record", new RecordCommand(context));
-        registerCommand("commit", new CommitCommand(context)); // Alias for record
-        registerCommand("query", new QueryCommand(context));
+        registerCommand("help", new HelpCommand(code));
+        registerCommand("exit", new ExitCommand(code));
+        registerCommand("add", new AddCommand(code));
+        registerCommand("diff", new DiffCommand(code));
+        registerCommand("record", new RecordCommand(code));
+        registerCommand("commit", new CommitCommand(code)); // Alias for record
+        registerCommand("query", new QueryCommand(code));
 
         // Newly registered commands
-        registerCommand("apply", new ApplyCommand(context));
-        registerCommand("channel", new ChannelCommand(context));
-        registerCommand("clear", new ClearCommand(context));
-        registerCommand("codebase", new CodebaseCommand(context));
-        registerCommand("conflicts", new ConflictsCommand(context));
-        registerCommand("create", new CreateCommand(context));
-        registerCommand("drop", new DropCommand(context));
-        registerCommand("edit", new EditCommand(context));
-        registerCommand("grep", new GrepCommand(context));
-        registerCommand("image", new ImageCommand(context));
-        registerCommand("ls", new LsCommand(context));
-        registerCommand("mv", new MvCommand(context));
-        registerCommand("patch", new PatchCommand(context));
-        registerCommand("rm", new RmCommand(context));
-        registerCommand("run", new RunCommand(context));
-        registerCommand("speech", new SpeechCommand(context));
-        registerCommand("status", new StatusCommand(context));
-        registerCommand("test", new TestCommand(context));
-        registerCommand("undo", new UndoCommand(context));
-        registerCommand("unrecord", new UnrecordCommand(context));
+        registerCommand("apply", new ApplyCommand(code));
+        registerCommand("channel", new ChannelCommand(code));
+        registerCommand("clear", new ClearCommand(code));
+        registerCommand("codebase", new CodebaseCommand(code));
+        registerCommand("conflicts", new ConflictsCommand(code));
+        registerCommand("create", new CreateCommand(code));
+        registerCommand("drop", new DropCommand(code));
+        registerCommand("edit", new EditCommand(code));
+        registerCommand("grep", new GrepCommand(code));
+        registerCommand("image", new ImageCommand(code));
+        registerCommand("ls", new LsCommand(code));
+        registerCommand("mv", new MvCommand(code));
+        registerCommand("patch", new PatchCommand(code));
+        registerCommand("rm", new RmCommand(code));
+        registerCommand("run", new RunCommand(code));
+        registerCommand("speech", new SpeechCommand(code));
+        registerCommand("status", new StatusCommand(code));
+        registerCommand("test", new TestCommand(code));
+        registerCommand("undo", new UndoCommand(code));
+        registerCommand("unrecord", new UnrecordCommand(code));
 
         // Stubs for future commands
-        registerCommand("refactor", new RefactorCommand(context));
-        registerCommand("debug", new DebugCommand(context));
-        registerCommand("doc", new DocCommand(context));
+        registerCommand("refactor", new RefactorCommand(code));
+        registerCommand("debug", new DebugCommand(code));
+        registerCommand("doc", new DocCommand(code));
     }
 
     public void registerCommand(String name, Command command) {

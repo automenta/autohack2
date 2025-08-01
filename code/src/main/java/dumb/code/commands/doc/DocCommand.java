@@ -1,16 +1,16 @@
 package dumb.code.commands.doc;
 
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 
 public class DocCommand implements Command {
-    private final Context context;
+    private final Code code;
     private final MessageHandler messageHandler;
 
-    public DocCommand(Context context) {
-        this.context = context;
-        this.messageHandler = context.messageHandler;
+    public DocCommand(Code code) {
+        this.code = code;
+        this.messageHandler = code.messageHandler;
     }
 
     @Override

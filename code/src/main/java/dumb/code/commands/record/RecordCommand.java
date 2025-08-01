@@ -1,22 +1,22 @@
 package dumb.code.commands.record;
 
-import dumb.code.Backend;
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
+import dumb.code.versioning.Backend;
 
 public class RecordCommand implements Command {
-    private final Context context;
+    private final Code code;
     private final MessageHandler messageHandler;
 
-    public RecordCommand(Context context) {
-        this.context = context;
-        this.messageHandler = context.messageHandler;
+    public RecordCommand(Code code) {
+        this.code = code;
+        this.messageHandler = code.messageHandler;
     }
 
     @Override
     public void execute(String[] args) {
-        Backend backend = context.getBackend();
+        Backend backend = code.getBackend();
         String message = String.join(" ", args);
 
         if (message.isEmpty()) {

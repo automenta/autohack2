@@ -3,9 +3,9 @@ package dumb.code.commands.query;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
-import dumb.code.Context;
-import dumb.code.commands.Command;
+import dumb.code.Code;
 import dumb.code.LMManager;
+import dumb.code.commands.Command;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,27 +17,27 @@ import java.util.regex.Pattern;
 
 public class QueryCommand implements Command {
 
-    private final Context context;
+    private final Code code;
 
-    public QueryCommand(Context context) {
-        this.context = context;
+    public QueryCommand(Code code) {
+        this.code = code;
     }
 
     @Override
     public void execute(String[] args) {
         if (args.length == 0) {
-            context.messageHandler.addMessage("system", "Usage: /query <your query>");
+            code.messageHandler.addMessage("system", "Usage: /query <your query>");
             return;
         }
 
         String prompt = String.join(" ", args);
-        String codebase = context.codebaseManager.getCodebaseRepresentation();
+        String codebase = code.codebaseManager.getCodebaseRepresentation();
 
-        LMManager lmManager = context.lmManager;
+        LMManager lmManager = code.lmManager;
         String response = lmManager.generateResponse(codebase + "\n\n---\n\n" + prompt);
 
         if (response.startsWith("Error:")) {
-            context.messageHandler.addMessage("error", response);
+            code.messageHandler.addMessage("error", response);
             return;
         }
 
@@ -52,40 +52,40 @@ public class QueryCommand implements Command {
             String newContent = matcher.group(1).trim();
             // Assuming the first file in the context is the one to be edited.
             // A more robust solution would be to have the LLM specify the file.
-            if (context.codebaseManager.getFiles().isEmpty()) {
-                context.messageHandler.addMessage("error", "No files in context to edit.");
+            if (code.codebaseManager.getFiles().isEmpty()) {
+                code.messageHandler.addMessage("error", "No files in context to edit.");
                 return;
             }
-            String filePath = context.codebaseManager.getFiles().get(0);
+            String filePath = code.codebaseManager.getFiles().getFirst();
             applyDiff(filePath, newContent);
         } else {
-            context.messageHandler.addMessage("ai", response);
+            code.messageHandler.addMessage("ai", response);
         }
     }
 
     private void applyDiff(String filePath, String newContent) {
         try {
-            String oldContent = context.codebaseManager.getFileContent(filePath);
+            String oldContent = code.codebaseManager.getFileContent(filePath);
             List<String> oldLines = Arrays.asList(oldContent.split("\n"));
             List<String> newLines = Arrays.asList(newContent.split("\n"));
             Patch<String> patch = DiffUtils.diff(oldLines, newLines);
             List<String> diff = UnifiedDiffUtils.generateUnifiedDiff(filePath, filePath, oldLines, patch, 0);
 
-            context.messageHandler.addMessage("system", "The agent proposes the following changes to " + filePath + ":");
+            code.messageHandler.addMessage("system", "The agent proposes the following changes to " + filePath + ":");
             for (String line : diff) {
-                context.messageHandler.addMessage("diff", line);
+                code.messageHandler.addMessage("diff", line);
             }
 
-            context.messageHandler.addMessage("system", "Apply this change? (yes/no)");
-            String response = context.messageHandler.promptUser("> ");
+            code.messageHandler.addMessage("system", "Apply this change? (yes/no)");
+            String response = code.messageHandler.promptUser("> ");
             if (response != null && response.equalsIgnoreCase("yes")) {
                 Files.writeString(Path.of(filePath), newContent);
-                context.messageHandler.addMessage("system", "Changes applied.");
+                code.messageHandler.addMessage("system", "Changes applied.");
             } else {
-                context.messageHandler.addMessage("system", "Changes discarded.");
+                code.messageHandler.addMessage("system", "Changes discarded.");
             }
         } catch (IOException e) {
-            context.messageHandler.addMessage("error", "Error applying diff: " + e.getMessage());
+            code.messageHandler.addMessage("error", "Error applying diff: " + e.getMessage());
         }
     }
 }

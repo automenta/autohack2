@@ -6,17 +6,12 @@ import dumb.mcr.tools.Tool;
 import dumb.mcr.tools.ToolProvider;
 import dumb.prolog.*;
 
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.IOException;
 
 public class Session {
 
@@ -123,8 +118,6 @@ public class Session {
             Term queryTerm = Parser.parseTerm(prologQuery);
             List<Map<Variable, Term>> solutions = solver.solve(queryTerm);
             return new QueryResult(!solutions.isEmpty(), prologQuery, solutions, null);
-        } catch (dumb.mcr.exceptions.PrologParseException e) {
-            return new QueryResult(false, prologQuery, null, e.getMessage());
         } catch (Exception e) {
             return new QueryResult(false, prologQuery, null, e.getMessage());
         }

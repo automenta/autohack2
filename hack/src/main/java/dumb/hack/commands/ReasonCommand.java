@@ -6,6 +6,7 @@ import dumb.code.CodebaseManager;
 import dumb.code.FileManager;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
+import dumb.hack.util.CodeParser;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
 
@@ -57,7 +58,7 @@ public record ReasonCommand(
 
     private void addCodebaseContext() {
         // Add file information
-        dumb.mcr.code.CodeParser codeParser = new dumb.mcr.code.CodeParser();
+        CodeParser codeParser = new CodeParser();
         java.util.List<String> files = codebaseManager.getFiles();
         for (String file : files) {
             String content = codebaseManager.getFileContent(file);

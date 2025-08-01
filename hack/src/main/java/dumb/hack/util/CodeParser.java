@@ -1,4 +1,4 @@
-package dumb.mcr.code;
+package dumb.hack.util;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;

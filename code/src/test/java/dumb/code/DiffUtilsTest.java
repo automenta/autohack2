@@ -1,6 +1,7 @@
 package dumb.code;
 
 import com.github.difflib.patch.PatchFailedException;
+import dumb.code.util.DiffUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

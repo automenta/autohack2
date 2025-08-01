@@ -119,7 +119,7 @@ public class Terminal {
             int row = screen.getTerminalSize().getRows() - 1;
 
             while (true) {
-                tg.putString(0, row, prompt + line.toString());
+                tg.putString(0, row, prompt + line);
                 screen.refresh();
 
                 com.googlecode.lanterna.input.KeyStroke keyStroke = screen.readInput();
@@ -133,7 +133,7 @@ public class Terminal {
                             commandManager.startListening();
                             return line.toString();
                         case Backspace:
-                            if (line.length() > 0) {
+                            if (!line.isEmpty()) {
                                 line.setLength(line.length() - 1);
                             }
                             break;

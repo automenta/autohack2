@@ -1,10 +1,10 @@
 package dumb.code.commands.exit;
 
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.commands.Command;
 import dumb.code.tui.Terminal;
 
-public record ExitCommand(Context context) implements Command {
+public record ExitCommand(Code code) implements Command {
 
     @Override
     public void init() {
@@ -13,11 +13,11 @@ public record ExitCommand(Context context) implements Command {
 
     @Override
     public void execute(String[] args) {
-        Terminal terminal = context.getTerminal();
+        Terminal terminal = code.getTerminal();
         if (terminal != null) {
             terminal.stop();
-            context.setTerminal(null);
-            context.messageHandler.addMessage("system", "Terminal session ended.");
+            code.setTerminal(null);
+            code.messageHandler.addMessage("system", "Terminal session ended.");
         }
     }
 

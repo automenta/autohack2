@@ -1,16 +1,16 @@
 package dumb.code.commands.commit;
 
-import dumb.code.Backend;
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
+import dumb.code.versioning.Backend;
 
-public record CommitCommand(Context context) implements Command {
+public record CommitCommand(Code code) implements Command {
 
     @Override
     public void execute(String[] args) {
-        Backend backend = context.getBackend();
-        MessageHandler messageHandler = context.messageHandler;
+        Backend backend = code.getBackend();
+        MessageHandler messageHandler = code.messageHandler;
         String message = String.join(" ", args);
 
         if (message.isEmpty()) {

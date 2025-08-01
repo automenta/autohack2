@@ -1,25 +1,25 @@
 package dumb.code.commands.status;
 
-import dumb.code.Backend;
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.commands.Command;
+import dumb.code.versioning.Backend;
 
 import java.util.concurrent.CompletableFuture;
 
 public class StatusCommand implements Command {
-    private final Context context;
+    private final Code code;
 
-    public StatusCommand(Context context) {
-        this.context = context;
+    public StatusCommand(Code code) {
+        this.code = code;
     }
 
     @Override
     public void execute(String[] args) {
-        Backend backend = context.getBackend();
+        Backend backend = code.getBackend();
         CompletableFuture<String> statusFuture = backend.status();
 
-        statusFuture.thenAccept(status -> context.messageHandler.addMessage("system", status)).exceptionally(error -> {
-            context.messageHandler.addMessage("system", "Error: " + error.getMessage());
+        statusFuture.thenAccept(status -> code.messageHandler.addMessage("system", status)).exceptionally(error -> {
+            code.messageHandler.addMessage("system", "Error: " + error.getMessage());
             return null;
         });
     }

@@ -1,4 +1,4 @@
-package dumb.code;
+package dumb.code.util;
 
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;

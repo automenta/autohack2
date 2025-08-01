@@ -1,6 +1,10 @@
 package dumb.code.commands;
 
-import dumb.code.*;
+import dumb.code.Code;
+import dumb.code.CodebaseManager;
+import dumb.code.FileSystem;
+import dumb.code.MessageHandler;
+import dumb.code.versioning.Backend;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,18 +14,18 @@ import java.util.Arrays;
 
 public class AddCommand implements Command {
 
-    private final Context context;
+    private final Code code;
     private final MessageHandler messageHandler;
     private final CodebaseManager codebaseManager;
     private final Backend backend;
     private final FileSystem fs;
 
-    public AddCommand(Context context) {
-        this.context = context;
-        this.messageHandler = context.getMessageHandler();
-        this.codebaseManager = context.getCodebaseManager();
-        this.backend = context.getBackend();
-        this.fs = context.getFiles();
+    public AddCommand(Code code) {
+        this.code = code;
+        this.messageHandler = code.getMessageHandler();
+        this.codebaseManager = code.getCodebaseManager();
+        this.backend = code.getBackend();
+        this.fs = code.getFiles();
     }
 
     @Override
@@ -63,7 +67,7 @@ public class AddCommand implements Command {
 
     private void addAllTracked() {
         try {
-            Backend backend = context.getBackend();
+            Backend backend = code.getBackend();
             backend.listTrackedFiles().thenAccept(trackedFiles -> addFiles(trackedFiles.toArray(new String[0]))).exceptionally(e -> {
                 e.printStackTrace();
                 return null;
@@ -75,7 +79,7 @@ public class AddCommand implements Command {
 
     private void addAllUntracked() {
         try {
-            Backend backend = context.getBackend();
+            Backend backend = code.getBackend();
             backend.listUntrackedFiles().thenAccept(untrackedFiles -> addFiles(untrackedFiles.toArray(new String[0]))).exceptionally(e -> {
                 e.printStackTrace();
                 return null;

@@ -5,17 +5,17 @@ import dumb.code.tui.Terminal;
 import java.io.IOException;
 
 public class UIManager {
-    private final Context context;
+    private final Code code;
     private Terminal terminal;
 
 
-    public UIManager(Context context) {
-        this.context = context;
+    public UIManager(Code code) {
+        this.code = code;
     }
 
     private Terminal getTerminal() {
         if (this.terminal == null) {
-            this.terminal = this.context.getTerminal();
+            this.terminal = this.code.getTerminal();
         }
         return this.terminal;
     }

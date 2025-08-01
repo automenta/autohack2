@@ -1,16 +1,16 @@
 package dumb.code.commands.patch;
 
-import dumb.code.Context;
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 
 public class PatchCommand implements Command {
-    private final Context context;
+    private final Code code;
     private final MessageHandler messageHandler;
 
-    public PatchCommand(Context context) {
-        this.context = context;
-        this.messageHandler = context.messageHandler;
+    public PatchCommand(Code code) {
+        this.code = code;
+        this.messageHandler = code.messageHandler;
     }
 
     @Override

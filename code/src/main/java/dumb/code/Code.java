@@ -4,11 +4,13 @@ import dev.langchain4j.service.tool.ToolProvider;
 import dumb.code.tui.Terminal;
 import dumb.code.util.IProcessRunner;
 import dumb.code.util.ProcessRunner;
+import dumb.code.versioning.Backend;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Context {
+/** Code-development (coding) context */
+public class Code {
     public final List<ToolProvider> toolProviders = new CopyOnWriteArrayList<>();
     public final BackendManager backendManager;
     public final FileManager fileManager;
@@ -19,15 +21,15 @@ public class Context {
     public final FileSystem files;
     public final MessageHandler messageHandler;
     public final IProcessRunner processRunner;
-    private Backend backend;
+    private final Backend backend;
     private String diff;
     private Terminal terminal;
 
-    public Context(String backendType, String provider, String model, String apiKey) {
+    public Code(String backendType, String provider, String model, String apiKey) {
         this(backendType, null, new LMManager(provider, model, apiKey));
     }
 
-    public Context(String backendType, FileManager fileManager, LMManager lmManager) {
+    public Code(String backendType, FileManager fileManager, LMManager lmManager) {
         this.messageHandler = new MessageHandler(this);
         this.backendManager = new BackendManager(this);
         this.processRunner = new ProcessRunner();
