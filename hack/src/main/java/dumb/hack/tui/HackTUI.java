@@ -26,7 +26,14 @@ public class HackTUI {
 
     private final App app;
     private Panel contentPanel;
-    private TerminalPanel codeTerminalPanel;
+    private Label statusBar;
+
+    // Cache for the UI components
+    private CodeUI codeUI;
+    private McrTUI mcrTUI;
+    private Panel codePanel;
+    private Panel mcrPanel;
+
 
     public HackTUI(App app) {
         this.app = app;
@@ -53,17 +60,10 @@ public class HackTUI {
             contentPanel = new Panel();
             mainPanel.addComponent(contentPanel.withBorder(Borders.singleLine("Content")));
 
-            window.setComponent(mainPanel);
+            statusBar = new Label("Ready");
+            mainPanel.addComponent(statusBar.withBorder(Borders.singleLine()));
 
-            window.addWindowListener(new WindowListenerAdapter() {
-                @Override
-                public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean hasBeenHandled) {
-                    if (codeTerminalPanel != null) {
-                        handleKeyStroke(keyStroke);
-                        hasBeenHandled.set(true);
-                    }
-                }
-            });
+            window.setComponent(mainPanel);
 
             MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
             gui.addWindowAndWait(window);
@@ -77,49 +77,45 @@ public class HackTUI {
 
     private void showCodeTUI() {
         contentPanel.removeAllComponents();
-        codeTerminalPanel = null;
-        try {
-            ProviderFactory factory = new ProviderFactory(app.getLmOptions());
-            ChatModel model = factory.create();
-            LMClient lmClient = new LMClient(model);
-            Code code = new Code(null, null, new dumb.code.LMManager(lmClient));
-            CodeUI codeUI = new CodeUI(code);
-            Panel codePanel = codeUI.createPanel();
-            codeTerminalPanel = codeUI.getTerminal().getTerminalPanel();
-            contentPanel.addComponent(codePanel);
-        } catch (MissingApiKeyException e) {
-            contentPanel.addComponent(new Label("Error starting Code TUI: " + e.getMessage()));
+        if (codeUI == null) {
+            try {
+                ProviderFactory factory = new ProviderFactory(app.getLmOptions());
+                ChatModel model = factory.create();
+                LMClient lmClient = new LMClient(model);
+                Code code = new Code(null, null, new dumb.code.LMManager(lmClient));
+                codeUI = new CodeUI(code);
+                codePanel = codeUI.createPanel();
+            } catch (MissingApiKeyException e) {
+                contentPanel.addComponent(new Label("Error starting Code TUI: " + e.getMessage()));
+                return;
+            }
         }
+        contentPanel.addComponent(codePanel);
+        statusBar.setText("Mode: Code");
     }
 
     private void showMcrTUI() {
         contentPanel.removeAllComponents();
-        codeTerminalPanel = null;
-        try {
-            ProviderFactory factory = new ProviderFactory(app.getLmOptions());
-            ChatModel model = factory.create();
-            LMClient lmClient = new LMClient(model);
-            MCR mcr = new MCR(lmClient);
-            Session session = mcr.createSession();
-            session.assertProlog("is_a(tweety, canary).");
-            session.assertProlog("bird(X) :- is_a(X, canary).");
-            session.assertProlog("has_wings(X) :- bird(X).");
-            session.addRelationship("tweety", "likes", "seeds");
+        if (mcrTUI == null) {
+            try {
+                ProviderFactory factory = new ProviderFactory(app.getLmOptions());
+                ChatModel model = factory.create();
+                LMClient lmClient = new LMClient(model);
+                MCR mcr = new MCR(lmClient);
+                Session session = mcr.createSession();
+                session.assertProlog("is_a(tweety, canary).");
+                session.assertProlog("bird(X) :- is_a(X, canary).");
+                session.assertProlog("has_wings(X) :- bird(X).");
+                session.addRelationship("tweety", "likes", "seeds");
 
-            McrTUI mcrTUI = new McrTUI(session);
-            contentPanel.addComponent(mcrTUI.createPanel());
-        } catch (MissingApiKeyException e) {
-            contentPanel.addComponent(new Label("Error starting MCR TUI: " + e.getMessage()));
+                mcrTUI = new McrTUI(session);
+                mcrPanel = mcrTUI.createPanel();
+            } catch (MissingApiKeyException e) {
+                contentPanel.addComponent(new Label("Error starting MCR TUI: " + e.getMessage()));
+                return;
+            }
         }
-    }
-
-    private void handleKeyStroke(KeyStroke keyStroke) {
-        if (codeTerminalPanel == null) {
-            return;
-        }
-        if (keyStroke.getKeyType() == KeyType.Enter) {
-            codeTerminalPanel.processInput(codeTerminalPanel.getInput());
-            codeTerminalPanel.clearInput();
-        }
+        contentPanel.addComponent(mcrPanel);
+        statusBar.setText("Mode: MCR");
     }
 }

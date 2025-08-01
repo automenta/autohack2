@@ -36,9 +36,12 @@ class McrCommandTest {
         assertEquals(query, processInputCaptor.getValue());
 
         ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
-        verify(messageHandler, times(2)).onMessage(messageCaptor.capture());
+        verify(messageHandler, times(5)).onMessage(messageCaptor.capture());
 
         assertEquals("Querying MCR with: '" + query + "'", messageCaptor.getAllValues().get(0));
-        assertEquals("MCR Result: {success=true, originalQuery=what is the meaning of life?, bindings=[{X=42}]}", messageCaptor.getAllValues().get(1));
+        assertEquals("MCR query successful.", messageCaptor.getAllValues().get(1));
+        assertEquals("Original query: what is the meaning of life?", messageCaptor.getAllValues().get(2));
+        assertEquals("Solutions:", messageCaptor.getAllValues().get(3));
+        assertEquals("[{X=42}]", messageCaptor.getAllValues().get(4));
     }
 }
