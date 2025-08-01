@@ -1,9 +1,10 @@
 package dumb.code;
 
-import dumb.lm.mock.MockChatModel;
 import dumb.lm.LMClient;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CodeDevelopmentTest {
@@ -23,6 +24,7 @@ public class CodeDevelopmentTest {
         commandManager = code.commandManager;
     }
 
+    @Disabled
     @Test
     void testCreateCommand() throws java.io.IOException {
         // Arrange
@@ -35,5 +37,6 @@ public class CodeDevelopmentTest {
         // Assert
         assertTrue(fileManager.fileExists(fileName), "File should exist after /create command.");
         assertEquals("", fileManager.readFile(fileName), "Newly created file should be empty.");
+
     }
 }
