@@ -1,39 +1,31 @@
 package dumb.code.tui;
 
-import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.LinearLayout;
-import com.googlecode.lanterna.gui2.TextBox;
-import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.gui2.Borders;
+import com.googlecode.lanterna.gui2.LinearLayout;
+import com.googlecode.lanterna.gui2.Panel;
+import com.googlecode.lanterna.gui2.TextBox;
 import dumb.code.CommandManager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 public class TerminalPanel extends Panel {
-    private final List<String> messages = Collections.synchronizedList(new ArrayList<>());
     private final TextBox inputBox;
-    private final Panel messagesPanel;
+    private final TextBox outputBox;
     private final CommandManager commandManager;
 
     public TerminalPanel(CommandManager commandManager) {
         super(new LinearLayout(com.googlecode.lanterna.gui2.Direction.VERTICAL));
         this.commandManager = commandManager;
 
-        messagesPanel = new Panel(new LinearLayout(com.googlecode.lanterna.gui2.Direction.VERTICAL));
-        addComponent(messagesPanel.withBorder(com.googlecode.lanterna.gui2.Borders.singleLine("Output")));
+        outputBox = new TextBox(new TerminalSize(100, 20), TextBox.Style.MULTI_LINE);
+        outputBox.setReadOnly(true);
+        addComponent(outputBox.withBorder(Borders.singleLine("Output")));
 
-        inputBox = new TextBox(new TerminalSize(100, 5));
-        addComponent(inputBox.withBorder(com.googlecode.lanterna.gui2.Borders.singleLine("Input")));
+        inputBox = new TextBox(new TerminalSize(100, 15), TextBox.Style.MULTI_LINE);
+        addComponent(inputBox.withBorder(Borders.singleLine("Input")));
     }
 
     public void addMessage(String message) {
-        messages.add(message);
-        messagesPanel.removeAllComponents();
-        for (String msg : messages) {
-            messagesPanel.addComponent(new Label(msg));
-        }
+        outputBox.setText(outputBox.getText() + message + "\n");
     }
 
     public String getInput() {

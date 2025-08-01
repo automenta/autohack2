@@ -1,6 +1,7 @@
 package dumb.hack.tui;
 
 import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import dumb.hack.App;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HackTUI {
 
@@ -39,21 +41,53 @@ public class HackTUI {
             window.setHints(Collections.singletonList(Window.Hint.FULL_SCREEN));
 
             Panel mainPanel = new Panel(new LinearLayout(Direction.VERTICAL));
+            contentPanel = new Panel();
+
+            RadioBoxList<String> radioBoxList = new RadioBoxList<>();
+            for (TUIComponent component : tuiComponents) {
+                radioBoxList.addItem(component.getName());
+            }
+            radioBoxList.addListener((selectedIndex, previousSelection) -> {
+                if (selectedIndex >= 0 && selectedIndex < tuiComponents.size()) {
+                    showTUI(tuiComponents.get(selectedIndex));
+                }
+            });
+
+            window.addWindowListener(new WindowListenerAdapter() {
+                @Override
+                public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+                    if (keyStroke.isCtrlDown() && keyStroke.getCharacter() != null) {
+                        switch (keyStroke.getCharacter()) {
+                            case 'c':
+                                radioBoxList.setCheckedItemIndex(0);
+                                deliverEvent.set(false);
+                                break;
+                            case 'm':
+                                radioBoxList.setCheckedItemIndex(1);
+                                deliverEvent.set(false);
+                                break;
+                            case 'o':
+                                radioBoxList.setCheckedItemIndex(2);
+                                deliverEvent.set(false);
+                                break;
+                        }
+                    }
+                }
+            });
 
             Panel topPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
-            for (TUIComponent component : tuiComponents) {
-                topPanel.addComponent(new Button(component.getName(), () -> showTUI(component)));
-            }
+            topPanel.addComponent(radioBoxList);
             topPanel.addComponent(new Button("Exit", window::close));
-            mainPanel.addComponent(topPanel.withBorder(Borders.singleLine()));
-
-            contentPanel = new Panel();
+            mainPanel.addComponent(topPanel.withBorder(Borders.singleLine("Navigation (Ctrl+C/M/O)")));
             mainPanel.addComponent(contentPanel.withBorder(Borders.singleLine("Content")));
 
             statusBar = new Label("Ready");
             mainPanel.addComponent(statusBar.withBorder(Borders.singleLine()));
 
             window.setComponent(mainPanel);
+
+            // Show the first TUI by default
+            radioBoxList.setCheckedItemIndex(0);
 
             MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
             gui.addWindowAndWait(window);
