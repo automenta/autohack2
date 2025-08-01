@@ -19,11 +19,22 @@ import java.io.IOException;
         })
 public class App {
 
+    private final ConfigManager configManager;
+
     @CommandLine.Mixin
-    private final LMOptions lmOptions = new LMOptions();
+    private final LMOptions lmOptions;
+
+    public App() {
+        this.configManager = new ConfigManager();
+        this.lmOptions = new LMOptions(configManager.getProperties());
+    }
 
     public LMOptions getLmOptions() {
         return lmOptions;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 
     public static void main(String[] args) throws IOException {

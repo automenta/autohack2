@@ -15,27 +15,27 @@ public record LMClient(ChatModel model) implements ILMClient {
     private static final Logger logger = Logger.getLogger(LMClient.class.getName());
 
     public LMClient(String provider, String modelName, String apiKey) {
+        this(createModel(provider, modelName, apiKey));
+    }
+
+    private static ChatModel createModel(String provider, String modelName, String apiKey) {
         switch (provider.toLowerCase()) {
             case "ollama":
-                this.model = OllamaChatModel.builder()
+                return OllamaChatModel.builder()
                         .baseUrl("http://localhost:11434")
                         .modelName(modelName)
                         .build();
-                break;
             case "openai":
-                this.model = OpenAiChatModel.builder()
+                return OpenAiChatModel.builder()
                         .apiKey(apiKey)
                         .modelName(modelName)
                         .build();
-                break;
             case "google":
-                this.model = GoogleAiGeminiChatModel.builder()
+                return GoogleAiGeminiChatModel.builder()
                         .modelName(modelName)
                         .build();
-                break;
             case "mock":
-                this.model = new MockChatModel();
-                break;
+                return new MockChatModel();
             default:
                 throw new IllegalArgumentException("Unsupported LLM provider: " + provider);
         }
