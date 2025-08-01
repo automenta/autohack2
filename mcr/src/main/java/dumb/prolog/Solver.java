@@ -17,8 +17,8 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
     }
 
     private void solve(Term query, Map<Variable, Term> substitution, List<Map<Variable, Term>> solutions) {
-        if (query instanceof Structure && ((Structure) query).getFunctor().getName().equals("use_tool")) {
-            executeTool((Structure) query, substitution, solutions);
+        if (query instanceof Structure structure && structure.getFunctor().getName().equals("use_tool") && structure.getArgs().size() == 3) {
+            executeTool(structure, substitution, solutions);
             return;
         }
 
@@ -59,24 +59,67 @@ public record Solver(List<Clause> knowledgeBase, ToolProvider toolProvider) {
 
     private void executeTool(Structure toolQuery, Map<Variable, Term> substitution, List<Map<Variable, Term>> solutions) {
         if (toolProvider == null) {
+            return; // No tool provider, cannot execute.
+        }
+
+        // use_tool(ToolName, [prop(K,V), ...], ResultVar)
+        Term toolNameTerm = toolQuery.getArgs().get(0);
+        Term argsListTerm = toolQuery.getArgs().get(1);
+        Term resultVariable = toolQuery.getArgs().get(2);
+
+        if (!(toolNameTerm instanceof Atom toolNameAtom)) {
+            // Tool name must be an atom.
             return;
         }
-        // Assuming use_tool(ToolName, MethodName, Args, Result)
-        String toolName = ((Atom) toolQuery.getArgs().get(0)).getName();
-        String methodName = ((Atom) toolQuery.getArgs().get(1)).getName();
-        // This is a simplified representation of args. A real implementation would need to handle lists of pairs.
-        Map<String, Object> args = new HashMap<>();
-        Term resultVariable = toolQuery.getArgs().get(3);
+        String toolName = toolNameAtom.getName();
+
+        Map<String, Object> args = parseArgs(argsListTerm);
+        if (args == null) {
+            // Argument parsing failed.
+            return;
+        }
 
         Tool tool = toolProvider.getTools().get(toolName);
         if (tool != null) {
-            // This is a simplification. A real implementation would need to match the method and args.
             String result = tool.run(args);
+            // The result from a tool is always a string, so we create an Atom.
+            // In a more advanced system, tools might return structured terms.
             Map<Variable, Term> newSubst = Unification.unify(resultVariable, new Atom(result), substitution);
             if (newSubst != null) {
+                // The tool call was successful and the result was unified.
                 solutions.add(newSubst);
             }
         }
+    }
+
+    private Map<String, Object> parseArgs(Term argsListTerm) {
+        Map<String, Object> args = new HashMap<>();
+        Term current = argsListTerm;
+
+        while (current instanceof Structure listNode && listNode.getFunctor().getName().equals(".") && listNode.getArgs().size() == 2) {
+            Term head = listNode.getArgs().get(0);
+            if (head instanceof Structure prop && prop.getFunctor().getName().equals("prop") && prop.getArgs().size() == 2) {
+                Term keyTerm = prop.getArgs().get(0);
+                Term valueTerm = prop.getArgs().get(1);
+
+                if (keyTerm instanceof Atom keyAtom) {
+                    // For now, we'll convert values to their string representation.
+                    // A more sophisticated implementation might handle different types.
+                    args.put(keyAtom.getName(), valueTerm.toString());
+                } else {
+                    return null; // Key must be an atom
+                }
+            } else {
+                return null; // List element must be a prop/2 structure
+            }
+            current = listNode.getArgs().get(1);
+        }
+
+        if (current instanceof Atom atom && atom.getName().equals("[]")) {
+            return args; // End of list
+        }
+
+        return null; // Malformed list
     }
 
 

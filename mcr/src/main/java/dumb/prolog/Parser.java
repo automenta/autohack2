@@ -61,6 +61,8 @@ public class Parser {
                 args = parseBody(argsStr);
             }
             return new Structure(functor, args);
+        } else if (text.startsWith("'") && text.endsWith("'")) {
+            return new Atom(text.substring(1, text.length() - 1));
         } else if (VARIABLE_PATTERN.matcher(text).matches()) {
             return new Variable(text);
         } else if (ATOM_PATTERN.matcher(text).matches()) {

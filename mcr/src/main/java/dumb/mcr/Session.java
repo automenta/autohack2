@@ -166,7 +166,7 @@ public class Session {
             try {
                 Term parsedGoal = Parser.parseTerm(prologGoal);
                 QueryResult result = query(prologGoal);
-                history.add("Goal result: " + result.getBindings());
+                history.add(formatStepResult(prologGoal, result));
 
                 if (parsedGoal instanceof Structure goalStructure) {
                     if (goalStructure.getFunctor().getName().equals("conclude")) {
@@ -189,6 +189,28 @@ public class Session {
         return firstSolution.values().stream().findFirst().map(Object::toString).orElse("Concluded without a specific answer.");
     }
 
+    private String formatStepResult(String prologGoal, QueryResult result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Goal '").append(prologGoal).append("' result: ");
+
+        if (!result.success()) {
+            sb.append("Failed. Error: ").append(result.error());
+        } else if (result.bindings() == null || result.bindings().isEmpty()) {
+            sb.append("Success, but no solutions found (false).");
+        } else {
+            sb.append("Success with ").append(result.bindings().size()).append(" solution(s).\n");
+            // Using the raw bindings here to avoid the string conversion in getBindings()
+            List<Map<String, String>> bindings = result.getBindings();
+            for (int i = 0; i < bindings.size(); i++) {
+                sb.append("  Solution ").append(i + 1).append(": ").append(bindings.get(i));
+                if (i < bindings.size() - 1) {
+                    sb.append("\n");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     public ReasoningResult reason(String taskDescription) {
         return reason(taskDescription, 10); // Default to 10 steps
     }
@@ -199,6 +221,20 @@ public class Session {
         return promptTemplate
                 .replace("{{ontology_types}}", ontology.getTypes().toString())
                 .replace("{{ontology_relationships}}", ontology.getRelationships().toString())
+                .replace("{{tools}}", buildToolManifest())
                 .replace("{{history}}", historyString);
+    }
+
+    private String buildToolManifest() {
+        if (toolProvider == null || toolProvider.getTools().isEmpty()) {
+            return "No tools are available.";
+        }
+        StringBuilder manifest = new StringBuilder();
+        manifest.append("You have access to the following tools:\n");
+        for (Tool tool : toolProvider.getTools().values()) {
+            manifest.append("- Tool: ").append(tool.name()).append("\n");
+            manifest.append("  Description: ").append(tool.description()).append("\n");
+        }
+        return manifest.toString();
     }
 }

@@ -30,7 +30,8 @@ class CodeModificationToolTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        fileManager = new FileManager(); // Using real FileManager to write to a temp file
+        tempFile = Files.createTempFile("test", ".txt");
+        fileManager = new FileManager(tempFile.getParent().toString());
         codebaseManager = Mockito.mock(CodebaseManager.class);
         tool = new CodeModificationTool(fileManager, codebaseManager);
 
@@ -48,7 +49,7 @@ class CodeModificationToolTest {
     @Test
     void testModifyFile() throws IOException {
         Map<String, Object> args = new HashMap<>();
-        String filePath = tempFile.toString();
+        String filePath = tempFile.getFileName().toString();
         String newContent = "new content";
         args.put("FilePath", filePath);
         args.put("NewContent", newContent);

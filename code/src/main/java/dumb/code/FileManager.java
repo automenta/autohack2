@@ -7,25 +7,33 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class FileManager {
-    // Placeholder for FileManager functionality
+    private final Path root;
 
     public FileManager() {
-        // Constructor
+        this.root = Paths.get(System.getProperty("user.dir"));
+    }
+
+    public FileManager(String root) {
+        this.root = Paths.get(root);
+    }
+
+    private Path resolve(String filePath) {
+        return root.resolve(filePath);
     }
 
     public String readFile(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
+        Path path = resolve(filePath);
         List<String> lines = Files.readAllLines(path);
         return String.join("\n", lines);
     }
 
     public void writeFile(String filePath, String content) throws IOException {
-        Path path = Paths.get(filePath);
+        Path path = resolve(filePath);
         Files.write(path, content.getBytes());
     }
 
     public boolean fileExists(String filePath) {
-        Path path = Paths.get(filePath);
+        Path path = resolve(filePath);
         return Files.exists(path);
     }
 

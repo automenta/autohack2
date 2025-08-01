@@ -8,10 +8,18 @@ You also have access to a knowledge base with the following predicates about the
 - `class(ClassName, FilePath)`: Represents a Java class.
 - `method(ClassName, MethodName, FilePath)`: Represents a method in a Java class.
 
-You can use the `use_tool/4` predicate to call tools.
+{{tools}}
+
+To use a tool, you must use the `use_tool/3` predicate with the following structure:
+`use_tool(ToolName, [prop(ArgName, ArgValue), ...], ResultVariable).`
+
+- `ToolName` must be an atom (e.g., 'modify_file').
+- The second argument is a list of properties, where each property is a `prop/2` structure. ArgName must be an atom, and ArgValue can be an atom or a string.
+- `ResultVariable` must be a variable that will be unified with the tool's output.
+
 To conclude the task, issue a `conclude/1` goal with your final answer.
 
 Here is the history of the reasoning process so far:
 {{history}}
 
-Based on the history and the available ontology, what is the next Prolog goal you should issue? Provide only the Prolog goal.
+Based on the history and the available tools and ontology, what is the next Prolog goal you should issue? Provide only the Prolog goal, ending with a period.

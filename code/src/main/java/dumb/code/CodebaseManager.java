@@ -17,8 +17,11 @@ public class CodebaseManager {
     private String codebasePath;
     private List<String> files = new ArrayList<>();
 
-    public CodebaseManager(Backend versioningBackend) {
-        this.versioningBackend = versioningBackend;
+    private final FileManager fileManager;
+
+    public CodebaseManager(Context context) {
+        this.versioningBackend = context.getBackend();
+        this.fileManager = context.fileManager;
     }
 
     public CompletableFuture<Void> loadCodebase(String path) {
@@ -67,11 +70,10 @@ public class CodebaseManager {
     }
 
     public CompletableFuture<Void> trackFile(String filePath) {
-        Path file = Paths.get(filePath);
-        if (Files.exists(file)) {
+        if (fileManager.fileExists(filePath)) {
             return versioningBackend.add(filePath).thenRun(() -> {
                 try {
-                    String content = new String(Files.readAllBytes(file));
+                    String content = fileManager.readFile(filePath);
                     this.fileContents.put(filePath, content);
                     if (!this.files.contains(filePath)) {
                         this.files.add(filePath);

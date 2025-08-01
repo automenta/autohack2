@@ -21,15 +21,19 @@ public class Context {
     private Terminal terminal;
 
     public Context(String[] args) {
+        this(args, null);
+    }
+
+    public Context(String[] args, FileManager fileManager) {
         this.messageHandler = new MessageHandler(this);
         this.backendManager = new BackendManager(this);
 
         initializeBackend(args);
 
-        this.fileManager = new FileManager();
+        this.fileManager = (fileManager != null) ? fileManager : new FileManager();
         this.LMManager = new LMManager();
         this.uiManager = new UIManager(this);
-        this.codebaseManager = new CodebaseManager(this.backend);
+        this.codebaseManager = new CodebaseManager(this);
         this.files = new FileSystem();
         this.commandManager = new CommandManager(this); // Initialize CommandManager after other dependencies
     }
