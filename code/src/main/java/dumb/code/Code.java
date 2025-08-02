@@ -5,6 +5,10 @@ import dumb.code.tui.Terminal;
 import dumb.code.util.IProcessRunner;
 import dumb.code.util.ProcessRunner;
 import dumb.code.versioning.Backend;
+import dumb.hack.help.DefaultHelpService;
+import dumb.hack.help.HelpService;
+import dumb.lm.LMClient;
+import dumb.mcr.MCR;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -26,10 +30,10 @@ public class Code {
     private Terminal terminal;
 
     public Code(String backendType, String provider, String model, String apiKey) {
-        this(backendType, null, new LMManager(provider, model, apiKey));
+        this(backendType, null, new LMManager(provider, model, apiKey), new DefaultHelpService(new MCR(new LMClient(provider, model, apiKey))));
     }
 
-    public Code(String backendType, IFileManager fileManager, LMManager lmManager) {
+    public Code(String backendType, IFileManager fileManager, LMManager lmManager, HelpService helpService) {
         this.fileManager = (fileManager != null) ? fileManager : new FileManager();
         this.messageHandler = new MessageHandler(this);
         this.backendManager = new BackendManager(this, this.fileManager);
@@ -46,7 +50,11 @@ public class Code {
         this.uiManager = new UIManager(this);
         this.codebaseManager = new CodebaseManager(this);
         this.files = new FileSystem();
-        this.commandManager = new CommandManager(this);
+        this.commandManager = new CommandManager(this, helpService);
+
+        if (helpService instanceof DefaultHelpService) {
+            ((DefaultHelpService) helpService).setMessageHandler(this.messageHandler);
+        }
     }
 
     public Backend getBackend() {

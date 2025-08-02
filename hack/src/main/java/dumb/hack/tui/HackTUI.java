@@ -7,6 +7,8 @@ import dev.langchain4j.model.chat.ChatModel;
 import dumb.code.Code;
 import dumb.code.CodeUI;
 import dumb.hack.App;
+import dumb.hack.help.DefaultHelpService;
+import dumb.hack.help.HelpService;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
 import dumb.lm.LMClient;
@@ -77,7 +79,9 @@ public class HackTUI {
                 ProviderFactory factory = new ProviderFactory(app.getLmOptions());
                 ChatModel model = factory.create();
                 LMClient lmClient = new LMClient(model);
-                Code code = new Code(null, null, new dumb.code.LMManager(lmClient));
+                MCR mcr = new MCR(lmClient);
+                HelpService helpService = new DefaultHelpService(mcr);
+                Code code = new Code(null, null, new dumb.code.LMManager(lmClient), helpService);
                 codeUI = new CodeUI(code);
                 codePanel = codeUI.createPanel();
             } catch (MissingApiKeyException e) {

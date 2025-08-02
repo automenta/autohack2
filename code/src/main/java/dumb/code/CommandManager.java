@@ -19,6 +19,7 @@ import dumb.code.commands.grep.GrepCommand;
 import dumb.code.commands.help.HelpCommand;
 import dumb.code.commands.image.ImageCommand;
 import dumb.code.commands.ls.LsCommand;
+import dumb.hack.help.HelpService;
 import dumb.code.commands.mv.MvCommand;
 import dumb.code.commands.patch.PatchCommand;
 import dumb.code.commands.query.QueryCommand;
@@ -29,6 +30,7 @@ import dumb.code.commands.run.RunCommand;
 import dumb.code.commands.speech.SpeechCommand;
 import dumb.code.commands.status.StatusCommand;
 import dumb.code.commands.test.TestCommand;
+import dumb.code.commands.tutorial.TutorialCommand;
 import dumb.code.commands.undo.UndoCommand;
 import dumb.code.commands.mcr.McrCommand;
 import dumb.code.commands.unrecord.UnrecordCommand;
@@ -39,11 +41,13 @@ import java.util.Map;
 public class CommandManager {
     private final MessageHandler messageHandler;
     private final Map<String, Command> commands;
+    private final HelpService helpService;
 
-    public CommandManager(Code code) {
+    public CommandManager(Code code, HelpService helpService) {
         this.messageHandler = code.messageHandler;
         this.commands = new HashMap<>();
-        registerCommand("help", new HelpCommand(code));
+        this.helpService = helpService;
+        registerCommand("help", new HelpCommand(helpService, code.messageHandler));
         registerCommand("exit", new ExitCommand(code));
         registerCommand("add", new AddCommand(code));
         registerCommand("diff", new DiffCommand(code));
@@ -71,6 +75,7 @@ public class CommandManager {
         registerCommand("speech", new SpeechCommand(code));
         registerCommand("status", new StatusCommand(code));
         registerCommand("test", new TestCommand(code));
+        registerCommand("tutorial", new TutorialCommand(helpService));
         registerCommand("undo", new UndoCommand(code));
         registerCommand("unrecord", new UnrecordCommand(code));
 
