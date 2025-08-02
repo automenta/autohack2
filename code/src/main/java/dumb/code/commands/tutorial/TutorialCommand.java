@@ -1,7 +1,7 @@
 package dumb.code.commands.tutorial;
 
 import dumb.code.commands.Command;
-import dumb.hack.help.HelpService;
+import dumb.code.help.HelpService;
 
 public class TutorialCommand implements Command {
 

@@ -2,7 +2,7 @@ package dumb.code.commands.help;
 
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
-import dumb.hack.help.HelpService;
+import dumb.code.help.HelpService;
 
 import java.util.List;
 

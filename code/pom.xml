@@ -17,6 +17,11 @@
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>dumb</groupId>
+            <artifactId>mcr</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Add Lanterna dependency for terminal UI -->
         <dependency>

@@ -5,8 +5,8 @@ import dumb.code.tui.Terminal;
 import dumb.code.util.IProcessRunner;
 import dumb.code.util.ProcessRunner;
 import dumb.code.versioning.Backend;
-import dumb.hack.help.DefaultHelpService;
-import dumb.hack.help.HelpService;
+import dumb.code.help.DefaultHelpService;
+import dumb.code.help.HelpService;
 import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 

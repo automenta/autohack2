@@ -19,7 +19,7 @@ import dumb.code.commands.grep.GrepCommand;
 import dumb.code.commands.help.HelpCommand;
 import dumb.code.commands.image.ImageCommand;
 import dumb.code.commands.ls.LsCommand;
-import dumb.hack.help.HelpService;
+import dumb.code.help.HelpService;
 import dumb.code.commands.mv.MvCommand;
 import dumb.code.commands.patch.PatchCommand;
 import dumb.code.commands.query.QueryCommand;
@@ -104,6 +104,10 @@ public class CommandManager {
             Command command = commands.get(commandName);
             if (command != null) {
                 command.execute(args);
+                String[] fullCommand = new String[args.length + 1];
+                fullCommand[0] = commandName;
+                System.arraycopy(args, 0, fullCommand, 1, args.length);
+                helpService.onCommandExecuted(fullCommand);
             } else {
                 messageHandler.addMessage("system", "Unknown command: " + commandName);
             }

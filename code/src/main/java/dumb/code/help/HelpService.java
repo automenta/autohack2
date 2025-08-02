@@ -1,4 +1,4 @@
-package dumb.hack.help;
+package dumb.code.help;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public interface HelpService {
     /**
      * Notifies the help service that a command has been executed.
      *
-     * @param commandName The name of the command that was executed.
+     * @param command The command that was executed, including arguments.
      */
-    void onCommandExecuted(String commandName);
+    void onCommandExecuted(String[] command);
 }

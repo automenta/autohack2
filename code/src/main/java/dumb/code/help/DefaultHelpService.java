@@ -1,4 +1,4 @@
-package dumb.hack.help;
+package dumb.code.help;
 
 import dumb.code.MessageHandler;
 import dumb.mcr.MCR;
@@ -84,5 +84,15 @@ public class DefaultHelpService implements HelpService {
         }
         String message = tutorialManager.start();
         messageHandler.addMessage("system", message);
+    }
+
+    @Override
+    public void onCommandExecuted(String[] command) {
+        if (tutorialManager.isActive()) {
+            String message = tutorialManager.checkCommand(command);
+            if (message != null) {
+                messageHandler.addMessage("system", message);
+            }
+        }
     }
 }

@@ -3,8 +3,8 @@ package dumb.hack.commands;
 import dev.langchain4j.model.chat.ChatModel;
 import dumb.code.*;
 import dumb.hack.App;
-import dumb.hack.help.DefaultHelpService;
-import dumb.hack.help.HelpService;
+import dumb.code.help.DefaultHelpService;
+import dumb.code.help.HelpService;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
 import dumb.hack.tools.CodeToolProvider;
@@ -59,7 +59,6 @@ public class CodeCommand implements Callable<Integer> {
 
         CodeToolProvider toolProvider = new CodeToolProvider(code.fileManager, codebaseManager);
 
-        MCR mcr = new MCR(lmClient);
         Session mcrSession = mcr.createSession(toolProvider);
 
         ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager, false);

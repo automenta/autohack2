@@ -4,6 +4,7 @@ import dumb.code.*;
 import dumb.hack.commands.ReasonCommand;
 import dumb.hack.tools.CodeModificationTool;
 import dumb.mcr.ReasoningResult;
+import dumb.code.help.HelpService;
 import dumb.mcr.Session;
 import dumb.mcr.step.ToolStep;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +31,9 @@ public class ReasoningIntegrationTest {
         fileManager = new InMemoryFileManager();
         fileManager.writeFile("test.java", "public class Test {}");
 
-        var code = new Code("file", fileManager, null);
+        LMManager lmManager = Mockito.mock(LMManager.class);
+        HelpService helpService = Mockito.mock(HelpService.class);
+        var code = new Code("file", fileManager, lmManager, helpService);
         codebaseManager = code.getCodebaseManager();
         codebaseManager.trackFile("test.java").join();
 
