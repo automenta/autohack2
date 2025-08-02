@@ -1,17 +1,20 @@
 package dumb.code;
 
 import dev.langchain4j.service.tool.ToolProvider;
+import dumb.code.help.DefaultHelpService;
+import dumb.code.help.HelpService;
 import dumb.code.tui.Terminal;
+import dumb.code.tui.events.UIEvent;
 import dumb.code.util.IProcessRunner;
 import dumb.code.util.ProcessRunner;
 import dumb.code.versioning.Backend;
-import dumb.code.help.DefaultHelpService;
-import dumb.code.help.HelpService;
 import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /** Code-development (coding) context */
 public class Code {
@@ -28,16 +31,17 @@ public class Code {
     private final Backend backend;
     private String diff;
     private Terminal terminal;
+    private final BlockingQueue<UIEvent> eventQueue;
 
-    public Code(String backendType, String provider, String model, String apiKey) {
-        this(backendType, null, new LMManager(provider, model, apiKey), new DefaultHelpService(new MCR(new LMClient(provider, model, apiKey))));
-    }
-
-    public Code(String backendType, IFileManager fileManager, LMManager lmManager, HelpService helpService) {
+    /**
+     * Primary constructor with all dependencies.
+     */
+    public Code(String backendType, IFileManager fileManager, LMManager lmManager, HelpService helpService, IProcessRunner processRunner, BlockingQueue<UIEvent> eventQueue) {
         this.fileManager = (fileManager != null) ? fileManager : new FileManager();
         this.messageHandler = new MessageHandler(this);
         this.backendManager = new BackendManager(this, this.fileManager);
-        this.processRunner = new ProcessRunner();
+        this.processRunner = processRunner;
+        this.eventQueue = (eventQueue != null) ? eventQueue : new LinkedBlockingQueue<>();
 
         if (backendType != null) {
             backendManager.setBackend(backendType);
@@ -52,10 +56,40 @@ public class Code {
         this.files = new FileSystem();
         this.commandManager = new CommandManager(this, helpService);
 
-        helpService.setCode(this);
-        if (helpService instanceof DefaultHelpService) {
-            ((DefaultHelpService) helpService).setMessageHandler(this.messageHandler);
+        if (helpService != null) {
+            helpService.setCode(this);
+            if (helpService instanceof DefaultHelpService) {
+                ((DefaultHelpService) helpService).setMessageHandler(this.messageHandler);
+            }
         }
+    }
+
+    /**
+     * Constructor for TUI usage.
+     */
+    public Code(String backendType, IFileManager fileManager, LMManager lmManager, HelpService helpService, BlockingQueue<UIEvent> eventQueue) {
+        this(backendType, fileManager, lmManager, helpService, new ProcessRunner(), eventQueue);
+    }
+
+    /**
+     * Simplified constructor for non-TUI usage.
+     */
+    public Code(String backendType, String provider, String model, String apiKey) {
+        this(backendType, null, new LMManager(provider, model, apiKey), new DefaultHelpService(new MCR(new LMClient(provider, model, apiKey))), new ProcessRunner(), null);
+    }
+
+    /**
+     * Constructor for tests.
+     */
+    public Code(String backendType, IFileManager fileManager, LMManager lmManager, HelpService helpService, IProcessRunner processRunner) {
+        this(backendType, fileManager, lmManager, helpService, processRunner, null);
+    }
+
+    /**
+     * General purpose constructor.
+     */
+    public Code(String backendType, IFileManager fileManager, LMManager lmManager, HelpService helpService) {
+        this(backendType, fileManager, lmManager, helpService, new ProcessRunner(), null);
     }
 
     public Backend getBackend() {
@@ -95,4 +129,7 @@ public class Code {
         this.terminal = terminal;
     }
 
+    public BlockingQueue<UIEvent> getEventQueue() {
+        return eventQueue;
+    }
 }

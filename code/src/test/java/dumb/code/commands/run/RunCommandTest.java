@@ -23,9 +23,8 @@ class RunCommandTest {
     void setUp() {
         processRunner = mock(IProcessRunner.class);
         HelpService helpService = mock(HelpService.class);
-        code = new Code(null, null, null, helpService);
+        code = new Code(null, null, null, helpService, processRunner);
         messageHandler = code.messageHandler;
-        code.processRunner = processRunner;
         runCommand = new RunCommand(code);
     }
 
