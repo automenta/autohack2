@@ -27,4 +27,6 @@ public interface Backend {
     CompletableFuture<Void> apply(String patch);
 
     CompletableFuture<Void> clear();
+
+    boolean isClean();
 }

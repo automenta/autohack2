@@ -247,6 +247,12 @@ public class Session {
         }
     }
 
+    public void clear() {
+        this.knowledgeGraph = new KnowledgeGraph();
+        resetSolver();
+        assertToolFacts();
+    }
+
     public static Session load(String path, LMClient lmClient, ToolProvider toolProvider) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
             KnowledgeGraph knowledgeGraph = (KnowledgeGraph) ois.readObject();

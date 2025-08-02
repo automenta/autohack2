@@ -144,4 +144,16 @@ public class PijulBackend implements Backend {
             return java.util.Arrays.asList(output.split("\\R"));
         });
     }
+
+    @Override
+    public boolean isClean() {
+        try {
+            // A simplification: assumes empty status output means clean.
+            // A more robust implementation might need to parse the status output.
+            String status = executeCommandWithOutput("pijul", "status").get();
+            return status.trim().isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

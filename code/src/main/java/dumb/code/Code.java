@@ -16,12 +16,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /** Code-development (coding) context */
 public class Code {
     public final List<ToolProvider> toolProviders = new CopyOnWriteArrayList<>();
-    public final BackendManager backendManager;
-    public final IFileManager fileManager;
+    public BackendManager backendManager;
+    public IFileManager fileManager;
     public final LMManager lmManager;
     public final UIManager uiManager;
     public final CommandManager commandManager;
-    public final CodebaseManager codebaseManager;
+    public CodebaseManager codebaseManager;
     public final FileSystem files;
     public final MessageHandler messageHandler;
     public final IProcessRunner processRunner;
@@ -72,6 +72,10 @@ public class Code {
 
     public FileSystem getFiles() {
         return files;
+    }
+
+    public List<String> getChatFiles() {
+        return codebaseManager.getFiles();
     }
 
 

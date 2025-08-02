@@ -18,7 +18,16 @@ public class TutorialCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        helpService.startTutorial();
+        var templates = helpService.getAvailableTemplates();
+        if (templates.isEmpty()) {
+            // How to communicate this to the user?
+            // This needs a proper UI integration. For now, just printing to console.
+            System.out.println("No tutorial templates found.");
+            return;
+        }
+        // For now, just start the first available tutorial.
+        // A real implementation should prompt the user.
+        helpService.startTutorial(templates.get(0));
     }
 
     @Override

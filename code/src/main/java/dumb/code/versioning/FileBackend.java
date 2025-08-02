@@ -168,4 +168,11 @@ public class FileBackend implements Backend {
     public CompletableFuture<Void> shutdown() {
         return CompletableFuture.completedFuture(null);
     }
+
+    @Override
+    public boolean isClean() {
+        // File backend doesn't have a concept of "clean" in the same way as Git.
+        // We can consider it always clean as there's no staging area.
+        return true;
+    }
 }

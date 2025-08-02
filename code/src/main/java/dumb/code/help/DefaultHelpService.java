@@ -1,5 +1,6 @@
 package dumb.code.help;
 
+import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.project.ProjectTemplate;
 import dumb.code.project.TemplateManager;

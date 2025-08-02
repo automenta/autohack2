@@ -6,15 +6,16 @@
       "goal": "create_readme",
       "instruction": "Create a README.md file to describe your project.",
       "verification": {
-        "type": "file_exists",
-        "file": "README.md"
+        "type": "prolog",
+        "query": "workspace_file('README.md')."
       }
     },
     {
       "goal": "initial_commit",
       "instruction": "Record your changes to save the new file.",
       "verification": {
-        "type": "git_status_clean"
+        "type": "prolog",
+        "query": "git_status_clean."
       }
     }
   ]

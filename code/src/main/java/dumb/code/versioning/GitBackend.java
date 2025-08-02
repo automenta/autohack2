@@ -188,4 +188,15 @@ public class GitBackend implements Backend {
         executor.shutdown();
         return CompletableFuture.completedFuture(null);
     }
+
+    @Override
+    public boolean isClean() {
+        try {
+            String status = runCommand("git", "status", "--porcelain").get();
+            return status.trim().isEmpty();
+        } catch (InterruptedException | ExecutionException e) {
+            // If the command fails, we can assume it's not "clean".
+            return false;
+        }
+    }
 }

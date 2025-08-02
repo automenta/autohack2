@@ -12,12 +12,24 @@ public class ProjectTemplate {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public List<TutorialGoal> getTutorial() {
         return tutorial;
+    }
+
+    public void setTutorial(List<TutorialGoal> tutorial) {
+        this.tutorial = tutorial;
     }
 
     public static class TutorialGoal {
@@ -29,12 +41,24 @@ public class ProjectTemplate {
             return goal;
         }
 
+        public void setGoal(String goal) {
+            this.goal = goal;
+        }
+
         public String getInstruction() {
             return instruction;
         }
 
+        public void setInstruction(String instruction) {
+            this.instruction = instruction;
+        }
+
         public Map<String, String> getVerification() {
             return verification;
+        }
+
+        public void setVerification(Map<String, String> verification) {
+            this.verification = verification;
         }
     }
 }

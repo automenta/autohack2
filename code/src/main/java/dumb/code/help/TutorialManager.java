@@ -1,12 +1,13 @@
 package dumb.code.help;
 
 import dumb.code.Code;
-import dumb.code.help.verification.VerificationStrategy;
-import dumb.code.help.verification.VerificationStrategyFactory;
 import dumb.code.project.ProjectTemplate;
 import dumb.mcr.MCR;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TutorialManager {
 
@@ -15,6 +16,8 @@ public class TutorialManager {
     private final Code code;
     private int currentStep;
     private boolean active;
+    private final Map<Integer, Integer> stepFailureCounts;
+    private static final int PROACTIVE_HINT_THRESHOLD = 2;
 
     public TutorialManager(ProjectTemplate template, MCR mcr, Code code) {
         this.template = template;
@@ -22,6 +25,7 @@ public class TutorialManager {
         this.code = code;
         this.currentStep = -1;
         this.active = false;
+        this.stepFailureCounts = new HashMap<>();
     }
 
     public String start() {
@@ -35,10 +39,26 @@ public class TutorialManager {
             return null;
         }
 
+        // 1. Get the current goal and verification info
         ProjectTemplate.TutorialGoal goal = template.getTutorial().get(currentStep);
-        VerificationStrategy strategy = VerificationStrategyFactory.getStrategy(goal);
+        Map<String, String> verification = goal.getVerification();
+        String verificationType = verification.get("type");
 
-        if (strategy.verify(code, goal, command)) {
+        if (!"prolog".equals(verificationType)) {
+            // Fallback or error for non-prolog verification for now
+            return "Error: This tutorial step is not configured for MCR verification.";
+        }
+
+        // 2. Assert current context into MCR session
+        assertContextIntoMcr(command);
+
+        // 3. Execute the prolog query
+        String prologQuery = verification.get("query");
+        boolean success = mcrSession.query(prologQuery).success();
+
+        // 4. Handle result
+        if (success) {
+            stepFailureCounts.remove(currentStep); // Reset failure count on success
             currentStep++;
             if (isActive()) {
                 return "Correct! " + getCurrentStepInstructions();
@@ -47,9 +67,64 @@ public class TutorialManager {
                 return "Congratulations, you have completed the tutorial!";
             }
         } else {
-            // The step is not complete, just return null, or maybe the instructions again?
-            // Returning the instructions again seems like a good idea.
-            return "Not quite. " + getCurrentStepInstructions();
+            int failures = stepFailureCounts.getOrDefault(currentStep, 0) + 1;
+            stepFailureCounts.put(currentStep, failures);
+
+            if (failures >= PROACTIVE_HINT_THRESHOLD) {
+                return getProactiveHint(goal, prologQuery);
+            } else {
+                return "Not quite. " + getCurrentStepInstructions();
+            }
+        }
+    }
+
+    private String getProactiveHint(ProjectTemplate.TutorialGoal goal, String verificationQuery) {
+        String prompt = String.format(
+            "You are a friendly and helpful AI assistant. A user is STUCK on a tutorial step. " +
+            "Their goal is '%s'. The instruction is '%s'. They have failed multiple times. " +
+            "The technical condition for success is this Prolog query: '%s'. " +
+            "Please provide a specific, actionable HINT to help them satisfy the condition. " +
+            "For example, if the query is about a file existing, suggest the command to create it. " +
+            "Be encouraging and don't just give the answer away.",
+            goal.getGoal(), goal.getInstruction(), verificationQuery
+        );
+
+        ReasoningResult result = mcrSession.reason(prompt);
+        return "Looks like you're stuck. Here's a hint: " + result.answer();
+    }
+
+    private void assertContextIntoMcr(String[] command) {
+        mcrSession.clear(); // Clear facts from previous turn
+
+        // Assert last command
+        String fullCommand = String.join(" ", command);
+        mcrSession.assertProlog(String.format("last_command('%s').", fullCommand));
+        mcrSession.assertProlog(String.format("last_command_startsWith(X) :- atom_concat(X, _, '%s').", fullCommand));
+
+
+        // Assert workspace files
+        code.codebaseManager.getFiles().forEach(file ->
+            mcrSession.assertProlog(String.format("workspace_file('%s').", new java.io.File(file).getName()))
+        );
+
+        // Assert files in chat
+        code.getChatFiles().forEach(file ->
+            mcrSession.assertProlog(String.format("chat_file('%s').", file))
+        );
+
+        // Assert all files in chat status
+        boolean allInChat = !code.codebaseManager.getFiles().isEmpty() &&
+                            code.getChatFiles().containsAll(
+                                code.codebaseManager.getFiles().stream().map(f -> new java.io.File(f).getName()).toList()
+                            );
+        if (allInChat) {
+            mcrSession.assertProlog("all_files_in_chat.");
+        }
+
+
+        // Assert git status
+        if (code.getBackend().isClean()) {
+            mcrSession.assertProlog("git_status_clean.");
         }
     }
 

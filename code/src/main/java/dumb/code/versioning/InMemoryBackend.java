@@ -82,4 +82,9 @@ public class InMemoryBackend implements Backend {
     public CompletableFuture<Void> clear() {
         return CompletableFuture.runAsync(trackedFiles::clear);
     }
+
+    @Override
+    public boolean isClean() {
+        return true;
+    }
 }

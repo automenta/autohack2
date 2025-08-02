@@ -1,12 +1,13 @@
 package dumb.code.help;
 
+import dumb.code.Code;
+import dumb.code.project.ProjectTemplate;
+
 import java.util.List;
 
 /**
  * A service for providing help and tutorials to the user.
  */
-import dumb.code.Code;
-
 public interface HelpService {
 
     /**
