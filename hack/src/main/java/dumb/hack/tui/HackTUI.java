@@ -6,6 +6,7 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import dev.langchain4j.model.chat.ChatModel;
 import dumb.code.Code;
 import dumb.code.CodeUI;
+import dumb.code.help.FirstRunHelp;
 import dumb.hack.App;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
@@ -78,6 +79,7 @@ public class HackTUI {
                 ChatModel model = factory.create();
                 LMClient lmClient = new LMClient(model);
                 Code code = new Code(null, null, new dumb.code.LMManager(lmClient));
+                code.getHelpManager().startHelp(new FirstRunHelp());
                 codeUI = new CodeUI(code);
                 codePanel = codeUI.createPanel();
             } catch (MissingApiKeyException e) {

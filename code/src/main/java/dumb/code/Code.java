@@ -1,6 +1,8 @@
 package dumb.code;
 
 import dev.langchain4j.service.tool.ToolProvider;
+import dumb.code.help.HelpManager;
+import dumb.code.help.FirstRunHelp;
 import dumb.code.tui.Terminal;
 import dumb.code.util.IProcessRunner;
 import dumb.code.util.ProcessRunner;
@@ -16,6 +18,7 @@ public class Code {
     public final IFileManager fileManager;
     public final LMManager lmManager;
     public final UIManager uiManager;
+    public final HelpManager helpManager;
     public final CommandManager commandManager;
     public final CodebaseManager codebaseManager;
     public final FileSystem files;
@@ -43,10 +46,13 @@ public class Code {
         this.backend = backendManager.getBackend();
 
         this.lmManager = lmManager;
+        this.helpManager = new HelpManager(this);
         this.uiManager = new UIManager(this);
         this.codebaseManager = new CodebaseManager(this);
         this.files = new FileSystem();
         this.commandManager = new CommandManager(this);
+
+        this.helpManager.setUIManager(this.uiManager);
     }
 
     public Backend getBackend() {
@@ -82,4 +88,7 @@ public class Code {
         this.terminal = terminal;
     }
 
+    public HelpManager getHelpManager() {
+        return helpManager;
+    }
 }

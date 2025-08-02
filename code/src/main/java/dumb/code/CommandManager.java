@@ -1,5 +1,6 @@
 package dumb.code;
 
+import dumb.code.help.HelpManager;
 import dumb.code.commands.AddCommand;
 import dumb.code.commands.Command;
 import dumb.code.commands.apply.ApplyCommand;
@@ -38,12 +39,14 @@ import java.util.Map;
 
 public class CommandManager {
     private final MessageHandler messageHandler;
+    private final HelpManager helpManager;
     private final Map<String, Command> commands;
 
     public CommandManager(Code code) {
         this.messageHandler = code.messageHandler;
+        this.helpManager = code.getHelpManager();
         this.commands = new HashMap<>();
-        registerCommand("help", new HelpCommand(code));
+        registerCommand("help", new HelpCommand(code, helpManager));
         registerCommand("exit", new ExitCommand(code));
         registerCommand("add", new AddCommand(code));
         registerCommand("diff", new DiffCommand(code));
@@ -88,6 +91,8 @@ public class CommandManager {
         if (input == null || input.trim().isEmpty()) {
             return;
         }
+
+        helpManager.processInput(input);
 
         input = input.trim();
 

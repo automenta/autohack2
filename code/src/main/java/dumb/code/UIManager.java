@@ -1,14 +1,17 @@
 package dumb.code;
 
+import dumb.code.help.HelpManager;
 import dumb.code.tui.Terminal;
 
 public class UIManager {
     private final Code code;
+    private final HelpManager helpManager;
     private Terminal terminal;
 
 
     public UIManager(Code code) {
         this.code = code;
+        this.helpManager = code.getHelpManager();
     }
 
     private Terminal getTerminal() {
@@ -21,7 +24,21 @@ public class UIManager {
 
     public void displayWelcomeMessage() {
         // Display welcome message
-        code.messageHandler.onMessage("Welcome to PijulAider!");
+        displayMessage("Welcome to AutoHack!  hacking with AI power! 🚀");
+        if (helpManager.isHelpActive()) {
+            displayHelpMessage();
+        }
+    }
+
+    public void displayHelpMessage() {
+        String helpMessage = helpManager.getCurrentHelpMessage();
+        if (helpMessage != null && !helpMessage.isEmpty()) {
+            displayMessage("💡 " + helpMessage);
+        }
+    }
+
+    public void displayMessage(String message) {
+        code.messageHandler.onMessage(message);
     }
 
     public String getUserInput() {
