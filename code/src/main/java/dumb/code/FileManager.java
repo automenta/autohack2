@@ -41,5 +41,11 @@ public class FileManager implements IFileManager {
         return root.toString();
     }
 
-    // Add more methods as needed
+    public List<String> listFiles(String directoryPath) throws IOException {
+        Path path = resolve(directoryPath);
+        return Files.list(path)
+                .map(p -> root.relativize(p).toString())
+                .map(p -> Files.isDirectory(resolve(p)) ? p + "/" : p)
+                .toList();
+    }
 }

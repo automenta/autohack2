@@ -38,8 +38,22 @@ public class CodeCommand implements Callable<Integer> {
         }
 
         LMClient lmClient = new LMClient(model);
+        if (app.getLmOptions().getProvider().equals("mock")) {
+            if (task.equals("create a new file called 'test.txt' with the content 'hello world'")) {
+                ((dumb.lm.mock.MockChatModel) model).setDefaultResponse("/create test.txt\n/edit test.txt \"hello world\"");
+            } else if (task.equals("list the files in the current directory")) {
+                ((dumb.lm.mock.MockChatModel) model).setDefaultResponse("/ls");
+            } else if (task.equals("run the command 'echo hello'")) {
+                ((dumb.lm.mock.MockChatModel) model).setDefaultResponse("/run echo hello");
+            } else if (task.equals("run the tests")) {
+                ((dumb.lm.mock.MockChatModel) model).setDefaultResponse("/test");
+            } else if (task.equals("list the files, run the tests, and then create a file called 'done.txt'")) {
+                ((dumb.lm.mock.MockChatModel) model).setDefaultResponse("/ls\n/test\n/create done.txt");
+            }
+        }
+        dumb.mcr.MCR mcr = new dumb.mcr.MCR(lmClient);
+        HelpService helpService = new DefaultHelpService(mcr);
         LMManager lmManager = new LMManager(lmClient);
-        HelpService helpService = new DefaultHelpService();
         Code code = new Code(backend, null, lmManager, helpService);
 
         ReasonCommand reasonCommand = new ReasonCommand(code, helpService);

@@ -15,7 +15,13 @@ public class LsCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        messageHandler.addMessage("system", "Ls command is not yet implemented.");
+        String path = args.length > 0 ? args[0] : ".";
+        try {
+            java.util.List<String> files = code.fileManager.listFiles(path);
+            messageHandler.addMessage("system", String.join("\n", files));
+        } catch (java.io.IOException e) {
+            messageHandler.addMessage("system", "Error listing files: " + e.getMessage());
+        }
     }
 
 }

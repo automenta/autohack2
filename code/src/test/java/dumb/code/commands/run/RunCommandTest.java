@@ -1,48 +1,42 @@
-//package dumb.code.commands.run;
-//
-//import dumb.code.Code;
-//import dumb.code.MessageHandler;
-//import dumb.code.util.IProcessRunner;
-//import dumb.code.util.ProcessResult;
-//import org.junit.jupiter.api.Test;
-//
-//import static org.mockito.Mockito.*;
-//
-//public class RunCommandTest {
-//
-//    @Test
-//    public void testRunCommand_withValidCommand_executesCommandAndPrintsOutput() {
-//        // Arrange
-//        IProcessRunner mockProcessRunner = mock(IProcessRunner.class);
-//        when(mockProcessRunner.run(new String[]{"echo", "hello", "world"})).thenReturn(new ProcessResult(0, "hello world\n"));
-//
-//        MessageHandler messageHandler = mock(MessageHandler.class);
-//        Code code = new Code(new String[]{}, null, messageHandler, null, mockProcessRunner);
-//
-//        RunCommand runCommand = new RunCommand(code);
-//
-//        // Act
-//        runCommand.execute(new String[]{"echo", "hello", "world"});
-//
-//        // Assert
-//        verify(messageHandler).addMessage("system", "Command finished with exit code 0:\nhello world\n");
-//    }
-//
-//    @Test
-//    public void testRunCommand_withInvalidCommand_printsErrorMessage() {
-//        // Arrange
-//        IProcessRunner mockProcessRunner = mock(IProcessRunner.class);
-//        when(mockProcessRunner.run(new String[]{"invalid_command"})).thenReturn(new ProcessResult(-1, "Error message"));
-//
-//        MessageHandler messageHandler = mock(MessageHandler.class);
-//        Code code = new Code(new String[]{}, null, messageHandler, null, mockProcessRunner);
-//
-//        RunCommand runCommand = new RunCommand(code);
-//
-//        // Act
-//        runCommand.execute(new String[]{"invalid_command"});
-//
-//        // Assert
-//        verify(messageHandler).addMessage("system", "Command finished with exit code -1:\nError message");
-//    }
-//}
+package dumb.code.commands.run;
+
+import dumb.code.Code;
+import dumb.code.MessageHandler;
+import dumb.code.help.HelpService;
+import dumb.code.util.IProcessRunner;
+import dumb.code.util.ProcessResult;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+class RunCommandTest {
+
+    private IProcessRunner processRunner;
+    private MessageHandler messageHandler;
+    private RunCommand runCommand;
+    private Code code;
+
+    @BeforeEach
+    void setUp() {
+        processRunner = mock(IProcessRunner.class);
+        HelpService helpService = mock(HelpService.class);
+        code = new Code(null, null, null, helpService);
+        messageHandler = code.messageHandler;
+        code.processRunner = processRunner;
+        runCommand = new RunCommand(code);
+    }
+
+    @Test
+    void testExecute() {
+        when(processRunner.run("echo", "hello")).thenReturn(new ProcessResult(0, "hello\n"));
+
+        runCommand.execute(new String[]{"echo", "hello"});
+
+        java.util.List<String> messages = messageHandler.getMessages();
+        assertEquals(1, messages.size());
+        assertEquals("system: Command finished with exit code 0:\nhello\n", messages.get(0));
+    }
+}

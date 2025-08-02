@@ -1,0 +1,2 @@
+/create test.txt
+/edit test.txt "hello world"

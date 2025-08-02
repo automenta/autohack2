@@ -18,6 +18,12 @@ public record LMClient(ChatModel model) implements ILMClient {
         this(createModel(provider, modelName, apiKey));
     }
 
+    public void configureModel(String prompt, String response) {
+        if (model instanceof dumb.lm.mock.MockChatModel) {
+            ((dumb.lm.mock.MockChatModel) model).addCannedResponse(prompt, response);
+        }
+    }
+
     private static ChatModel createModel(String provider, String modelName, String apiKey) {
         switch (provider.toLowerCase()) {
             case "ollama":

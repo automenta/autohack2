@@ -40,4 +40,9 @@ public class InMemoryFileManager implements IFileManager {
     public String getRootDir() {
         return rootDir;
     }
+
+    @Override
+    public java.util.List<String> listFiles(String directoryPath) throws IOException {
+        return new java.util.ArrayList<>(files.keySet());
+    }
 }
