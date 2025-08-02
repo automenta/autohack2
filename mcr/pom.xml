@@ -18,6 +18,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Code module dependency for UI elements -->
+        <dependency>
+            <groupId>dumb</groupId>
+            <artifactId>code</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Gson for JSON serialization -->
         <dependency>
             <groupId>com.google.code.gson</groupId>

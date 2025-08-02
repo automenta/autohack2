@@ -20,7 +20,6 @@ public class McrTUIComponent implements TUIComponent {
     @Override
     public Panel createPanel(App app, BreadcrumbManager breadcrumbManager) {
         try {
-            // TODO: Pass breadcrumbManager to McrTUI and have it update the breadcrumbs
             ProviderFactory factory = new ProviderFactory(app.getLmOptions());
             ChatModel model = factory.create();
             LMClient lmClient = new LMClient(model);
@@ -32,7 +31,7 @@ public class McrTUIComponent implements TUIComponent {
             session.assertProlog("has_wings(X) :- bird(X).");
             session.addRelationship("tweety", "likes", "seeds");
 
-            McrTUI mcrTUI = new McrTUI(session);
+            McrTUI mcrTUI = new McrTUI(session, breadcrumbManager);
             return mcrTUI.createPanel();
         } catch (MissingApiKeyException e) {
             Panel errorPanel = new Panel();

@@ -47,19 +47,9 @@ public class HackTUI {
             Panel mainPanel = new Panel(new LinearLayout(Direction.VERTICAL));
             contentPanel = new Panel();
 
-            RadioBoxList<String> radioBoxList = new RadioBoxList<>();
-            for (TUIComponent component : tuiComponents) {
-                radioBoxList.addItem(component.getName());
-            }
-            radioBoxList.addListener((selectedIndex, previousSelection) -> {
-                if (selectedIndex >= 0 && selectedIndex < tuiComponents.size()) {
-                    showTUI(tuiComponents.get(selectedIndex));
-                }
-            });
-
-            keybindingManager.register(new KeyStroke('c', true, false, false), () -> radioBoxList.setCheckedItemIndex(0));
-            keybindingManager.register(new KeyStroke('m', true, false, false), () -> radioBoxList.setCheckedItemIndex(1));
-            keybindingManager.register(new KeyStroke('o', true, false, false), () -> radioBoxList.setCheckedItemIndex(2));
+            keybindingManager.register(new KeyStroke('c', true, false, false), () -> showTUI(tuiComponents.get(0)));
+            keybindingManager.register(new KeyStroke('m', true, false, false), () -> showTUI(tuiComponents.get(1)));
+            keybindingManager.register(new KeyStroke('o', true, false, false), () -> showTUI(tuiComponents.get(2)));
             keybindingManager.register(new KeyStroke('s', true, false, false), () -> statusBar.setText("Saved."));
 
             window.addWindowListener(new WindowListenerAdapter() {
@@ -72,7 +62,9 @@ public class HackTUI {
             });
 
             Panel topPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
-            topPanel.addComponent(radioBoxList);
+            for (TUIComponent component : tuiComponents) {
+                topPanel.addComponent(new Button(component.getName(), () -> showTUI(component)));
+            }
             topPanel.addComponent(new Button("Exit", window::close));
 
             Panel navigationPanel = new Panel(new LinearLayout(Direction.VERTICAL));
@@ -90,7 +82,7 @@ public class HackTUI {
             window.setComponent(mainPanel);
 
             // Show the first TUI by default
-            radioBoxList.setCheckedItemIndex(0);
+            showTUI(tuiComponents.get(0));
 
             MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
             gui.addWindowAndWait(window);
