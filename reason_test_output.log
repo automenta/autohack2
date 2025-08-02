@@ -1,0 +1,8 @@
+Missing required option: '--task=<task>'
+Usage: hack code [-hV] [--backend=<backend>] --task=<task>
+Runs a non-interactive AI pair programming task.
+      --backend=<backend>   Specify the version control backend (git, pijul, or
+                              files).
+  -h, --help                Show this help message and exit.
+      --task=<task>         The task to perform.
+  -V, --version             Print version information and exit.
