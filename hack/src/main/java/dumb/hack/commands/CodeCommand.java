@@ -14,17 +14,14 @@ import picocli.CommandLine;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "code", mixinStandardHelpOptions = true,
-        description = "Runs the interactive AI pair programmer.")
+        description = "Runs a non-interactive AI pair programming task.")
 public class CodeCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"--backend"}, description = "Specify the version control backend (git, pijul, or files).")
     private String backend;
 
-    @CommandLine.Option(names = {"--task"}, description = "The task to perform non-interactively.")
+    @CommandLine.Option(names = {"--task"}, required = true, description = "The task to perform.")
     private String task;
-
-    @CommandLine.Option(names = {"--non-interactive"}, description = "Enable non-interactive mode.", defaultValue = "false")
-    private boolean nonInteractive;
 
     @CommandLine.ParentCommand
     private App app;
@@ -40,31 +37,14 @@ public class CodeCommand implements Callable<Integer> {
             return 1;
         }
 
-        if (nonInteractive) {
-            if (task == null || task.isEmpty()) {
-                System.err.println("Error: --task option is required for non-interactive mode.");
-                return 1;
-            }
+        ReasonCommand reasonCommand = createReasonCommand(model);
+        reasonCommand.execute(new String[]{task});
 
-            // Setup services but don't start the UI
-            CodeServices services = setup(model, false); // false for interactive
-
-            // Execute the reasoning command directly
-            services.reasonCommand().execute(new String[]{task});
-
-            System.out.println("Non-interactive task completed.");
-            return 0;
-        } else {
-            // In interactive mode, the HackTUI is responsible for starting the UI.
-            // This command is now only for non-interactive mode.
-            System.err.println("Interactive mode must be launched from the main `hack` command.");
-            return 1;
-        }
+        System.out.println("Non-interactive task completed.");
+        return 0;
     }
 
-    private record CodeServices(Code code, ReasonCommand reasonCommand) {}
-
-    private CodeServices setup(ChatModel model, boolean interactive) {
+    private ReasonCommand createReasonCommand(ChatModel model) {
         LMClient lmClient = new LMClient(model);
         LMManager lmManager = new LMManager(lmClient);
         Code code = new Code(backend, null, lmManager);
@@ -78,10 +58,10 @@ public class CodeCommand implements Callable<Integer> {
         MCR mcr = new MCR(lmClient);
         Session mcrSession = mcr.createSession(toolProvider);
 
-        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager, interactive);
+        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager, false);
         commandManager.registerCommand("/reason", reasonCommand);
 
-        return new CodeServices(code, reasonCommand);
+        return reasonCommand;
     }
 
 }

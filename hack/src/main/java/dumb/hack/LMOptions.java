@@ -31,7 +31,6 @@ public class LMOptions {
         if (apiKey != null) {
             return apiKey;
         }
-        // Fallback to environment variable if --api-key is not provided
         String envVarName = provider.toUpperCase() + "_API_KEY";
         return System.getenv(envVarName);
     }
