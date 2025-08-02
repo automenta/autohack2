@@ -34,6 +34,10 @@ public class TutorialManager {
         return getCurrentStepInstructions();
     }
 
+    public void stop() {
+        this.active = false;
+    }
+
     public String checkCommand(String[] command) {
         if (!isActive()) {
             return null;

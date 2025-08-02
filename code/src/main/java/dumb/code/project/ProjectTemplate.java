@@ -1,5 +1,6 @@
 package dumb.code.project;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,15 @@ public class ProjectTemplate {
     private String name;
     private String description;
     private List<TutorialGoal> tutorial;
+    private transient File templateDir;
+
+    public File getTemplateDir() {
+        return templateDir;
+    }
+
+    public void setTemplateDir(File templateDir) {
+        this.templateDir = templateDir;
+    }
 
     public String getName() {
         return name;

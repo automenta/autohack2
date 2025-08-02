@@ -112,4 +112,23 @@ public class DefaultHelpService implements HelpService {
             }
         }
     }
+
+    @Override
+    public void createProject(ProjectTemplate template, java.io.File targetDir) throws java.io.IOException {
+        templateManager.createProject(template, targetDir);
+    }
+
+    @Override
+    public void stopTutorial() {
+        if (tutorialManager != null && tutorialManager.isActive()) {
+            tutorialManager.stop();
+            if (messageHandler != null) {
+                messageHandler.addMessage("system", "Tutorial stopped.");
+            }
+        } else {
+            if (messageHandler != null) {
+                messageHandler.addMessage("system", "No active tutorial to stop.");
+            }
+        }
+    }
 }

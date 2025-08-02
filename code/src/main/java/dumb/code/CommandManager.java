@@ -19,6 +19,7 @@ import dumb.code.commands.grep.GrepCommand;
 import dumb.code.commands.help.HelpCommand;
 import dumb.code.commands.image.ImageCommand;
 import dumb.code.commands.ls.LsCommand;
+import dumb.code.commands.createproject.CreateProjectCommand;
 import dumb.code.help.HelpService;
 import dumb.code.commands.mv.MvCommand;
 import dumb.code.commands.patch.PatchCommand;
@@ -75,7 +76,8 @@ public class CommandManager {
         registerCommand("speech", new SpeechCommand(code));
         registerCommand("status", new StatusCommand(code));
         registerCommand("test", new TestCommand(code));
-        registerCommand("tutorial", new TutorialCommand(helpService));
+        registerCommand("tutorial", new TutorialCommand(code, helpService));
+        registerCommand("new", new CreateProjectCommand(code, helpService));
         registerCommand("undo", new UndoCommand(code));
         registerCommand("unrecord", new UnrecordCommand(code));
 

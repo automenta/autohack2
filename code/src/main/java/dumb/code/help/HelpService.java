@@ -44,6 +44,19 @@ public interface HelpService {
     void startTutorial(ProjectTemplate template);
 
     /**
+     * Creates a project from a template.
+     * @param template The template to create the project from.
+     * @param targetDir The directory to create the project in.
+     * @throws java.io.IOException if there is an error creating the project.
+     */
+    void createProject(ProjectTemplate template, java.io.File targetDir) throws java.io.IOException;
+
+    /**
+     * Stops the currently active tutorial.
+     */
+    void stopTutorial();
+
+    /**
      * Notifies the help service that a command has been executed.
      *
      * @param command The command that was executed, including arguments.
