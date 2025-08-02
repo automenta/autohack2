@@ -1,30 +1,32 @@
 package dumb.code.help;
 
-import java.util.ArrayList;
-import java.util.List;
+import dumb.code.Code;
+import dumb.code.help.verification.VerificationStrategy;
+import dumb.code.help.verification.VerificationStrategyFactory;
+import dumb.code.project.ProjectTemplate;
+import dumb.mcr.MCR;
+import dumb.mcr.ReasoningResult;
+import dumb.mcr.Session;
 
 public class TutorialManager {
 
-    private final List<TutorialStep> steps;
+    private final ProjectTemplate template;
+    private final Session mcrSession;
+    private final Code code;
     private int currentStep;
+    private boolean active;
 
-    public TutorialManager() {
-        this.steps = new ArrayList<>();
+    public TutorialManager(ProjectTemplate template, MCR mcr, Code code) {
+        this.template = template;
+        this.mcrSession = mcr.createSession();
+        this.code = code;
         this.currentStep = -1;
-        initializeSteps();
-    }
-
-    private void initializeSteps() {
-        steps.add(new TutorialStep("Welcome to the AutoHack tutorial! This tutorial will guide you through creating a new project. To start, create a new file named README.md with the /add command.",
-                command -> command.length > 1 && command[0].equals("add") && command[1].equals("README.md")));
-        steps.add(new TutorialStep("Great! Now, let's record your changes with the /record command. Give it a message, like \"Initial commit\".",
-                command -> command.length > 1 && command[0].equals("record")));
-        steps.add(new TutorialStep("Excellent! You've completed the basic workflow. The tutorial is now over.",
-                command -> false)); // No command completes this step
+        this.active = false;
     }
 
     public String start() {
-        currentStep = 0;
+        this.active = true;
+        this.currentStep = 0;
         return getCurrentStepInstructions();
     }
 
@@ -33,27 +35,45 @@ public class TutorialManager {
             return null;
         }
 
-        TutorialStep step = steps.get(currentStep);
-        if (step.isComplete(command)) {
+        ProjectTemplate.TutorialGoal goal = template.getTutorial().get(currentStep);
+        VerificationStrategy strategy = VerificationStrategyFactory.getStrategy(goal);
+
+        if (strategy.verify(code, goal, command)) {
             currentStep++;
             if (isActive()) {
                 return "Correct! " + getCurrentStepInstructions();
             } else {
+                this.active = false;
                 return "Congratulations, you have completed the tutorial!";
             }
         } else {
+            // The step is not complete, just return null, or maybe the instructions again?
+            // Returning the instructions again seems like a good idea.
             return "Not quite. " + getCurrentStepInstructions();
         }
     }
 
     public boolean isActive() {
-        return currentStep >= 0 && currentStep < steps.size();
+        return active && template != null && currentStep < template.getTutorial().size();
     }
 
     private String getCurrentStepInstructions() {
-        if (isActive()) {
-            return steps.get(currentStep).getInstruction();
+        if (!isActive()) {
+            return null;
         }
-        return null;
+
+        ProjectTemplate.TutorialGoal goal = template.getTutorial().get(currentStep);
+        String instruction = goal.getInstruction();
+
+        String prompt = String.format(
+            "You are a friendly and helpful AI assistant leading a user through a tutorial. " +
+            "The user's current goal is '%s'. " +
+            "The basic instruction is: '%s'. " +
+            "Please provide a clear, encouraging, and user-friendly message to guide them. " +
+            "Keep it concise.",
+            goal.getGoal(), instruction);
+
+        ReasoningResult result = mcrSession.reason(prompt);
+        return result.answer();
     }
 }

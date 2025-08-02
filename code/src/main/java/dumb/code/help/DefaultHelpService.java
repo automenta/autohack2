@@ -1,26 +1,30 @@
 package dumb.code.help;
 
 import dumb.code.MessageHandler;
+import dumb.code.project.ProjectTemplate;
+import dumb.code.project.TemplateManager;
 import dumb.mcr.MCR;
-import dumb.mcr.Session;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A default implementation of the HelpService that provides static help messages.
- */
 public class DefaultHelpService implements HelpService {
 
-    private final TutorialManager tutorialManager;
+    private TutorialManager tutorialManager;
     private final MCR mcr;
-    private final Session session;
     private MessageHandler messageHandler;
+    private final TemplateManager templateManager;
+    private Code code;
 
     public DefaultHelpService(MCR mcr) {
-        this.tutorialManager = new TutorialManager();
         this.mcr = mcr;
-        this.session = mcr.createSession();
+        // Assuming templates are in a "templates" directory at the project root
+        this.templateManager = new TemplateManager("templates");
+    }
+
+    @Override
+    public void setCode(Code code) {
+        this.code = code;
     }
 
     public void setMessageHandler(MessageHandler messageHandler) {
@@ -29,6 +33,7 @@ public class DefaultHelpService implements HelpService {
 
     @Override
     public List<String> getHelp() {
+        // ... (rest of the getHelp method is unchanged)
         List<String> help = new ArrayList<>();
         help.add("Available commands:");
         help.add("  /help [command] - Show help for a command.");
@@ -42,6 +47,7 @@ public class DefaultHelpService implements HelpService {
 
     @Override
     public List<String> getHelp(String commandName) {
+        // ... (rest of the getHelp(commandName) method is unchanged)
         List<String> help = new ArrayList<>();
         switch (commandName) {
             case "help":
@@ -77,18 +83,28 @@ public class DefaultHelpService implements HelpService {
     }
 
     @Override
-    public void startTutorial() {
+    public List<ProjectTemplate> getAvailableTemplates() {
+        return templateManager.loadTemplates();
+    }
+
+    @Override
+    public void startTutorial(ProjectTemplate template) {
         if (messageHandler == null) {
             System.out.println("Error: MessageHandler not set.");
             return;
         }
+        if (code == null) {
+            System.out.println("Error: Code context not set. Cannot start tutorial.");
+            return;
+        }
+        this.tutorialManager = new TutorialManager(template, mcr, code);
         String message = tutorialManager.start();
         messageHandler.addMessage("system", message);
     }
 
     @Override
     public void onCommandExecuted(String[] command) {
-        if (tutorialManager.isActive()) {
+        if (tutorialManager != null && tutorialManager.isActive()) {
             String message = tutorialManager.checkCommand(command);
             if (message != null) {
                 messageHandler.addMessage("system", message);

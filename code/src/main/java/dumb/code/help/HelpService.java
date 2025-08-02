@@ -5,7 +5,15 @@ import java.util.List;
 /**
  * A service for providing help and tutorials to the user.
  */
+import dumb.code.Code;
+
 public interface HelpService {
+
+    /**
+     * Sets the Code instance, used to access application state.
+     * @param code The Code instance.
+     */
+    void setCode(Code code);
 
     /**
      * Gets a general help message, typically listing available commands.
@@ -23,9 +31,16 @@ public interface HelpService {
     List<String> getHelp(String commandName);
 
     /**
-     * Starts the tutorial.
+     * Gets a list of available project templates.
+     * @return A list of project templates.
      */
-    void startTutorial();
+    List<ProjectTemplate> getAvailableTemplates();
+
+    /**
+     * Starts the tutorial for a given project template.
+     * @param template The project template to use for the tutorial.
+     */
+    void startTutorial(ProjectTemplate template);
 
     /**
      * Notifies the help service that a command has been executed.

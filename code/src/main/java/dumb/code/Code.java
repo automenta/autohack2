@@ -52,6 +52,7 @@ public class Code {
         this.files = new FileSystem();
         this.commandManager = new CommandManager(this, helpService);
 
+        helpService.setCode(this);
         if (helpService instanceof DefaultHelpService) {
             ((DefaultHelpService) helpService).setMessageHandler(this.messageHandler);
         }

@@ -1,0 +1,37 @@
+{
+  "name": "Java CLI App",
+  "description": "A simple Java command-line application using Maven.",
+  "tutorial": [
+    {
+      "goal": "explore_structure",
+      "instruction": "Familiarize yourself with the project structure. I've created a standard Maven layout with a `pom.xml` and a `src` directory. Use the `/ls` command to look around.",
+      "verification": {
+        "type": "command_run",
+        "command": "ls"
+      }
+    },
+    {
+        "goal": "add_all_files",
+        "instruction": "Now, add all the project files to the chat so the AI can see them.",
+        "verification": {
+            "type": "all_files_in_chat"
+        }
+    },
+    {
+      "goal": "compile_project",
+      "instruction": "This is a Maven project. The next step is to compile it. You can run shell commands using `/run`.",
+      "verification": {
+        "type": "command_run",
+        "command": "mvn compile"
+      }
+    },
+    {
+      "goal": "run_app",
+      "instruction": "Now that it's compiled, run the application.",
+      "verification": {
+        "type": "command_run",
+        "command": "mvn exec:java -Dexec.mainClass=com.example.Main"
+      }
+    }
+  ]
+}
