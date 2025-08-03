@@ -9,6 +9,18 @@ public record LMManager(ILMClient lmClient) {
         this(new LMClient(provider, model, apiKey));
     }
 
+    public String getProvider() {
+        return lmClient.getProvider();
+    }
+
+    public String getModel() {
+        return lmClient.getModel();
+    }
+
+    public String getApiKey() {
+        return lmClient.getApiKey();
+    }
+
     public void shutdown() {
         // Nothing to do
     }

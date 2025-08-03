@@ -1,11 +1,10 @@
 package dumb.code.commands.clear;
 
-import dumb.code.Code;
-import dumb.code.CodebaseManager;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
+import dumb.code.tools.CodebaseTool;
 
-public record ClearCommand(Code code) implements Command {
+public record ClearCommand(CodebaseTool codebaseTool, MessageHandler messageHandler) implements Command {
 
     @Override
     public void init() {
@@ -15,10 +14,7 @@ public record ClearCommand(Code code) implements Command {
     @Override
     public void execute(String[] args) {
         try {
-            CodebaseManager codebaseManager = code.codebaseManager;
-            MessageHandler messageHandler = code.messageHandler;
-
-            codebaseManager.setCodebase("");
+            codebaseTool.clear();
             messageHandler.addMessage("system", "Codebase cleared.");
         } catch (Exception e) {
             e.printStackTrace();

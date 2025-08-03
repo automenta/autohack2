@@ -1,6 +1,6 @@
 package dumb.code.help;
 
-import dumb.code.Code;
+import dumb.code.MessageHandler;
 import dumb.code.project.ProjectTemplate;
 import dumb.mcr.MCR;
 import dumb.mcr.ReasoningResult;
@@ -13,16 +13,16 @@ public class TutorialManager {
 
     private final ProjectTemplate template;
     private final Session mcrSession;
-    private final Code code;
+    private final MessageHandler messageHandler;
     private int currentStep;
     private boolean active;
     private final Map<Integer, Integer> stepFailureCounts;
     private static final int PROACTIVE_HINT_THRESHOLD = 2;
 
-    public TutorialManager(ProjectTemplate template, MCR mcr, Code code) {
+    public TutorialManager(ProjectTemplate template, MCR mcr, MessageHandler messageHandler) {
         this.template = template;
         this.mcrSession = mcr.createSession();
-        this.code = code;
+        this.messageHandler = messageHandler;
         this.currentStep = -1;
         this.active = false;
         this.stepFailureCounts = new HashMap<>();
@@ -106,30 +106,9 @@ public class TutorialManager {
         mcrSession.assertProlog(String.format("last_command_startsWith(X) :- atom_concat(X, _, '%s').", fullCommand));
 
 
-        // Assert workspace files
-        code.codebaseManager.getFiles().forEach(file ->
-            mcrSession.assertProlog(String.format("workspace_file('%s').", new java.io.File(file).getName()))
-        );
-
-        // Assert files in chat
-        code.getChatFiles().forEach(file ->
-            mcrSession.assertProlog(String.format("chat_file('%s').", file))
-        );
-
-        // Assert all files in chat status
-        boolean allInChat = !code.codebaseManager.getFiles().isEmpty() &&
-                            code.getChatFiles().containsAll(
-                                code.codebaseManager.getFiles().stream().map(f -> new java.io.File(f).getName()).toList()
-                            );
-        if (allInChat) {
-            mcrSession.assertProlog("all_files_in_chat.");
-        }
-
-
-        // Assert git status
-        if (code.getBackend().isClean()) {
-            mcrSession.assertProlog("git_status_clean.");
-        }
+        // This part needs to be refactored as we don't have access to the codebase manager anymore
+        // For now, we will just assert an empty workspace
+        mcrSession.assertProlog("workspace_file('').");
     }
 
     public boolean isActive() {

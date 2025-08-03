@@ -1,20 +1,18 @@
-package dumb.code.versioning;
+package dumb.code.tools.vcs;
 
-import dumb.code.IFileManager;
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-public class InMemoryBackend implements Backend {
+public class FileBackend implements Backend {
+    private final String rootDir;
 
-    private final IFileManager fileManager;
-    private final Set<String> trackedFiles = new HashSet<>();
-
-    public InMemoryBackend(IFileManager fileManager) {
-        this.fileManager = fileManager;
+    public FileBackend(String rootDir) {
+        this.rootDir = rootDir;
     }
 
     @Override
@@ -49,7 +47,17 @@ public class InMemoryBackend implements Backend {
 
     @Override
     public CompletableFuture<List<String>> listTrackedFiles() {
-        return CompletableFuture.completedFuture(new ArrayList<>(trackedFiles));
+        try {
+            List<String> files = new ArrayList<>();
+            Files.walk(Paths.get(rootDir)).forEach(path -> {
+                if (Files.isRegularFile(path)) {
+                    files.add(path.toString());
+                }
+            });
+            return CompletableFuture.completedFuture(files);
+        } catch (IOException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Override
@@ -59,18 +67,12 @@ public class InMemoryBackend implements Backend {
 
     @Override
     public CompletableFuture<Void> add(String file) {
-        return CompletableFuture.runAsync(() -> {
-            if (fileManager.fileExists(file)) {
-                trackedFiles.add(file);
-            } else {
-                throw new RuntimeException("File not found: " + file);
-            }
-        });
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
     public CompletableFuture<String> status() {
-        return CompletableFuture.completedFuture("");
+        return CompletableFuture.completedFuture("File backend does not support status.");
     }
 
     @Override
@@ -80,7 +82,7 @@ public class InMemoryBackend implements Backend {
 
     @Override
     public CompletableFuture<Void> clear() {
-        return CompletableFuture.runAsync(trackedFiles::clear);
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override

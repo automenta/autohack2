@@ -1,6 +1,5 @@
 package dumb.code.help;
 
-import dumb.code.Code;
 import dumb.code.project.ProjectTemplate;
 
 import java.util.List;
@@ -9,12 +8,6 @@ import java.util.List;
  * A service for providing help and tutorials to the user.
  */
 public interface HelpService {
-
-    /**
-     * Sets the Code instance, used to access application state.
-     * @param code The Code instance.
-     */
-    void setCode(Code code);
 
     /**
      * Gets a general help message, typically listing available commands.

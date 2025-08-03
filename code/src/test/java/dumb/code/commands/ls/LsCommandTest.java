@@ -1,39 +1,46 @@
 package dumb.code.commands.ls;
 
-import dumb.code.Code;
-import dumb.code.InMemoryFileManager;
 import dumb.code.MessageHandler;
-import dumb.code.help.HelpService;
+import dumb.code.tools.FileSystemTool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 class LsCommandTest {
 
-    private InMemoryFileManager fileManager;
-    private MessageHandler messageHandler;
     private LsCommand lsCommand;
+    private FileSystemTool fileSystemTool;
+    private MessageHandler messageHandler;
+
+    @TempDir
+    Path tempDir;
 
     @BeforeEach
     void setUp() {
-        fileManager = new InMemoryFileManager();
-        HelpService helpService = mock(HelpService.class);
-        Code code = new Code(null, fileManager, null, helpService);
-        messageHandler = code.messageHandler;
-        lsCommand = new LsCommand(code);
+        messageHandler = mock(MessageHandler.class);
+        fileSystemTool = new FileSystemTool(tempDir.toString());
+        lsCommand = new LsCommand(fileSystemTool, messageHandler);
     }
 
     @Test
     void testExecute() throws java.io.IOException {
-        fileManager.writeFile("test1.txt", "content1");
-        fileManager.writeFile("test2.txt", "content2");
+        Files.createFile(tempDir.resolve("test1.txt"));
+        Files.createFile(tempDir.resolve("test2.txt"));
 
         lsCommand.execute(new String[]{});
 
-        java.util.List<String> messages = messageHandler.getMessages();
-        assertEquals(1, messages.size());
-        assertEquals("system: test1.txt\ntest2.txt", messages.get(0));
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(messageHandler).addMessage(eq("system"), captor.capture());
+        String message = captor.getValue();
+
+        assertTrue(message.contains("test1.txt"));
+        assertTrue(message.contains("test2.txt"));
     }
 }

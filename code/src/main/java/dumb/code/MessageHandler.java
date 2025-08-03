@@ -7,11 +7,15 @@ import java.util.List;
 
 public class MessageHandler {
 
-    private final Code code;
+    private Terminal terminal;
     private final List<String> messages = new ArrayList<>();
 
-    public MessageHandler(Code code) {
-        this.code = code;
+    public MessageHandler() {
+        // constructor is empty
+    }
+
+    public void setTerminal(Terminal terminal) {
+        this.terminal = terminal;
     }
 
     public void onMessage(String message) {
@@ -20,7 +24,6 @@ public class MessageHandler {
 
     public void addMessage(String sender, String message) {
         messages.add(sender + ": " + message);
-        Terminal terminal = code.getTerminal();
         if (terminal != null) {
             terminal.addMessage(sender + ": " + message);
         } else {

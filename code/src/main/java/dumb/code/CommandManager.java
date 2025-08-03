@@ -1,5 +1,6 @@
 package dumb.code;
 
+import dumb.code.tools.CodebaseTool;
 import dumb.code.commands.AddCommand;
 import dumb.code.commands.Command;
 import dumb.code.commands.apply.ApplyCommand;
@@ -35,6 +36,9 @@ import dumb.code.commands.tutorial.TutorialCommand;
 import dumb.code.commands.undo.UndoCommand;
 import dumb.code.commands.mcr.McrCommand;
 import dumb.code.commands.unrecord.UnrecordCommand;
+import dumb.code.tools.FileSystemTool;
+import dumb.code.tools.VersionControlTool;
+import dumb.code.util.IProcessRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,47 +48,47 @@ public class CommandManager {
     private final Map<String, Command> commands;
     private final HelpService helpService;
 
-    public CommandManager(Code code, HelpService helpService) {
-        this.messageHandler = code.messageHandler;
+    public CommandManager(MessageHandler messageHandler, HelpService helpService, CodebaseTool codebaseTool, VersionControlTool versionControlTool, IProcessRunner processRunner, LMManager lmManager, FileSystemTool fileSystemTool) {
+        this.messageHandler = messageHandler;
         this.commands = new HashMap<>();
         this.helpService = helpService;
-        registerCommand("help", new HelpCommand(helpService, code.messageHandler));
-        registerCommand("exit", new ExitCommand(code));
-        registerCommand("add", new AddCommand(code));
-        registerCommand("diff", new DiffCommand(code));
-        registerCommand("record", new RecordCommand(code));
-        registerCommand("commit", new CommitCommand(code)); // Alias for record
-        registerCommand("query", new QueryCommand(code));
-        registerCommand("mcr", new McrCommand(code.processRunner, code.messageHandler));
+        registerCommand("help", new HelpCommand(helpService, messageHandler));
+        registerCommand("exit", new ExitCommand());
+        registerCommand("add", new AddCommand(messageHandler, codebaseTool, versionControlTool, fileSystemTool));
+        registerCommand("diff", new DiffCommand(versionControlTool, messageHandler));
+        registerCommand("record", new RecordCommand(versionControlTool, messageHandler));
+        registerCommand("commit", new CommitCommand(versionControlTool, messageHandler)); // Alias for record
+        registerCommand("query", new QueryCommand(lmManager, codebaseTool, messageHandler));
+        registerCommand("mcr", new McrCommand(processRunner, messageHandler));
 
         // Newly registered commands
-        registerCommand("apply", new ApplyCommand(code));
-        registerCommand("channel", new ChannelCommand(code));
-        registerCommand("clear", new ClearCommand(code));
-        registerCommand("codebase", new CodebaseCommand(code));
-        registerCommand("conflicts", new ConflictsCommand(code));
-        registerCommand("create", new CreateCommand(code));
-        registerCommand("drop", new DropCommand(code));
-        registerCommand("edit", new EditCommand(code));
-        registerCommand("grep", new GrepCommand(code));
-        registerCommand("image", new ImageCommand(code));
-        registerCommand("ls", new LsCommand(code));
-        registerCommand("mv", new MvCommand(code));
-        registerCommand("patch", new PatchCommand(code));
-        registerCommand("rm", new RmCommand(code));
-        registerCommand("run", new RunCommand(code));
-        registerCommand("speech", new SpeechCommand(code));
-        registerCommand("status", new StatusCommand(code));
-        registerCommand("test", new TestCommand(code));
-        registerCommand("tutorial", new TutorialCommand(code, helpService));
-        registerCommand("new", new CreateProjectCommand(code, helpService));
-        registerCommand("undo", new UndoCommand(code));
-        registerCommand("unrecord", new UnrecordCommand(code));
+        registerCommand("apply", new ApplyCommand(versionControlTool, messageHandler));
+        registerCommand("channel", new ChannelCommand(versionControlTool, messageHandler));
+        registerCommand("clear", new ClearCommand(codebaseTool, messageHandler));
+        registerCommand("codebase", new CodebaseCommand(codebaseTool, messageHandler));
+        registerCommand("conflicts", new ConflictsCommand(versionControlTool, messageHandler));
+        registerCommand("create", new CreateCommand(fileSystemTool, messageHandler));
+        registerCommand("drop", new DropCommand(codebaseTool, messageHandler));
+        registerCommand("edit", new EditCommand(lmManager, messageHandler));
+        registerCommand("grep", new GrepCommand(messageHandler));
+        registerCommand("image", new ImageCommand(messageHandler));
+        registerCommand("ls", new LsCommand(fileSystemTool, messageHandler));
+        registerCommand("mv", new MvCommand(messageHandler));
+        registerCommand("patch", new PatchCommand(messageHandler));
+        registerCommand("rm", new RmCommand(messageHandler));
+        registerCommand("run", new RunCommand(processRunner, messageHandler));
+        registerCommand("speech", new SpeechCommand(messageHandler));
+        registerCommand("status", new StatusCommand(versionControlTool, messageHandler));
+        registerCommand("test", new TestCommand(processRunner, messageHandler));
+        registerCommand("tutorial", new TutorialCommand(helpService, messageHandler));
+        registerCommand("new", new CreateProjectCommand(helpService, messageHandler));
+        registerCommand("undo", new UndoCommand(messageHandler));
+        registerCommand("unrecord", new UnrecordCommand(messageHandler));
 
         // Stubs for future commands
-        registerCommand("refactor", new RefactorCommand(code));
-        registerCommand("debug", new DebugCommand(code));
-        registerCommand("doc", new DocCommand(code));
+        registerCommand("refactor", new RefactorCommand(messageHandler));
+        registerCommand("debug", new DebugCommand(messageHandler));
+        registerCommand("doc", new DocCommand(messageHandler));
     }
 
     public void registerCommand(String name, Command command) {

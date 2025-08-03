@@ -1,8 +1,6 @@
 package dumb.code.commands.test;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
-import dumb.code.help.HelpService;
 import dumb.code.util.IProcessRunner;
 import dumb.code.util.ProcessResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,15 +15,12 @@ class TestCommandTest {
     private IProcessRunner processRunner;
     private MessageHandler messageHandler;
     private TestCommand testCommand;
-    private Code code;
 
     @BeforeEach
     void setUp() {
         processRunner = mock(IProcessRunner.class);
-        HelpService helpService = mock(HelpService.class);
-        code = new Code(null, null, null, helpService, processRunner);
-        messageHandler = code.messageHandler;
-        testCommand = new TestCommand(code);
+        messageHandler = new MessageHandler();
+        testCommand = new TestCommand(processRunner, messageHandler);
     }
 
     @Test

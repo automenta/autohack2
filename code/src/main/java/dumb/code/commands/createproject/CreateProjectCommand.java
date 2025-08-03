@@ -1,6 +1,5 @@
 package dumb.code.commands.createproject;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 import dumb.code.help.HelpService;
@@ -11,17 +10,16 @@ import java.util.List;
 import java.util.Optional;
 
 public class CreateProjectCommand implements Command {
-    private final Code code;
     private final HelpService helpService;
+    private final MessageHandler messageHandler;
 
-    public CreateProjectCommand(Code code, HelpService helpService) {
-        this.code = code;
+    public CreateProjectCommand(HelpService helpService, MessageHandler messageHandler) {
         this.helpService = helpService;
+        this.messageHandler = messageHandler;
     }
 
     @Override
     public void execute(String[] args) {
-        MessageHandler messageHandler = code.messageHandler;
         if (args.length == 0) {
             messageHandler.addMessage("system", "Usage: /new <template-name>");
             messageHandler.addMessage("system", "Creates a new project from a template in the current directory.");

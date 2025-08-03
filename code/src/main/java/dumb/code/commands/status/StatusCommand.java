@@ -1,27 +1,26 @@
 package dumb.code.commands.status;
 
-import dumb.code.Code;
+import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
-import dumb.code.versioning.Backend;
-
-import java.util.concurrent.CompletableFuture;
+import dumb.code.tools.VersionControlTool;
 
 public class StatusCommand implements Command {
-    private final Code code;
+    private final VersionControlTool versionControlTool;
+    private final MessageHandler messageHandler;
 
-    public StatusCommand(Code code) {
-        this.code = code;
+    public StatusCommand(VersionControlTool versionControlTool, MessageHandler messageHandler) {
+        this.versionControlTool = versionControlTool;
+        this.messageHandler = messageHandler;
     }
 
     @Override
     public void execute(String[] args) {
-        Backend backend = code.getBackend();
-        CompletableFuture<String> statusFuture = backend.status();
-
-        statusFuture.thenAccept(status -> code.messageHandler.addMessage("system", status)).exceptionally(error -> {
-            code.messageHandler.addMessage("system", "Error: " + error.getMessage());
-            return null;
-        });
+        try {
+            String status = versionControlTool.status();
+            messageHandler.addMessage("system", status);
+        } catch (Exception e) {
+            messageHandler.addMessage("system", "Error: " + e.getMessage());
+        }
     }
 
 }

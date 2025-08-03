@@ -1,6 +1,5 @@
 package dumb.code.commands.grep;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 
@@ -13,15 +12,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class GrepCommand implements Command {
-    private final Code code;
+    private final MessageHandler messageHandler;
 
-    public GrepCommand(Code code) {
-        this.code = code;
+    public GrepCommand(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
     }
 
     @Override
     public void execute(String[] args) {
-        MessageHandler messageHandler = code.messageHandler;
         if (args.length < 1) {
             messageHandler.addMessage("system", "Usage: /grep <pattern> [file...]");
             return;

@@ -1,9 +1,8 @@
 package dumb.code.commands.exit;
 
-import dumb.code.Code;
 import dumb.code.commands.Command;
 
-public record ExitCommand(Code code) implements Command {
+public record ExitCommand() implements Command {
 
     @Override
     public void init() {

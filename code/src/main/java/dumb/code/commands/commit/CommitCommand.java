@@ -1,16 +1,13 @@
 package dumb.code.commands.commit;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
-import dumb.code.versioning.Backend;
+import dumb.code.tools.VersionControlTool;
 
-public record CommitCommand(Code code) implements Command {
+public record CommitCommand(VersionControlTool versionControlTool, MessageHandler messageHandler) implements Command {
 
     @Override
     public void execute(String[] args) {
-        Backend backend = code.getBackend();
-        MessageHandler messageHandler = code.messageHandler;
         String message = String.join(" ", args);
 
         if (message.isEmpty()) {
@@ -18,12 +15,12 @@ public record CommitCommand(Code code) implements Command {
             return;
         }
 
-        backend.record(message)
-                .thenAccept(v -> messageHandler.addMessage("system", "Changes committed."))
-                .exceptionally(e -> {
-                    messageHandler.addMessage("system", "Error: " + e.getMessage());
-                    return null;
-                });
+        try {
+            versionControlTool.record(message);
+            messageHandler.addMessage("system", "Changes committed.");
+        } catch (Exception e) {
+            messageHandler.addMessage("system", "Error: " + e.getMessage());
+        }
     }
 
 }

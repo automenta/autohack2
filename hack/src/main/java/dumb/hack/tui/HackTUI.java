@@ -6,8 +6,6 @@ import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import dev.langchain4j.model.chat.ChatModel;
-import dumb.code.Code;
-import dumb.code.CodeUI;
 import dumb.code.tui.events.CommandFinishEvent;
 import dumb.code.tui.events.CommandOutputEvent;
 import dumb.code.tui.events.CommandStartEvent;
@@ -15,9 +13,14 @@ import dumb.code.tui.events.PlanGeneratedEvent;
 import dumb.code.tui.events.StatusUpdateEvent;
 import dumb.code.tui.events.TaskFinishEvent;
 import dumb.code.tui.events.UIEvent;
-import dumb.hack.App;
+import dumb.code.agent.AgentOrchestrator;
+import dumb.code.agent.ToolRegistry;
+import dumb.code.tools.FileSystemTool;
 import dumb.code.help.DefaultHelpService;
 import dumb.code.help.HelpService;
+import dumb.code.tools.CodebaseTool;
+import dumb.code.tools.FileSystemTool;
+import dumb.code.tools.VersionControlTool;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
 import dumb.lm.LMClient;
@@ -60,7 +63,6 @@ public class HackTUI {
 
 
     // Cache for the UI components
-    private CodeUI codeUI;
     private McrTUI mcrTUI;
     private Panel codePanel;
     private Panel codeViewPanel;
@@ -561,7 +563,6 @@ public class HackTUI {
 
     private void switchProject(Project project) {
         this.currentProject = project;
-        this.codeUI = null; // Invalidate the cache
         this.codePanel = null;
         this.codeViewPanel = null;
         this.actionPanel = null;
@@ -589,22 +590,32 @@ public class HackTUI {
                 return;
             }
             try {
+                // 1. Create Tools
+                FileSystemTool fileSystemTool = new FileSystemTool(currentProject.path);
+                VersionControlTool versionControlTool = new VersionControlTool(currentProject.path);
+                CodebaseTool codebaseTool = new CodebaseTool(versionControlTool, fileSystemTool);
+
+                // 2. Create ToolRegistry and register tools
+                ToolRegistry toolRegistry = new ToolRegistry();
+                toolRegistry.register(fileSystemTool);
+                toolRegistry.register(codebaseTool);
+                toolRegistry.register(versionControlTool);
+
+                // 3. Create AgentOrchestrator
                 ProviderFactory factory = new ProviderFactory(app.getLmOptions());
                 ChatModel model = factory.create();
-                LMClient lmClient = new LMClient(model);
-                MCR mcr = new MCR(lmClient);
-                HelpService helpService = new DefaultHelpService(mcr);
-                dumb.code.IFileManager fileManager = new dumb.code.FileManager(currentProject.path);
-                Code code = new Code(null, fileManager, new dumb.code.LMManager(lmClient), helpService, eventQueue);
-                codeUI = new CodeUI(code);
+                LMClient lmClient = new LMClient(app.getLmOptions().getProvider(), app.getLmOptions().getModel(), app.getLmOptions().getApiKey());
+                AgentOrchestrator orchestrator = new AgentOrchestrator(currentProject.path, new dumb.code.LMManager(lmClient));
 
+                // 4. Create UI
                 codeViewPanel = new Panel(new LinearLayout(Direction.VERTICAL));
 
                 actionPanel = new Panel(new LinearLayout(Direction.VERTICAL));
                 actionPanel.addComponent(new Label("Enter a task in the terminal below."));
                 codeViewPanel.addComponent(actionPanel.withBorder(Borders.singleLine("Plan")));
 
-                codePanel = codeUI.createPanel(); // This is the terminal
+                Terminal terminal = new Terminal(orchestrator, eventQueue);
+                codePanel = terminal.getPanel();
                 codeViewPanel.addComponent(codePanel);
 
             } catch (MissingApiKeyException e) {

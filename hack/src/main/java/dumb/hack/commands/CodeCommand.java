@@ -37,7 +37,7 @@ public class CodeCommand implements Callable<Integer> {
             return 1;
         }
 
-        LMClient lmClient = new LMClient(model);
+        LMClient lmClient = new LMClient(app.getLmOptions().getProvider(), app.getLmOptions().getModel(), app.getLmOptions().getApiKey());
         if (app.getLmOptions().getProvider().equals("mock")) {
             if (task.equals("create a new file called 'test.txt' with the content 'hello world'")) {
                 ((dumb.lm.mock.MockChatModel) model).setDefaultResponse("/create test.txt\n/edit test.txt \"hello world\"");
@@ -52,11 +52,9 @@ public class CodeCommand implements Callable<Integer> {
             }
         }
         dumb.mcr.MCR mcr = new dumb.mcr.MCR(lmClient);
-        HelpService helpService = new DefaultHelpService(mcr);
-        LMManager lmManager = new LMManager(lmClient);
-        Code code = new Code(backend, null, lmManager, helpService);
+        HelpService helpService = new DefaultHelpService(mcr, null);
 
-        ReasonCommand reasonCommand = new ReasonCommand(code, helpService);
+        ReasonCommand reasonCommand = new ReasonCommand(mcr.createSession(), new CodebaseTool(new VersionControlTool(System.getProperty("user.dir")), new FileSystemTool(System.getProperty("user.dir"))), null, new FileSystemTool(System.getProperty("user.dir")), false);
         reasonCommand.execute(new String[]{task});
 
         System.out.println("Non-interactive task completed.");

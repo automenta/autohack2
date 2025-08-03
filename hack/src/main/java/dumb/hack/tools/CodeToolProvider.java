@@ -1,7 +1,7 @@
 package dumb.hack.tools;
 
-import dumb.code.CodebaseManager;
-import dumb.code.IFileManager;
+import dumb.code.tools.CodebaseTool;
+import dumb.code.tools.FileSystemTool;
 import dumb.mcr.tools.Tool;
 import dumb.mcr.tools.ToolProvider;
 
@@ -12,8 +12,8 @@ public class CodeToolProvider implements ToolProvider {
 
     private final Map<String, Tool> tools = new HashMap<>();
 
-    public CodeToolProvider(IFileManager fileManager, CodebaseManager codebaseManager) {
-        CodeModificationTool modifyFileTool = new CodeModificationTool(fileManager, codebaseManager);
+    public CodeToolProvider(FileSystemTool fileSystemTool, CodebaseTool codebaseTool) {
+        CodeModificationTool modifyFileTool = new CodeModificationTool(fileSystemTool, codebaseTool);
         tools.put(modifyFileTool.name(), modifyFileTool);
     }
 

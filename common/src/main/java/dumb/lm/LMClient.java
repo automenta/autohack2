@@ -11,11 +11,18 @@ import dumb.lm.mock.MockChatModel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public record LMClient(ChatModel model) implements ILMClient {
+public class LMClient implements ILMClient {
     private static final Logger logger = Logger.getLogger(LMClient.class.getName());
+    private final ChatModel model;
+    private final String provider;
+    private final String modelName;
+    private final String apiKey;
 
     public LMClient(String provider, String modelName, String apiKey) {
-        this(createModel(provider, modelName, apiKey));
+        this.provider = provider;
+        this.modelName = modelName;
+        this.apiKey = apiKey;
+        this.model = createModel(provider, modelName, apiKey);
     }
 
     public void configureModel(String prompt, String response) {
@@ -64,5 +71,20 @@ public record LMClient(ChatModel model) implements ILMClient {
 
     public ChatModel getChatModel() {
         return model;
+    }
+
+    @Override
+    public String getProvider() {
+        return provider;
+    }
+
+    @Override
+    public String getModel() {
+        return modelName;
+    }
+
+    @Override
+    public String getApiKey() {
+        return apiKey;
     }
 }

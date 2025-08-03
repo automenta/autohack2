@@ -47,7 +47,6 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-mcp</artifactId>
-            <version>1.2.0-beta8</version>
         </dependency>
 
         <!-- Add java-diff-utils for diff and patch -->

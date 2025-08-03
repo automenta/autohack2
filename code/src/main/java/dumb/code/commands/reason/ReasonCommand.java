@@ -1,6 +1,7 @@
 package dumb.code.commands.reason;
 
-import dumb.code.Code;
+import dumb.code.CommandManager;
+import dumb.code.LMManager;
 import dumb.code.commands.Command;
 import dumb.code.help.HelpService;
 import dumb.code.tui.events.*;
@@ -12,24 +13,24 @@ import java.util.stream.Collectors;
 
 public class ReasonCommand implements Command {
 
-    private final Code code;
-    private final HelpService helpService;
+    private final LMManager lmManager;
+    private final CommandManager commandManager;
+    private final BlockingQueue<UIEvent> eventQueue;
 
-    public ReasonCommand(Code code, HelpService helpService) {
-        this.code = code;
-        this.helpService = helpService;
+    public ReasonCommand(LMManager lmManager, CommandManager commandManager, BlockingQueue<UIEvent> eventQueue) {
+        this.lmManager = lmManager;
+        this.commandManager = commandManager;
+        this.eventQueue = eventQueue;
     }
 
     @Override
     public void execute(String[] args) {
-        BlockingQueue<UIEvent> eventQueue = code.getEventQueue();
-
         String task = String.join(" ", args);
         postEvent(eventQueue, new StatusUpdateEvent("Reasoning about task: " + task));
 
         String prompt = "You are an expert software engineer. Your task is to break down the following natural language request into a series of commands to be executed in a terminal. The available commands are: /ls, /add, /rm, /create, /edit, /run, /test. Please provide only the commands, each on a new line.\n\nTask: " + task;
 
-        String response = code.lmManager.generateResponse(prompt);
+        String response = lmManager.generateResponse(prompt);
 
         if (eventQueue == null) {
             System.out.println("LLM Response:");
@@ -51,7 +52,7 @@ public class ReasonCommand implements Command {
                 System.out.println("Executing command: " + command);
             }
 
-            code.commandManager.processInput(command);
+            commandManager.processInput(command);
 
             // TODO: This is a temporary simplification. A proper implementation requires
             // the CommandManager to return a status. For now, we assume success to

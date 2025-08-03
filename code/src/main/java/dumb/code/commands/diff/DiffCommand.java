@@ -1,20 +1,17 @@
 package dumb.code.commands.diff;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
-import dumb.code.versioning.Backend;
+import dumb.code.tools.VersionControlTool;
 
-public record DiffCommand(Code code) implements Command {
+public record DiffCommand(VersionControlTool versionControlTool, MessageHandler messageHandler) implements Command {
 
     @Override
     public void execute(String[] args) {
-        Backend backend = code.getBackend();
-        MessageHandler messageHandler = code.messageHandler;
-
         try {
-            String diff = backend.diff().get();
-            code.setDiff(diff);
+            String diff = versionControlTool.diff();
+            // The diff is now returned, and the caller is responsible for handling it.
+            // For now, just print it to the message handler.
             messageHandler.addMessage("system", diff);
         } catch (Exception e) {
             messageHandler.addMessage("system", "Error: " + e.getMessage());

@@ -1,15 +1,15 @@
 package dumb.code.commands.apply;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
+import dumb.code.tools.VersionControlTool;
 import dumb.code.util.DiffUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public record ApplyCommand(Code code) implements Command {
+public record ApplyCommand(VersionControlTool versionControlTool, MessageHandler messageHandler) implements Command {
 
     @Override
     public void init() {
@@ -19,8 +19,7 @@ public record ApplyCommand(Code code) implements Command {
     @Override
     public void execute(String[] args) {
         try {
-            MessageHandler messageHandler = code.messageHandler;
-            String currentDiff = code.getDiff(); // Assuming Container has getDiff() method
+            String currentDiff = versionControlTool.diff();
 
             if (currentDiff == null || currentDiff.isEmpty()) {
                 messageHandler.addMessage("system", "No diff to apply.");
@@ -41,7 +40,6 @@ public record ApplyCommand(Code code) implements Command {
                 String result = DiffUtils.applyPatch(fileContent, currentDiff);
                 Files.write(filePathPath, result.getBytes());
                 messageHandler.addMessage("system", "Applied patch to " + filePath);
-                code.setDiff(null); // Clear the diff after application
             } catch (Exception e) {
                 messageHandler.addMessage("system", "Failed to apply patch: " + e.getMessage());
             }

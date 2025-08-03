@@ -1,12 +1,12 @@
 package dumb.code.commands;
 
-import dumb.code.Code;
-import dumb.code.CodebaseManager;
-import dumb.code.FileSystem;
+import dumb.code.tools.CodebaseTool;
+import dumb.code.tools.VersionControlTool;
+import dumb.code.tools.FileSystemTool;
 import dumb.code.MessageHandler;
-import dumb.code.versioning.Backend;
 
 import java.io.IOException;
+import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,18 +14,16 @@ import java.util.Arrays;
 
 public class AddCommand implements Command {
 
-    private final Code code;
     private final MessageHandler messageHandler;
-    private final CodebaseManager codebaseManager;
-    private final Backend backend;
-    private final FileSystem fs;
+    private final CodebaseTool codebaseTool;
+    private final VersionControlTool versionControlTool;
+    private final FileSystemTool fileSystemTool;
 
-    public AddCommand(Code code) {
-        this.code = code;
-        this.messageHandler = code.getMessageHandler();
-        this.codebaseManager = code.getCodebaseManager();
-        this.backend = code.getBackend();
-        this.fs = code.getFiles();
+    public AddCommand(MessageHandler messageHandler, CodebaseTool codebaseTool, VersionControlTool versionControlTool, FileSystemTool fileSystemTool) {
+        this.messageHandler = messageHandler;
+        this.codebaseTool = codebaseTool;
+        this.versionControlTool = versionControlTool;
+        this.fileSystemTool = fileSystemTool;
     }
 
     @Override
@@ -58,20 +56,19 @@ public class AddCommand implements Command {
     }
 
     private void processFile(Path filePath) {
-        codebaseManager.trackFile(filePath.toString()).thenRun(() -> messageHandler.addMessage("system", "Added and staged " + filePath)).exceptionally(e -> {
+        try {
+            codebaseTool.trackFile(filePath.toString());
+            messageHandler.addMessage("system", "Added and staged " + filePath);
+        } catch (Exception e) {
             e.printStackTrace();
             messageHandler.addMessage("system", "Error adding file: " + filePath);
-            return null;
-        });
+        }
     }
 
     private void addAllTracked() {
         try {
-            Backend backend = code.getBackend();
-            backend.listTrackedFiles().thenAccept(trackedFiles -> addFiles(trackedFiles.toArray(new String[0]))).exceptionally(e -> {
-                e.printStackTrace();
-                return null;
-            });
+            List<String> trackedFiles = versionControlTool.listTrackedFiles();
+            addFiles(trackedFiles.toArray(new String[0]));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,11 +76,8 @@ public class AddCommand implements Command {
 
     private void addAllUntracked() {
         try {
-            Backend backend = code.getBackend();
-            backend.listUntrackedFiles().thenAccept(untrackedFiles -> addFiles(untrackedFiles.toArray(new String[0]))).exceptionally(e -> {
-                e.printStackTrace();
-                return null;
-            });
+            List<String> untrackedFiles = versionControlTool.listUntrackedFiles();
+            addFiles(untrackedFiles.toArray(new String[0]));
         } catch (Exception e) {
             e.printStackTrace();
         }

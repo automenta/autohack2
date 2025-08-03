@@ -1,6 +1,5 @@
 package dumb.code.commands.tutorial;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 import dumb.code.help.HelpService;
@@ -11,14 +10,12 @@ import java.util.Optional;
 
 public class TutorialCommand implements Command {
 
-    private final Code code;
     private final HelpService helpService;
     private final MessageHandler messageHandler;
 
-    public TutorialCommand(Code code, HelpService helpService) {
-        this.code = code;
+    public TutorialCommand(HelpService helpService, MessageHandler messageHandler) {
         this.helpService = helpService;
-        this.messageHandler = code.messageHandler;
+        this.messageHandler = messageHandler;
     }
 
     @Override

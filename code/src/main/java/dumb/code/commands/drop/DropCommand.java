@@ -1,15 +1,16 @@
 package dumb.code.commands.drop;
 
-import dumb.code.Code;
-import dumb.code.CodebaseManager;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
+import dumb.code.tools.CodebaseTool;
 
 public class DropCommand implements Command {
-    private final Code code;
+    private final CodebaseTool codebaseTool;
+    private final MessageHandler messageHandler;
 
-    public DropCommand(Code code) {
-        this.code = code;
+    public DropCommand(CodebaseTool codebaseTool, MessageHandler messageHandler) {
+        this.codebaseTool = codebaseTool;
+        this.messageHandler = messageHandler;
     }
 
     @Override
@@ -19,12 +20,9 @@ public class DropCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        CodebaseManager codebaseManager = code.codebaseManager;
-        MessageHandler messageHandler = code.messageHandler;
-
         for (String file : args) {
-            if (codebaseManager.getFiles().contains(file)) {
-                codebaseManager.removeFile(file);
+            if (codebaseTool.getFiles().contains(file)) {
+                codebaseTool.removeFile(file);
                 messageHandler.addMessage("system", "Removed " + file + " from the chat.");
             } else {
                 messageHandler.addMessage("system", "File " + file + " not found in the chat.");

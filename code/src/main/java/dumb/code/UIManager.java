@@ -3,25 +3,27 @@ package dumb.code;
 import dumb.code.tui.Terminal;
 
 public class UIManager {
-    private final Code code;
+    private final MessageHandler messageHandler;
     private Terminal terminal;
 
 
-    public UIManager(Code code) {
-        this.code = code;
+    public UIManager(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+    }
+
+    public void setTerminal(Terminal terminal) {
+        this.terminal = terminal;
+        this.messageHandler.setTerminal(terminal);
     }
 
     private Terminal getTerminal() {
-        if (this.terminal == null) {
-            this.terminal = this.code.getTerminal();
-        }
         return this.terminal;
     }
 
 
     public void displayWelcomeMessage() {
         // Display welcome message
-        code.messageHandler.onMessage("Welcome to PijulAider!");
+        messageHandler.onMessage("Welcome to PijulAider!");
     }
 
     public String getUserInput() {

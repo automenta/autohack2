@@ -1,9 +1,8 @@
 package dumb.hack.commands;
 
-import dumb.code.CodebaseManager;
-import dumb.code.IFileManager;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
+import dumb.code.tools.CodebaseTool;
 import dumb.hack.util.CodeParser;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
@@ -15,42 +14,42 @@ import java.util.stream.Collectors;
 
 public record ReasonCommand(
         Session mcrSession,
-        CodebaseManager codebaseManager,
+        CodebaseTool codebaseTool,
         MessageHandler messageHandler,
-        IFileManager fileManager,
+        FileSystemTool fileSystemTool,
         boolean interactive
 ) implements Command {
 
     @Override
     public void execute(String[] args) {
         if (args.length == 0) {
-            messageHandler.addMessage("system", "Usage: /reason <your task>");
+            System.out.println("Usage: /reason <your task>");
             return;
         }
 
         if (mcrSession == null) {
-            messageHandler.addMessage("system", "MCR Session not initialized.");
+            System.out.println("MCR Session not initialized.");
             return;
         }
 
         String task = String.join(" ", args);
-        messageHandler.addMessage("system", "Task: " + task);
+        System.out.println("Task: " + task);
 
         // Automatically proceed with the task
 
-        messageHandler.addMessage("system", "Reasoning...");
+        System.out.println("Reasoning...");
         addCodebaseContext();
 
         ReasoningResult result = mcrSession.reason(task);
 
-        messageHandler.addMessage("system", "\n--- Reasoning History ---");
+        System.out.println("\n--- Reasoning History ---");
         for (StepResult step : result.history()) {
             displayStep(step);
         }
-        messageHandler.addMessage("system", "--- End of History ---\n");
+        System.out.println("--- End of History ---\n");
 
         String answer = result.answer();
-        messageHandler.addMessage("system", "Final Answer: " + answer);
+        System.out.println("Final Answer: " + answer);
     }
 
     private void displayStep(StepResult step) {
@@ -62,25 +61,25 @@ public record ReasonCommand(
                             .map(Object::toString)
                             .collect(Collectors.joining(", "));
                 }
-                messageHandler.addMessage("system", "🤖 Thought: " + prologStep.goal() + " -> " + solutions);
+                System.out.println("🤖 Thought: " + prologStep.goal() + " -> " + solutions);
             }
             case ToolStep toolStep -> {
-                messageHandler.addMessage("system", "🛠️ Tool Call: " + toolStep.toolName());
-                messageHandler.addMessage("system", "   Args: " + toolStep.args());
-                messageHandler.addMessage("system", "   Result: " + toolStep.result());
+                System.out.println("🛠️ Tool Call: " + toolStep.toolName());
+                System.out.println("   Args: " + toolStep.args());
+                System.out.println("   Result: " + toolStep.result());
             }
-            default -> messageHandler.addMessage("system", "Unknown step type: " + step.getClass().getName());
+            default -> System.out.println("Unknown step type: " + step.getClass().getName());
         }
     }
 
 
     private void addCodebaseContext() {
         CodeParser codeParser = new CodeParser();
-        java.util.List<String> files = codebaseManager.getFiles();
+        java.util.List<String> files = codebaseTool.getFiles();
         for (String file : files) {
-            String content = codebaseManager.getFileContent(file);
+            String content = codebaseTool.getFileContent(file);
             if (content != null) {
-                java.nio.file.Path filePath = java.nio.file.Paths.get(fileManager.getRootDir(), file);
+                java.nio.file.Path filePath = java.nio.file.Paths.get(fileSystemTool.getRootDir(), file);
                 java.util.List<String> facts = codeParser.parse(filePath, content);
                 for (String fact : facts) {
                     if (fact != null && !fact.isBlank() && fact.matches("^[a-z_]+\\(.*\\)\\.$")) {
@@ -91,12 +90,12 @@ public record ReasonCommand(
         }
 
         try {
-            String status = codebaseManager.getVersioningBackend().status().get();
+            String status = codebaseTool.versionControlTool().status().get();
             if (status != null && !status.isBlank()) {
                 mcrSession.assertProlog("git_status(\"" + status + "\").");
             }
         } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
-            messageHandler.addMessage("system", "Error getting git status: " + e.getMessage());
+            System.out.println("Error getting git status: " + e.getMessage());
             Thread.currentThread().interrupt();
         }
     }

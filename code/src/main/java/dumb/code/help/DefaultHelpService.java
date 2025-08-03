@@ -1,6 +1,5 @@
 package dumb.code.help;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.project.ProjectTemplate;
 import dumb.code.project.TemplateManager;
@@ -15,22 +14,14 @@ public class DefaultHelpService implements HelpService {
     private final MCR mcr;
     private MessageHandler messageHandler;
     private final TemplateManager templateManager;
-    private Code code;
 
-    public DefaultHelpService(MCR mcr) {
+    public DefaultHelpService(MCR mcr, MessageHandler messageHandler) {
         this.mcr = mcr;
+        this.messageHandler = messageHandler;
         // Assuming templates are in a "templates" directory at the project root
         this.templateManager = new TemplateManager("templates");
     }
 
-    @Override
-    public void setCode(Code code) {
-        this.code = code;
-    }
-
-    public void setMessageHandler(MessageHandler messageHandler) {
-        this.messageHandler = messageHandler;
-    }
 
     @Override
     public List<String> getHelp() {
@@ -94,11 +85,7 @@ public class DefaultHelpService implements HelpService {
             System.out.println("Error: MessageHandler not set.");
             return;
         }
-        if (code == null) {
-            System.out.println("Error: Code context not set. Cannot start tutorial.");
-            return;
-        }
-        this.tutorialManager = new TutorialManager(template, mcr, code);
+        this.tutorialManager = new TutorialManager(template, mcr, messageHandler);
         String message = tutorialManager.start();
         messageHandler.addMessage("system", message);
     }

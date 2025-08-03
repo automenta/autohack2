@@ -48,7 +48,7 @@ public class McrCommand implements Callable<Integer> {
             return 1;
         }
 
-        LMClient lmClient = new LMClient(model);
+        LMClient lmClient = new LMClient(app.getLmOptions().getProvider(), app.getLmOptions().getModel(), app.getLmOptions().getApiKey());
         MCR mcr = new MCR(lmClient);
         Session session = mcr.createSession();
 

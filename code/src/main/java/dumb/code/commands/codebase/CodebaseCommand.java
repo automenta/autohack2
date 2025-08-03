@@ -1,21 +1,22 @@
 package dumb.code.commands.codebase;
 
-import dumb.code.Code;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
+import dumb.code.tools.CodebaseTool;
 
 public class CodebaseCommand implements Command {
-    private final Code code;
+    private final CodebaseTool codebaseTool;
     private final MessageHandler messageHandler;
 
-    public CodebaseCommand(Code code) {
-        this.code = code;
-        this.messageHandler = code.messageHandler;
+    public CodebaseCommand(CodebaseTool codebaseTool, MessageHandler messageHandler) {
+        this.codebaseTool = codebaseTool;
+        this.messageHandler = messageHandler;
     }
 
     @Override
     public void execute(String[] args) {
-        messageHandler.addMessage("system", "Codebase command is not yet implemented.");
+        String representation = codebaseTool.getCodebaseRepresentation();
+        messageHandler.addMessage("system", "Current codebase context:\n" + representation);
     }
 
 }

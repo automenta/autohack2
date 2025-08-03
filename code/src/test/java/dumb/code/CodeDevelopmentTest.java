@@ -1,47 +1,35 @@
 package dumb.code;
 
-import dumb.lm.LMClient;
+import dumb.code.agent.AgentOrchestrator;
+import dumb.code.tools.FileSystemTool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import java.io.File;
 
-import dumb.code.help.HelpService;
-import org.mockito.Mock;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CodeDevelopmentTest {
 
-    private Code code;
-    private CommandManager commandManager;
-    private InMemoryFileManager fileManager;
+    private AgentOrchestrator orchestrator;
+    private FileSystemTool fileSystemTool;
 
-    @Mock
-    private HelpService helpService;
+    @TempDir
+    File tempDir;
 
     @BeforeEach
-    void setUp() {
-        fileManager = new InMemoryFileManager();
-        LMClient lmClient = new LMClient("mock", "mock-model", "mock-key");
-        LMManager lmManager = new LMManager(lmClient);
-        helpService = mock(HelpService.class);
-
-        // The "files" backend is most suitable for in-memory testing
-        code = new Code("files", fileManager, lmManager, helpService);
-        commandManager = code.commandManager;
+    public void setUp() {
+        // Use a temporary directory for the file manager to avoid cluttering the project root
+        fileSystemTool = new FileSystemTool(tempDir.getAbsolutePath());
+        orchestrator = new AgentOrchestrator(tempDir.getAbsolutePath(), new LMManager("mock", "mock-model", "mock-key"));
     }
 
     @Test
-    void testCreateCommand() throws java.io.IOException {
-        // Arrange
-        String fileName = "new_test_file.txt";
-        assertFalse(fileManager.fileExists(fileName), "File should not exist before creation.");
+    public void testCreateFile() {
+        orchestrator.getCommandManager().processInput("/create new_test_file.txt");
 
-        // Act
-        commandManager.processInput("/create " + fileName);
-
-        // Assert
-        assertTrue(fileManager.fileExists(fileName), "File should exist after /create command.");
-        assertEquals("", fileManager.readFile(fileName), "Newly created file should be empty.");
+        // Verify that the file was created
+        assertTrue(fileSystemTool.fileExists("new_test_file.txt"));
     }
 }

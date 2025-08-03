@@ -1,10 +1,7 @@
 package dumb.code.help;
 
-import dumb.code.Code;
-import dumb.code.CodebaseManager;
-import dumb.code.IFileManager;
+import dumb.code.MessageHandler;
 import dumb.code.project.ProjectTemplate;
-import dumb.code.versioning.Backend;
 import dumb.mcr.MCR;
 import dumb.mcr.QueryResult;
 import dumb.mcr.ReasoningResult;
@@ -38,16 +35,7 @@ class TutorialManagerTest {
     private Session mcrSession;
 
     @Mock
-    private Code code;
-
-    @Mock
-    private IFileManager fileManager;
-
-    @Mock
-    private Backend backend;
-
-    @Mock
-    private CodebaseManager codebaseManager;
+    private MessageHandler messageHandler;
 
     private TutorialManager tutorialManager;
 
@@ -55,11 +43,6 @@ class TutorialManagerTest {
     void setUp() {
         // Configure mocks
         when(mcr.createSession()).thenReturn(mcrSession);
-        code.fileManager = fileManager;
-        code.codebaseManager = codebaseManager;
-        when(code.getBackend()).thenReturn(backend);
-        when(code.getChatFiles()).thenReturn(Collections.emptyList());
-        when(codebaseManager.getFiles()).thenReturn(Collections.emptyList());
         // Default mock for reason() to avoid NPE in start() method
         when(mcrSession.reason(anyString())).thenReturn(new ReasoningResult("Default instruction.", Collections.emptyList()));
 
@@ -75,7 +58,7 @@ class TutorialManagerTest {
         template.setTutorial(List.of(goal));
 
         // Initialize the manager
-        tutorialManager = new TutorialManager(template, mcr, code);
+        tutorialManager = new TutorialManager(template, mcr, messageHandler);
     }
 
     @Test
