@@ -57,6 +57,7 @@ public class HackTUI {
     private Panel sidebarPanel;
     private Button codeButton;
     private Button mcrButton;
+    private Button deleteProjectButton;
     private BasicWindow window;
 
 
@@ -64,7 +65,8 @@ public class HackTUI {
     private CodeUI codeUI;
     private McrTUI mcrTUI;
     private Panel codePanel;
-    private Panel mcrPanel;
+    private Panel codeViewPanel;
+    private Panel actionPanel;
 
     // State for the Action View
     private List<String> planSteps;
@@ -154,6 +156,10 @@ public class HackTUI {
 
     private void showWelcomeScreen(Panel sidebar, Button codeButton, Button mcrButton) {
         sidebar.addComponent(new Button("New Project...", this::showNewProjectDialog));
+        deleteProjectButton = new Button("Delete Project", this::showDeleteProjectDialog);
+        deleteProjectButton.setEnabled(false);
+        sidebar.addComponent(deleteProjectButton);
+
         contentPanel.addComponent(new Label("Welcome to Hack! Create a project to get started."));
         statusBar.setText("No projects loaded.");
         codeButton.setEnabled(false);
@@ -167,19 +173,24 @@ public class HackTUI {
                 switchProject(project);
                 codeButton.setEnabled(true);
                 mcrButton.setEnabled(true);
+                deleteProjectButton.setEnabled(true);
             });
         }
         sidebar.addComponent(projectListBox);
         sidebar.addComponent(new Button("New Project...", this::showNewProjectDialog));
+        deleteProjectButton = new Button("Delete Project", this::showDeleteProjectDialog);
+        sidebar.addComponent(deleteProjectButton);
 
         // Auto-select first project
         if (currentProject != null) {
             switchProject(currentProject);
             codeButton.setEnabled(true);
             mcrButton.setEnabled(true);
+            deleteProjectButton.setEnabled(true);
         } else {
             codeButton.setEnabled(false);
             mcrButton.setEnabled(false);
+            deleteProjectButton.setEnabled(false);
         }
     }
 
@@ -206,11 +217,17 @@ public class HackTUI {
 
         Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
         buttonPanel.addComponent(new Button("Create", () -> {
-            String name = nameBox.getText();
+            String name = nameBox.getText().trim();
             Template selectedTemplate = templateBox.getSelectedItem();
 
-            if (name.trim().isEmpty()) {
+            if (name.isEmpty()) {
                 MessageDialog.showMessageDialog(gui, "Input Error", "Project Name cannot be empty.");
+                return;
+            }
+
+            // Check for duplicate project name
+            if (projects.stream().anyMatch(p -> p.name.equalsIgnoreCase(name))) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "A project with this name already exists.");
                 return;
             }
 
@@ -264,6 +281,75 @@ public class HackTUI {
         statusBar.setText("Project '" + name + "' created successfully!");
     }
 
+    private void showDeleteProjectDialog() {
+        if (currentProject == null) {
+            MessageDialog.showMessageDialog(gui, "Error", "No project selected to delete.");
+            return;
+        }
+
+        final BasicWindow dialog = new BasicWindow("Confirm Deletion");
+        dialog.setHints(Arrays.asList(Window.Hint.CENTERED));
+        Panel panel = new Panel(new LinearLayout(Direction.VERTICAL));
+
+        panel.addComponent(new Label("Are you sure you want to delete the project '" + currentProject.name + "'?"));
+        panel.addComponent(new Label("This will permanently delete the directory:"));
+        panel.addComponent(new Label(currentProject.path));
+        panel.addComponent(new EmptySpace());
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        buttonPanel.addComponent(new Button("Yes, Delete", () -> {
+            deleteCurrentProject();
+            dialog.close();
+        }));
+        buttonPanel.addComponent(new Button("No, Cancel", dialog::close));
+        panel.addComponent(buttonPanel);
+
+        dialog.setComponent(panel);
+        gui.addWindow(dialog);
+    }
+
+    private void deleteCurrentProject() {
+        if (currentProject == null) {
+            return; // Should not happen if called from dialog
+        }
+
+        Project projectToDelete = currentProject;
+
+        // 1. Delete project directory
+        try {
+            FileUtils.deleteDirectory(new File(projectToDelete.path));
+        } catch (IOException e) {
+            MessageDialog.showMessageDialog(gui, "Error", "Could not delete project directory: " + e.getMessage());
+            return; // Stop if we can't delete the files
+        }
+
+        // 2. Remove project from list
+        projects.remove(projectToDelete);
+
+        // 3. Save updated projects.json
+        try (FileWriter writer = new FileWriter("projects.json")) {
+            new GsonBuilder().setPrettyPrinting().create().toJson(projects, writer);
+        } catch (IOException e) {
+            // This is tricky. The directory is gone but the config is not updated.
+            // For now, we'll just show an error. A more robust solution might try to restore the directory or retry saving.
+            MessageDialog.showMessageDialog(gui, "Fatal Error", "Could not save projects file after deletion: " + e.getMessage() + "\nPlease check your projects.json file.");
+            // We continue to update the UI, as the in-memory list is correct.
+        }
+
+        // 4. Update UI state
+        statusBar.setText("Project '" + projectToDelete.name + "' deleted.");
+        currentProject = projects.isEmpty() ? null : projects.get(0); // Select first project or null
+
+        // 5. Refresh the UI
+        sidebarPanel.removeAllComponents();
+        contentPanel.removeAllComponents();
+        if (projects.isEmpty()) {
+            showWelcomeScreen(sidebarPanel, codeButton, mcrButton);
+        } else {
+            showProjectScreen(sidebarPanel, codeButton, mcrButton);
+        }
+    }
+
     private void startEventProcessor() {
         gui.getGUIThread().invokeLater(() -> {
             while (true) {
@@ -283,16 +369,19 @@ public class HackTUI {
         if (event instanceof StatusUpdateEvent e) {
             statusBar.setText(e.status());
         } else if (event instanceof PlanGeneratedEvent e) {
+            // We now have a persistent actionPanel, so we just clear it and add the new plan.
+            if (actionPanel == null) return; // Should not happen if view is visible
+
             this.planSteps = e.plan();
             this.stepLabels = new java.util.ArrayList<>();
-            Panel actionPanel = new Panel(new LinearLayout(Direction.VERTICAL));
+
+            actionPanel.removeAllComponents(); // Clear the persistent panel
+
             for (int i = 0; i < planSteps.size(); i++) {
                 Label stepLabel = new Label("[ ] " + (i + 1) + ". " + planSteps.get(i));
                 stepLabels.add(stepLabel);
-                actionPanel.addComponent(stepLabel);
+                actionPanel.addComponent(stepLabel); // Add to the persistent panel
             }
-            contentPanel.removeAllComponents();
-            contentPanel.addComponent(actionPanel);
         } else if (event instanceof CommandStartEvent e) {
             if (e.commandIndex() < stepLabels.size()) {
                 stepLabels.get(e.commandIndex()).setText("[*] " + (e.commandIndex() + 1) + ". " + planSteps.get(e.commandIndex()));
@@ -314,14 +403,18 @@ public class HackTUI {
         this.currentProject = project;
         this.codeUI = null; // Invalidate the cache
         this.codePanel = null;
+        this.codeViewPanel = null;
+        this.actionPanel = null;
+        if (deleteProjectButton != null) {
+            deleteProjectButton.setEnabled(true);
+        }
         contentPanel.removeAllComponents();
         statusBar.setText("Switched to project: " + project.name);
         showCodeTUI(); // Reload the Code TUI for the new project
     }
 
     private void showCodeTUI() {
-        contentPanel.removeAllComponents();
-        if (codeUI == null) {
+        if (codeViewPanel == null) {
             if (currentProject == null) {
                 contentPanel.addComponent(new Label("Error: No project selected."));
                 return;
@@ -335,38 +428,59 @@ public class HackTUI {
                 dumb.code.IFileManager fileManager = new dumb.code.FileManager(currentProject.path);
                 Code code = new Code(null, fileManager, new dumb.code.LMManager(lmClient), helpService, eventQueue);
                 codeUI = new CodeUI(code);
-                codePanel = codeUI.createPanel();
+
+                codeViewPanel = new Panel(new LinearLayout(Direction.VERTICAL));
+
+                actionPanel = new Panel(new LinearLayout(Direction.VERTICAL));
+                actionPanel.addComponent(new Label("Enter a task in the terminal below."));
+                codeViewPanel.addComponent(actionPanel.withBorder(Borders.singleLine("Plan")));
+
+                codePanel = codeUI.createPanel(); // This is the terminal
+                codeViewPanel.addComponent(codePanel);
+
             } catch (MissingApiKeyException e) {
+                contentPanel.removeAllComponents();
                 contentPanel.addComponent(new Label("Error starting Code TUI: " + e.getMessage()));
                 return;
             }
         }
-        contentPanel.addComponent(codePanel);
+        contentPanel.removeAllComponents();
+        contentPanel.addComponent(codeViewPanel);
         statusBar.setText("Project: " + currentProject.name + " | Mode: Code");
     }
 
     private void showMcrTUI() {
         contentPanel.removeAllComponents();
-        if (mcrTUI == null) {
-            try {
-                ProviderFactory factory = new ProviderFactory(app.getLmOptions());
-                ChatModel model = factory.create();
-                LMClient lmClient = new LMClient(model);
-                MCR mcr = new MCR(lmClient);
-                Session session = mcr.createSession();
-                session.assertProlog("is_a(tweety, canary).");
-                session.assertProlog("bird(X) :- is_a(X, canary).");
-                session.assertProlog("has_wings(X) :- bird(X).");
-                session.addRelationship("tweety", "likes", "seeds");
+        try {
+            ProviderFactory factory = new ProviderFactory(app.getLmOptions());
+            ChatModel model = factory.create();
+            LMClient lmClient = new LMClient(model);
+            MCR mcr = new MCR(lmClient);
+            Session session = mcr.createSession();
 
-                mcrTUI = new McrTUI(session);
-                mcrPanel = mcrTUI.createPanel();
-            } catch (MissingApiKeyException e) {
-                contentPanel.addComponent(new Label("Error starting MCR TUI: " + e.getMessage()));
-                return;
+            // Assert facts about existing projects
+            if (projects != null) {
+                for (Project project : projects) {
+                    // Escape quotes in name just in case
+                    String projectName = project.name.replace("\"", "\\\"");
+                    session.assertProlog("project(\"" + projectName + "\").");
+                }
             }
+
+            // The old hardcoded facts
+            session.assertProlog("is_a(tweety, canary).");
+            session.assertProlog("bird(X) :- is_a(X, canary).");
+            session.assertProlog("has_wings(X) :- bird(X).");
+            session.addRelationship("tweety", "likes", "seeds");
+
+            mcrTUI = new McrTUI(session);
+            Panel newMcrPanel = mcrTUI.createPanel();
+            contentPanel.addComponent(newMcrPanel);
+
+        } catch (MissingApiKeyException e) {
+            contentPanel.addComponent(new Label("Error starting MCR TUI: " + e.getMessage()));
+            return;
         }
-        contentPanel.addComponent(mcrPanel);
         statusBar.setText("Mode: MCR");
     }
 }
