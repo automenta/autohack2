@@ -46,11 +46,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class HackTUI {
 
-    private static class Project {
-        String name;
-        String path;
-    }
-
     private final App app;
     private Panel contentPanel;
     private Label statusBar;
@@ -58,6 +53,9 @@ public class HackTUI {
     private Button codeButton;
     private Button mcrButton;
     private Button deleteProjectButton;
+    private Button renameProjectButton;
+    private Button archiveProjectButton;
+    private Button healthCheckButton;
     private BasicWindow window;
 
 
@@ -72,29 +70,17 @@ public class HackTUI {
     private List<String> planSteps;
     private List<Label> stepLabels;
     private MultiWindowTextGUI gui;
-    private List<Project> projects;
+    private ProjectManager projectManager;
     private Project currentProject;
     private final BlockingQueue<UIEvent> eventQueue = new LinkedBlockingQueue<>();
 
 
     public HackTUI(App app) {
         this.app = app;
-        loadProjects();
+        this.projectManager = new ProjectManager();
+        List<Project> projects = projectManager.getProjects();
         if (projects != null && !projects.isEmpty()) {
             currentProject = projects.get(0);
-        }
-    }
-
-    private void loadProjects() {
-        try (FileReader reader = new FileReader("projects.json")) {
-            Type projectListType = new TypeToken<ArrayList<Project>>() {}.getType();
-            projects = new Gson().fromJson(reader, projectListType);
-            if (projects == null) {
-                projects = new ArrayList<>();
-            }
-        } catch (IOException e) {
-            projects = new ArrayList<>();
-            // This is not an error, it just means the user hasn't created any projects yet.
         }
     }
 
@@ -135,7 +121,7 @@ public class HackTUI {
 
             rootPanel.addComponent(mainContentPanel);
 
-            if (projects.isEmpty()) {
+            if (projectManager.getProjects().isEmpty()) {
                 showWelcomeScreen(sidebarPanel, codeButton, mcrButton);
             } else {
                 showProjectScreen(sidebarPanel, codeButton, mcrButton);
@@ -156,6 +142,16 @@ public class HackTUI {
 
     private void showWelcomeScreen(Panel sidebar, Button codeButton, Button mcrButton) {
         sidebar.addComponent(new Button("New Project...", this::showNewProjectDialog));
+        sidebar.addComponent(new Button("Import Project...", this::showImportProjectDialog));
+        renameProjectButton = new Button("Rename Project", this::showRenameProjectDialog);
+        renameProjectButton.setEnabled(false);
+        sidebar.addComponent(renameProjectButton);
+        archiveProjectButton = new Button("Archive Project", this::showArchiveProjectDialog);
+        archiveProjectButton.setEnabled(false);
+        sidebar.addComponent(archiveProjectButton);
+        healthCheckButton = new Button("Health Check", this::runHealthCheck);
+        healthCheckButton.setEnabled(false);
+        sidebar.addComponent(healthCheckButton);
         deleteProjectButton = new Button("Delete Project", this::showDeleteProjectDialog);
         deleteProjectButton.setEnabled(false);
         sidebar.addComponent(deleteProjectButton);
@@ -168,7 +164,7 @@ public class HackTUI {
 
     private void showProjectScreen(Panel sidebar, Button codeButton, Button mcrButton) {
         ActionListBox projectListBox = new ActionListBox();
-        for (Project project : projects) {
+        for (Project project : projectManager.getProjects()) {
             projectListBox.addItem(project.name, () -> {
                 switchProject(project);
                 codeButton.setEnabled(true);
@@ -178,6 +174,13 @@ public class HackTUI {
         }
         sidebar.addComponent(projectListBox);
         sidebar.addComponent(new Button("New Project...", this::showNewProjectDialog));
+        sidebar.addComponent(new Button("Import Project...", this::showImportProjectDialog));
+        renameProjectButton = new Button("Rename Project", this::showRenameProjectDialog);
+        sidebar.addComponent(renameProjectButton);
+        archiveProjectButton = new Button("Archive Project", this::showArchiveProjectDialog);
+        sidebar.addComponent(archiveProjectButton);
+        healthCheckButton = new Button("Health Check", this::runHealthCheck);
+        sidebar.addComponent(healthCheckButton);
         deleteProjectButton = new Button("Delete Project", this::showDeleteProjectDialog);
         sidebar.addComponent(deleteProjectButton);
 
@@ -187,10 +190,16 @@ public class HackTUI {
             codeButton.setEnabled(true);
             mcrButton.setEnabled(true);
             deleteProjectButton.setEnabled(true);
+            renameProjectButton.setEnabled(true);
+            archiveProjectButton.setEnabled(true);
+            healthCheckButton.setEnabled(true);
         } else {
             codeButton.setEnabled(false);
             mcrButton.setEnabled(false);
             deleteProjectButton.setEnabled(false);
+            renameProjectButton.setEnabled(false);
+            archiveProjectButton.setEnabled(false);
+            healthCheckButton.setEnabled(false);
         }
     }
 
@@ -226,7 +235,7 @@ public class HackTUI {
             }
 
             // Check for duplicate project name
-            if (projects.stream().anyMatch(p -> p.name.equalsIgnoreCase(name))) {
+            if (projectManager.getProjects().stream().anyMatch(p -> p.name.equalsIgnoreCase(name))) {
                 MessageDialog.showMessageDialog(gui, "Input Error", "A project with this name already exists.");
                 return;
             }
@@ -247,38 +256,187 @@ public class HackTUI {
         gui.addWindow(dialog);
     }
 
-    private void createNewProject(String name, Template template) {
-        Path projectPath = Paths.get(System.getProperty("user.home"), ".autohack", "projects", name);
+    private void showImportProjectDialog() {
+        final BasicWindow dialog = new BasicWindow("Import Existing Project");
+        dialog.setHints(Arrays.asList(Window.Hint.CENTERED));
 
-        // 1. Create project directory from template
+        Panel dialogPanel = new Panel(new GridLayout(2));
+
+        dialogPanel.addComponent(new Label("Project Path:"));
+        final TextBox pathBox = new TextBox().addTo(dialogPanel);
+
+        dialogPanel.addComponent(new EmptySpace(new TerminalSize(0, 0))); // Spacer
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        buttonPanel.addComponent(new Button("Import", () -> {
+            String path = pathBox.getText().trim();
+
+            if (path.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "Project Path cannot be empty.");
+                return;
+            }
+
+            File projectDir = new File(path);
+            if (!projectDir.exists() || !projectDir.isDirectory()) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "The specified path is not a valid directory.");
+                return;
+            }
+
+            String name = projectDir.getName();
+            if (projectManager.getProjects().stream().anyMatch(p -> p.name.equalsIgnoreCase(name))) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "A project with the same name as the directory already exists.");
+                return;
+            }
+
+            dialog.close();
+            importProject(path);
+        }));
+        buttonPanel.addComponent(new Button("Cancel", dialog::close));
+
+        dialogPanel.addComponent(buttonPanel);
+
+        dialog.setComponent(dialogPanel);
+        gui.addWindow(dialog);
+    }
+
+    private void showRenameProjectDialog() {
+        if (currentProject == null) {
+            MessageDialog.showMessageDialog(gui, "Error", "No project selected to rename.");
+            return;
+        }
+
+        final BasicWindow dialog = new BasicWindow("Rename Project");
+        dialog.setHints(Arrays.asList(Window.Hint.CENTERED));
+
+        Panel dialogPanel = new Panel(new GridLayout(2));
+
+        dialogPanel.addComponent(new Label("New Project Name:"));
+        final TextBox nameBox = new TextBox(currentProject.name).addTo(dialogPanel);
+
+        dialogPanel.addComponent(new EmptySpace(new TerminalSize(0, 0))); // Spacer
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        buttonPanel.addComponent(new Button("Rename", () -> {
+            String newName = nameBox.getText().trim();
+
+            if (newName.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "Project Name cannot be empty.");
+                return;
+            }
+
+            if (projectManager.getProjects().stream().anyMatch(p -> p.name.equalsIgnoreCase(newName))) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "A project with this name already exists.");
+                return;
+            }
+
+            dialog.close();
+            renameProject(newName);
+        }));
+        buttonPanel.addComponent(new Button("Cancel", dialog::close));
+
+        dialogPanel.addComponent(buttonPanel);
+
+        dialog.setComponent(dialogPanel);
+        gui.addWindow(dialog);
+    }
+
+    private void renameProject(String newName) {
+        if (currentProject == null) {
+            return; // Should not happen
+        }
+
+        String oldName = currentProject.name;
         try {
-            Files.createDirectories(projectPath);
-            FileUtils.copyDirectory(new File(template.getPath()), projectPath.toFile());
+            projectManager.renameProject(currentProject, newName);
+
+            // Refresh the UI
+            sidebarPanel.removeAllComponents();
+            contentPanel.removeAllComponents();
+            showProjectScreen(sidebarPanel, codeButton, mcrButton);
+            statusBar.setText("Project '" + oldName + "' renamed to '" + newName + "'.");
+        } catch (IOException e) {
+            MessageDialog.showMessageDialog(gui, "Error", "Could not rename project: " + e.getMessage());
+            currentProject.name = oldName; // Rollback
+        }
+    }
+
+    private void showArchiveProjectDialog() {
+        if (currentProject == null) {
+            MessageDialog.showMessageDialog(gui, "Error", "No project selected to archive.");
+            return;
+        }
+
+        final BasicWindow dialog = new BasicWindow("Confirm Archival");
+        dialog.setHints(Arrays.asList(Window.Hint.CENTERED));
+        Panel panel = new Panel(new LinearLayout(Direction.VERTICAL));
+
+        panel.addComponent(new Label("Are you sure you want to archive the project '" + currentProject.name + "'?"));
+        panel.addComponent(new Label("This will move the project to an 'archived' directory."));
+        panel.addComponent(new EmptySpace());
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        buttonPanel.addComponent(new Button("Yes, Archive", () -> {
+            archiveProject();
+            dialog.close();
+        }));
+        buttonPanel.addComponent(new Button("No, Cancel", dialog::close));
+        panel.addComponent(buttonPanel);
+
+        dialog.setComponent(panel);
+        gui.addWindow(dialog);
+    }
+
+    private void archiveProject() {
+        if (currentProject == null) {
+            return; // Should not happen
+        }
+
+        Project projectToArchive = currentProject;
+        try {
+            projectManager.archiveProject(projectToArchive);
+            currentProject = projectManager.getProjects().isEmpty() ? null : projectManager.getProjects().get(0);
+
+            sidebarPanel.removeAllComponents();
+            contentPanel.removeAllComponents();
+            if (projectManager.getProjects().isEmpty()) {
+                showWelcomeScreen(sidebarPanel, codeButton, mcrButton);
+            } else {
+                showProjectScreen(sidebarPanel, codeButton, mcrButton);
+            }
+            statusBar.setText("Project '" + projectToArchive.name + "' archived.");
+        } catch (IOException e) {
+            MessageDialog.showMessageDialog(gui, "Error", "Could not archive project: " + e.getMessage());
+        }
+    }
+
+    private void createNewProject(String name, Template template) {
+        try {
+            Project newProject = projectManager.createNewProject(name, template);
+            currentProject = newProject; // Set as current
+
+            // Refresh the UI
+            sidebarPanel.removeAllComponents();
+            contentPanel.removeAllComponents();
+            showProjectScreen(sidebarPanel, codeButton, mcrButton);
+            statusBar.setText("Project '" + name + "' created successfully!");
         } catch (IOException e) {
             MessageDialog.showMessageDialog(gui, "Error", "Could not create project: " + e.getMessage());
-            return;
         }
+    }
 
-        // 2. Add project to the list and save to projects.json
-        Project newProject = new Project();
-        newProject.name = name;
-        newProject.path = projectPath.toString();
-        projects.add(newProject);
-        currentProject = newProject; // Set as current
+    private void importProject(String path) {
+        try {
+            Project newProject = projectManager.importProject(path);
+            currentProject = newProject; // Set as current
 
-        try (FileWriter writer = new FileWriter("projects.json")) {
-            new GsonBuilder().setPrettyPrinting().create().toJson(projects, writer);
+            // Refresh the UI
+            sidebarPanel.removeAllComponents();
+            contentPanel.removeAllComponents();
+            showProjectScreen(sidebarPanel, codeButton, mcrButton);
+            statusBar.setText("Project '" + newProject.name + "' imported successfully!");
         } catch (IOException e) {
-            MessageDialog.showMessageDialog(gui, "Error", "Could not save projects file: " + e.getMessage());
-            projects.remove(newProject); // Rollback
-            return;
+            MessageDialog.showMessageDialog(gui, "Error", "Could not import project: " + e.getMessage());
         }
-
-        // 3. Refresh the UI
-        sidebarPanel.removeAllComponents();
-        contentPanel.removeAllComponents();
-        showProjectScreen(sidebarPanel, codeButton, mcrButton);
-        statusBar.setText("Project '" + name + "' created successfully!");
     }
 
     private void showDeleteProjectDialog() {
@@ -314,39 +472,41 @@ public class HackTUI {
         }
 
         Project projectToDelete = currentProject;
-
-        // 1. Delete project directory
         try {
-            FileUtils.deleteDirectory(new File(projectToDelete.path));
+            projectManager.deleteProject(projectToDelete);
+            currentProject = projectManager.getProjects().isEmpty() ? null : projectManager.getProjects().get(0);
+
+            // 4. Update UI state
+            statusBar.setText("Project '" + projectToDelete.name + "' deleted.");
+
+            // 5. Refresh the UI
+            sidebarPanel.removeAllComponents();
+            contentPanel.removeAllComponents();
+            if (projectManager.getProjects().isEmpty()) {
+                showWelcomeScreen(sidebarPanel, codeButton, mcrButton);
+            } else {
+                showProjectScreen(sidebarPanel, codeButton, mcrButton);
+            }
         } catch (IOException e) {
-            MessageDialog.showMessageDialog(gui, "Error", "Could not delete project directory: " + e.getMessage());
-            return; // Stop if we can't delete the files
+            MessageDialog.showMessageDialog(gui, "Error", "Could not delete project: " + e.getMessage());
+        }
+    }
+
+    private void runHealthCheck() {
+        if (currentProject == null) {
+            MessageDialog.showMessageDialog(gui, "Error", "No project selected.");
+            return;
         }
 
-        // 2. Remove project from list
-        projects.remove(projectToDelete);
-
-        // 3. Save updated projects.json
-        try (FileWriter writer = new FileWriter("projects.json")) {
-            new GsonBuilder().setPrettyPrinting().create().toJson(projects, writer);
-        } catch (IOException e) {
-            // This is tricky. The directory is gone but the config is not updated.
-            // For now, we'll just show an error. A more robust solution might try to restore the directory or retry saving.
-            MessageDialog.showMessageDialog(gui, "Fatal Error", "Could not save projects file after deletion: " + e.getMessage() + "\nPlease check your projects.json file.");
-            // We continue to update the UI, as the in-memory list is correct.
-        }
-
-        // 4. Update UI state
-        statusBar.setText("Project '" + projectToDelete.name + "' deleted.");
-        currentProject = projects.isEmpty() ? null : projects.get(0); // Select first project or null
-
-        // 5. Refresh the UI
-        sidebarPanel.removeAllComponents();
-        contentPanel.removeAllComponents();
-        if (projects.isEmpty()) {
-            showWelcomeScreen(sidebarPanel, codeButton, mcrButton);
+        List<String> issues = projectManager.runHealthCheck(currentProject);
+        if (issues.isEmpty()) {
+            MessageDialog.showMessageDialog(gui, "Health Check", "No issues found.");
         } else {
-            showProjectScreen(sidebarPanel, codeButton, mcrButton);
+            StringBuilder sb = new StringBuilder();
+            for (String issue : issues) {
+                sb.append("- ").append(issue).append("\n");
+            }
+            MessageDialog.showMessageDialog(gui, "Health Check Issues", sb.toString());
         }
     }
 
@@ -408,6 +568,15 @@ public class HackTUI {
         if (deleteProjectButton != null) {
             deleteProjectButton.setEnabled(true);
         }
+        if (renameProjectButton != null) {
+            renameProjectButton.setEnabled(true);
+        }
+        if (archiveProjectButton != null) {
+            archiveProjectButton.setEnabled(true);
+        }
+        if (healthCheckButton != null) {
+            healthCheckButton.setEnabled(true);
+        }
         contentPanel.removeAllComponents();
         statusBar.setText("Switched to project: " + project.name);
         showCodeTUI(); // Reload the Code TUI for the new project
@@ -459,8 +628,8 @@ public class HackTUI {
             Session session = mcr.createSession();
 
             // Assert facts about existing projects
-            if (projects != null) {
-                for (Project project : projects) {
+            if (projectManager.getProjects() != null) {
+                for (Project project : projectManager.getProjects()) {
                     // Escape quotes in name just in case
                     String projectName = project.name.replace("\"", "\\\"");
                     session.assertProlog("project(\"" + projectName + "\").");
