@@ -1,6 +1,8 @@
 package dumb.hack.tui;
 
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -22,13 +24,18 @@ import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 import dumb.mcr.McrTUI;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import dumb.mcr.Session;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -44,6 +51,11 @@ public class HackTUI {
     private final App app;
     private Panel contentPanel;
     private Label statusBar;
+    private Panel sidebarPanel;
+    private Button codeButton;
+    private Button mcrButton;
+    private BasicWindow window;
+
 
     // Cache for the UI components
     private CodeUI codeUI;
@@ -70,11 +82,14 @@ public class HackTUI {
 
     private void loadProjects() {
         try (FileReader reader = new FileReader("projects.json")) {
-            Type projectListType = new TypeToken<ArrayList<Project>>(){}.getType();
+            Type projectListType = new TypeToken<ArrayList<Project>>() {}.getType();
             projects = new Gson().fromJson(reader, projectListType);
+            if (projects == null) {
+                projects = new ArrayList<>();
+            }
         } catch (IOException e) {
             projects = new ArrayList<>();
-            // Handle error, maybe show in status bar
+            // This is not an error, it just means the user hasn't created any projects yet.
         }
     }
 
@@ -85,19 +100,14 @@ public class HackTUI {
             screen = terminalFactory.createScreen();
             screen.startScreen();
 
-            BasicWindow window = new BasicWindow("Hack");
+            window = new BasicWindow("Hack");
             window.setHints(Collections.singletonList(Window.Hint.FULL_SCREEN));
 
             // Root panel with a horizontal layout
             Panel rootPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
 
             // --- Sidebar Panel (Left) ---
-            Panel sidebarPanel = new Panel(new LinearLayout(Direction.VERTICAL));
-            ActionListBox projectListBox = new ActionListBox();
-            for (Project project : projects) {
-                projectListBox.addItem(project.name, () -> switchProject(project));
-            }
-            sidebarPanel.addComponent(projectListBox);
+            sidebarPanel = new Panel(new LinearLayout(Direction.VERTICAL));
             rootPanel.addComponent(sidebarPanel.withBorder(Borders.singleLine("Projects")));
 
 
@@ -105,8 +115,10 @@ public class HackTUI {
             Panel mainContentPanel = new Panel(new LinearLayout(Direction.VERTICAL));
 
             Panel topPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
-            topPanel.addComponent(new Button("Code", this::showCodeTUI));
-            topPanel.addComponent(new Button("MCR", this::showMcrTUI));
+            codeButton = new Button("Code", this::showCodeTUI);
+            mcrButton = new Button("MCR", this::showMcrTUI);
+            topPanel.addComponent(codeButton);
+            topPanel.addComponent(mcrButton);
             topPanel.addComponent(new Button("Exit", window::close));
             mainContentPanel.addComponent(topPanel.withBorder(Borders.singleLine()));
 
@@ -117,6 +129,12 @@ public class HackTUI {
             mainContentPanel.addComponent(statusBar.withBorder(Borders.singleLine()));
 
             rootPanel.addComponent(mainContentPanel);
+
+            if (projects.isEmpty()) {
+                showWelcomeScreen(sidebarPanel, codeButton, mcrButton);
+            } else {
+                showProjectScreen(sidebarPanel, codeButton, mcrButton);
+            }
 
             window.setComponent(rootPanel);
 
@@ -129,6 +147,103 @@ public class HackTUI {
                 screen.stopScreen();
             }
         }
+    }
+
+    private void showWelcomeScreen(Panel sidebar, Button codeButton, Button mcrButton) {
+        sidebar.addComponent(new Button("New Project...", this::showNewProjectDialog));
+        contentPanel.addComponent(new Label("Welcome to Hack! Create a project to get started."));
+        statusBar.setText("No projects loaded.");
+        codeButton.setEnabled(false);
+        mcrButton.setEnabled(false);
+    }
+
+    private void showProjectScreen(Panel sidebar, Button codeButton, Button mcrButton) {
+        ActionListBox projectListBox = new ActionListBox();
+        for (Project project : projects) {
+            projectListBox.addItem(project.name, () -> {
+                switchProject(project);
+                codeButton.setEnabled(true);
+                mcrButton.setEnabled(true);
+            });
+        }
+        sidebar.addComponent(projectListBox);
+        sidebar.addComponent(new Button("New Project...", this::showNewProjectDialog));
+
+        // Auto-select first project
+        if (currentProject != null) {
+            switchProject(currentProject);
+            codeButton.setEnabled(true);
+            mcrButton.setEnabled(true);
+        } else {
+            codeButton.setEnabled(false);
+            mcrButton.setEnabled(false);
+        }
+    }
+
+    private void showNewProjectDialog() {
+        final BasicWindow dialog = new BasicWindow("Create New Project");
+        dialog.setHints(Arrays.asList(Window.Hint.CENTERED));
+
+        Panel dialogPanel = new Panel(new GridLayout(2));
+
+        dialogPanel.addComponent(new Label("Project Name:"));
+        final TextBox nameBox = new TextBox().addTo(dialogPanel);
+
+        dialogPanel.addComponent(new Label("Project Path:"));
+        final TextBox pathBox = new TextBox().addTo(dialogPanel);
+
+        dialogPanel.addComponent(new EmptySpace(new TerminalSize(0, 0))); // Spacer
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        buttonPanel.addComponent(new Button("Create", () -> {
+            String name = nameBox.getText();
+            String path = pathBox.getText();
+
+            if (name.trim().isEmpty() || path.trim().isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "Project Name and Path cannot be empty.");
+                return;
+            }
+
+            dialog.close();
+            createNewProject(name, path);
+        }));
+        buttonPanel.addComponent(new Button("Cancel", dialog::close));
+
+        dialogPanel.addComponent(buttonPanel);
+
+        dialog.setComponent(dialogPanel);
+        gui.addWindow(dialog);
+    }
+
+    private void createNewProject(String name, String path) {
+        // 1. Create directory if it doesn't exist
+        try {
+            Files.createDirectories(Paths.get(path));
+        } catch (IOException e) {
+            MessageDialog.showMessageDialog(gui, "Error", "Could not create directory: " + e.getMessage());
+            return;
+        }
+
+        // 2. Add project to the list and save to projects.json
+        Project newProject = new Project();
+        newProject.name = name;
+        newProject.path = path;
+        projects.add(newProject);
+        currentProject = newProject; // Set as current
+
+        try (FileWriter writer = new FileWriter("projects.json")) {
+            new GsonBuilder().setPrettyPrinting().create().toJson(projects, writer);
+        } catch (IOException e) {
+            MessageDialog.showMessageDialog(gui, "Error", "Could not save projects file: " + e.getMessage());
+            projects.remove(newProject); // Rollback
+            return;
+        }
+
+        // 3. Refresh the UI
+        sidebarPanel.removeAllComponents();
+        contentPanel.removeAllComponents();
+        showProjectScreen(sidebarPanel, codeButton, mcrButton);
+        statusBar.setText("Project '" + name + "' created successfully!");
     }
 
     private void startEventProcessor() {
