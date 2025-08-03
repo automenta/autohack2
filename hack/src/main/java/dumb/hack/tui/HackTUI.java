@@ -27,12 +27,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import dumb.mcr.Session;
+import org.apache.commons.io.FileUtils;
 
 import java.io.FileReader;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -189,23 +192,35 @@ public class HackTUI {
         dialogPanel.addComponent(new Label("Project Name:"));
         final TextBox nameBox = new TextBox().addTo(dialogPanel);
 
-        dialogPanel.addComponent(new Label("Project Path:"));
-        final TextBox pathBox = new TextBox().addTo(dialogPanel);
+        dialogPanel.addComponent(new Label("Template:"));
+        ComboBox<Template> templateBox = new ComboBox<>();
+        TemplateService templateService = new TemplateService("templates");
+        List<Template> templates = templateService.getAvailableTemplates();
+        for (Template template : templates) {
+            templateBox.addItem(template);
+        }
+        dialogPanel.addComponent(templateBox);
+
 
         dialogPanel.addComponent(new EmptySpace(new TerminalSize(0, 0))); // Spacer
 
         Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
         buttonPanel.addComponent(new Button("Create", () -> {
             String name = nameBox.getText();
-            String path = pathBox.getText();
+            Template selectedTemplate = templateBox.getSelectedItem();
 
-            if (name.trim().isEmpty() || path.trim().isEmpty()) {
-                MessageDialog.showMessageDialog(gui, "Input Error", "Project Name and Path cannot be empty.");
+            if (name.trim().isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "Project Name cannot be empty.");
+                return;
+            }
+
+            if (selectedTemplate == null) {
+                MessageDialog.showMessageDialog(gui, "Input Error", "Please select a template.");
                 return;
             }
 
             dialog.close();
-            createNewProject(name, path);
+            createNewProject(name, selectedTemplate);
         }));
         buttonPanel.addComponent(new Button("Cancel", dialog::close));
 
@@ -215,19 +230,22 @@ public class HackTUI {
         gui.addWindow(dialog);
     }
 
-    private void createNewProject(String name, String path) {
-        // 1. Create directory if it doesn't exist
+    private void createNewProject(String name, Template template) {
+        Path projectPath = Paths.get(System.getProperty("user.home"), ".autohack", "projects", name);
+
+        // 1. Create project directory from template
         try {
-            Files.createDirectories(Paths.get(path));
+            Files.createDirectories(projectPath);
+            FileUtils.copyDirectory(new File(template.getPath()), projectPath.toFile());
         } catch (IOException e) {
-            MessageDialog.showMessageDialog(gui, "Error", "Could not create directory: " + e.getMessage());
+            MessageDialog.showMessageDialog(gui, "Error", "Could not create project: " + e.getMessage());
             return;
         }
 
         // 2. Add project to the list and save to projects.json
         Project newProject = new Project();
         newProject.name = name;
-        newProject.path = path;
+        newProject.path = projectPath.toString();
         projects.add(newProject);
         currentProject = newProject; // Set as current
 
