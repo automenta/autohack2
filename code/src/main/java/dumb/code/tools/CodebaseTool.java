@@ -20,14 +20,17 @@ public class CodebaseTool {
     private String codebasePath;
     private List<String> files = new ArrayList<>();
 
+    public VersionControlTool versionControlTool() {
+        return versionControlTool;
+    }
+
     public CodebaseTool(VersionControlTool versionControlTool, FileSystemTool fileSystemTool) {
         this.versionControlTool = versionControlTool;
         this.fileSystemTool = fileSystemTool;
         this.codebasePath = fileSystemTool.getRootDir();
-        loadCodebase(this.codebasePath);
     }
 
-    private void loadCodebase(String path) {
+    public void loadCodebase(String path) {
         this.files = versionControlTool.listTrackedFiles();
         this.fileContents.clear();
         for (String file : this.files) {

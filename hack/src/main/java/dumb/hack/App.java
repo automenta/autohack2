@@ -1,7 +1,6 @@
 package dumb.hack;
 
 import dumb.hack.commands.CodeCommand;
-import dumb.hack.commands.McrCommand;
 import dumb.hack.tui.HackTUI;
 import picocli.CommandLine;
 
@@ -14,7 +13,6 @@ import java.io.IOException;
         description = "AI-powered software engineering tool.",
         subcommands = {
                 CodeCommand.class,
-                McrCommand.class,
                 CommandLine.HelpCommand.class
         })
 public class App {

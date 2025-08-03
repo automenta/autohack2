@@ -28,7 +28,7 @@ public record CodeModificationTool(FileSystemTool fileSystemTool, CodebaseTool c
 
         try {
             fileSystemTool.writeFile(filePath, newContent);
-            codebaseTool.trackFile(filePath).join(); // Ensure the change is tracked
+            codebaseTool.trackFile(filePath); // Ensure the change is tracked
             return "Successfully modified file: " + filePath;
         } catch (java.io.IOException e) {
             return "Error modifying file " + filePath + ": " + e.getMessage();

@@ -1,7 +1,9 @@
-package dumb.mcr;
+package dumb.hack.tui;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
+import dumb.mcr.QueryResult;
+import dumb.mcr.Session;
 
 public class McrTUI {
     private final Session session;

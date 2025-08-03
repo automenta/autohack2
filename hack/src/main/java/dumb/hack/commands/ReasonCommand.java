@@ -3,6 +3,7 @@ package dumb.hack.commands;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 import dumb.code.tools.CodebaseTool;
+import dumb.code.tools.FileSystemTool;
 import dumb.hack.util.CodeParser;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
@@ -90,11 +91,11 @@ public record ReasonCommand(
         }
 
         try {
-            String status = codebaseTool.versionControlTool().status().get();
+            String status = codebaseTool.versionControlTool().status();
             if (status != null && !status.isBlank()) {
                 mcrSession.assertProlog("git_status(\"" + status + "\").");
             }
-        } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
+        } catch (Exception e) {
             System.out.println("Error getting git status: " + e.getMessage());
             Thread.currentThread().interrupt();
         }

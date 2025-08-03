@@ -59,7 +59,7 @@ public class CommandManager {
         registerCommand("record", new RecordCommand(versionControlTool, messageHandler));
         registerCommand("commit", new CommitCommand(versionControlTool, messageHandler)); // Alias for record
         registerCommand("query", new QueryCommand(lmManager, codebaseTool, messageHandler));
-        registerCommand("mcr", new McrCommand(processRunner, messageHandler));
+        registerCommand("mcr", new McrCommand(lmManager.getSession(), messageHandler));
 
         // Newly registered commands
         registerCommand("apply", new ApplyCommand(versionControlTool, messageHandler));
