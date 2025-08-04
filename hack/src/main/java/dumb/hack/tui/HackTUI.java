@@ -98,10 +98,6 @@ public class HackTUI {
                 LMClient lmClient = new LMClient(model);
                 MCR mcr = new MCR(lmClient);
                 Session session = mcr.createSession();
-                session.assertProlog("is_a(tweety, canary).");
-                session.assertProlog("bird(X) :- is_a(X, canary).");
-                session.assertProlog("has_wings(X) :- bird(X).");
-                session.addRelationship("tweety", "likes", "seeds");
 
                 mcrTUI = new McrTUI(session);
                 mcrPanel = mcrTUI.createPanel();
