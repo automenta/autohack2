@@ -34,10 +34,10 @@ import dumb.code.commands.status.StatusCommand;
 import dumb.code.commands.test.TestCommand;
 import dumb.code.commands.tutorial.TutorialCommand;
 import dumb.code.commands.undo.UndoCommand;
-import dumb.code.commands.mcr.McrCommand;
 import dumb.code.commands.unrecord.UnrecordCommand;
 import dumb.code.tools.FileSystemTool;
 import dumb.code.tools.VersionControlTool;
+import dumb.lm.LMManager;
 import dumb.code.util.IProcessRunner;
 
 import java.util.HashMap;
@@ -59,7 +59,6 @@ public class CommandManager {
         registerCommand("record", new RecordCommand(versionControlTool, messageHandler));
         registerCommand("commit", new CommitCommand(versionControlTool, messageHandler)); // Alias for record
         registerCommand("query", new QueryCommand(lmManager, codebaseTool, messageHandler));
-        registerCommand("mcr", new McrCommand(lmManager.getSession(), messageHandler));
 
         // Newly registered commands
         registerCommand("apply", new ApplyCommand(versionControlTool, messageHandler));

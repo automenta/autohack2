@@ -1,6 +1,6 @@
 package dumb.code.commands.edit;
 
-import dumb.code.LMManager;
+import dumb.lm.LMManager;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 

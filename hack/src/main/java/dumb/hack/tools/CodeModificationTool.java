@@ -2,7 +2,7 @@ package dumb.hack.tools;
 
 import dumb.code.tools.CodebaseTool;
 import dumb.code.tools.FileSystemTool;
-import dumb.mcr.tools.Tool;
+import dumb.common.tools.Tool;
 
 import java.util.Map;
 

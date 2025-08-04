@@ -34,4 +34,13 @@ public class LMOptions {
         String envVarName = provider.toUpperCase() + "_API_KEY";
         return System.getenv(envVarName);
     }
+
+    public void init() {
+        if (provider == null) {
+            provider = "openai";
+        }
+        if (model == null) {
+            model = "gpt-4o-mini";
+        }
+    }
 }

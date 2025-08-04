@@ -1,7 +1,7 @@
-package dumb.code.agent;
+package dumb.hack.agent;
 
 import dumb.code.CommandManager;
-import dumb.code.LMManager;
+import dumb.lm.LMManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

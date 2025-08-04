@@ -1,6 +1,5 @@
 package dumb.hack;
 
-import dumb.hack.commands.CodeCommand;
 import dumb.hack.tui.HackTUI;
 import picocli.CommandLine;
 
@@ -12,7 +11,6 @@ import java.io.IOException;
         version = "hack 1.0",
         description = "AI-powered software engineering tool.",
         subcommands = {
-                CodeCommand.class,
                 CommandLine.HelpCommand.class
         })
 public class App {
@@ -27,6 +25,7 @@ public class App {
     public static void main(String[] args) throws IOException {
         App app = new App();
         if (args.length == 0) {
+            app.getLmOptions().init();
             new HackTUI(app).start();
         } else {
             int exitCode = new CommandLine(app).execute(args);

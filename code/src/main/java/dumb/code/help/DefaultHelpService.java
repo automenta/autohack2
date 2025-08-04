@@ -3,7 +3,6 @@ package dumb.code.help;
 import dumb.code.MessageHandler;
 import dumb.code.project.ProjectTemplate;
 import dumb.code.project.TemplateManager;
-import dumb.mcr.MCR;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,13 +10,13 @@ import java.util.List;
 public class DefaultHelpService implements HelpService {
 
     private TutorialManager tutorialManager;
-    private final MCR mcr;
+    private final TutorialManagerFactory tutorialManagerFactory;
     private MessageHandler messageHandler;
     private final TemplateManager templateManager;
 
-    public DefaultHelpService(MCR mcr, MessageHandler messageHandler) {
-        this.mcr = mcr;
+    public DefaultHelpService(MessageHandler messageHandler, TutorialManagerFactory tutorialManagerFactory) {
         this.messageHandler = messageHandler;
+        this.tutorialManagerFactory = tutorialManagerFactory;
         // Assuming templates are in a "templates" directory at the project root
         this.templateManager = new TemplateManager("templates");
     }
@@ -85,7 +84,7 @@ public class DefaultHelpService implements HelpService {
             System.out.println("Error: MessageHandler not set.");
             return;
         }
-        this.tutorialManager = new TutorialManager(template, mcr, messageHandler);
+        this.tutorialManager = tutorialManagerFactory.create(template, messageHandler);
         String message = tutorialManager.start();
         messageHandler.addMessage("system", message);
     }

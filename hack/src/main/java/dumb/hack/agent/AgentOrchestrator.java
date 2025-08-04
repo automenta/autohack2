@@ -1,17 +1,21 @@
-package dumb.code.agent;
+package dumb.hack.agent;
 
+import dumb.code.agent.ToolRegistry;
 import dumb.code.CommandManager;
 import dumb.code.MessageHandler;
 import dumb.code.help.DefaultHelpService;
 import dumb.code.help.HelpService;
+import dumb.code.help.TutorialManagerFactory;
 import dumb.code.tools.CodebaseTool;
 import dumb.code.tools.FileSystemTool;
 import dumb.code.tools.VersionControlTool;
 import dumb.code.util.IProcessRunner;
 import dumb.code.util.ProcessRunner;
+import dumb.hack.help.TutorialManagerFactoryImpl;
 import dumb.lm.LMClient;
 import dumb.mcr.MCR;
-import dumb.code.LMManager;
+import dumb.mcr.Session;
+import dumb.lm.LMManager;
 
 import java.util.List;
 
@@ -42,10 +46,16 @@ public class AgentOrchestrator {
 
         // Create other services
         IProcessRunner processRunner = new ProcessRunner();
-        HelpService helpService = new DefaultHelpService(new MCR(new LMClient(lmManager.getProvider(), lmManager.getModel(), lmManager.getApiKey())), messageHandler);
+        MCR mcr = new MCR(new LMClient(lmManager.getProvider(), lmManager.getModel(), lmManager.getApiKey()));
+        TutorialManagerFactory tutorialManagerFactory = new TutorialManagerFactoryImpl(mcr);
+        HelpService helpService = new DefaultHelpService(messageHandler, tutorialManagerFactory);
+        dumb.mcr.tools.DefaultToolProvider toolProvider = new dumb.mcr.tools.DefaultToolProvider();
+        Session session = mcr.createSession(toolProvider);
+        toolProvider.setSession(session);
 
         // Create CommandManager
         this.commandManager = new CommandManager(messageHandler, helpService, codebaseTool, versionControlTool, processRunner, lmManager, fileSystemTool);
+        this.commandManager.registerCommand("prolog", new dumb.hack.commands.prolog.PrologCommand(session, messageHandler));
     }
 
     public CommandManager getCommandManager() {

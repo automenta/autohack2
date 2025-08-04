@@ -5,9 +5,16 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.gui2.Button;
+import com.googlecode.lanterna.gui2.Panel;
+import com.googlecode.lanterna.gui2.Window;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import dev.langchain4j.model.chat.ChatModel;
-import dumb.code.agent.AgentOrchestrator;
-import dumb.code.agent.ToolRegistry;
+import dumb.hack.agent.AgentOrchestrator;
+import dumb.lm.LMManager;
+import dumb.code.tui.Terminal;
 import dumb.code.help.DefaultHelpService;
 import dumb.code.help.HelpService;
 import dumb.code.tools.CodebaseTool;
@@ -572,48 +579,33 @@ public class HackTUI {
     }
 
     private void showCodeTUI() {
-//        if (codeViewPanel == null) {
-//            if (currentProject == null) {
-//                contentPanel.addComponent(new Label("Error: No project selected."));
-//                return;
-//            }
-//            try {
-//                // 1. Create Tools
-//                FileSystemTool fileSystemTool = new FileSystemTool(currentProject.path);
-//                VersionControlTool versionControlTool = new VersionControlTool(currentProject.path);
-//                CodebaseTool codebaseTool = new CodebaseTool(versionControlTool, fileSystemTool);
-//
-//                // 2. Create ToolRegistry and register tools
-//                ToolRegistry toolRegistry = new ToolRegistry();
-//                toolRegistry.register(fileSystemTool);
-//                toolRegistry.register(codebaseTool);
-//                toolRegistry.register(versionControlTool);
-//
-//                // 3. Create AgentOrchestrator
-//                ProviderFactory factory = new ProviderFactory(app.getLmOptions());
-//                ChatModel model = factory.create();
-//                AgentOrchestrator orchestrator = new AgentOrchestrator(currentProject.path, new dumb.code.LMManager(app.getLmOptions().getProvider(), app.getLmOptions().getModel(), app.getLmOptions().getApiKey()));
-//
-//                // 4. Create UI
-//                codeViewPanel = new Panel(new LinearLayout(Direction.VERTICAL));
-//
-//                actionPanel = new Panel(new LinearLayout(Direction.VERTICAL));
-//                actionPanel.addComponent(new Label("Enter a task in the terminal below."));
-//                codeViewPanel.addComponent(actionPanel.withBorder(Borders.singleLine("Plan")));
-//
-//                Terminal terminal = new Terminal(orchestrator, eventQueue);
-//                codePanel = terminal.getPanel();
-//                codeViewPanel.addComponent(codePanel);
-//
-//            } catch (MissingApiKeyException e) {
-//                contentPanel.removeAllComponents();
-//                contentPanel.addComponent(new Label("Error starting Code TUI: " + e.getMessage()));
-//                return;
-//            }
-//        }
-//        contentPanel.removeAllComponents();
-//        contentPanel.addComponent(codeViewPanel);
-//        statusBar.setText("Project: " + currentProject.name + " | Mode: Code");
+        if (currentProject == null) {
+            contentPanel.addComponent(new Label("Error: No project selected."));
+            return;
+        }
+        try {
+            // 1. Create AgentOrchestrator
+            AgentOrchestrator orchestrator = new AgentOrchestrator(currentProject.path, new LMManager(app.getLmOptions().getProvider(), app.getLmOptions().getModel(), app.getLmOptions().getApiKey()));
+
+            // 2. Create UI
+            codeViewPanel = new Panel(new LinearLayout(Direction.VERTICAL));
+
+            actionPanel = new Panel(new LinearLayout(Direction.VERTICAL));
+            actionPanel.addComponent(new Label("Enter a task in the terminal below."));
+            codeViewPanel.addComponent(actionPanel.withBorder(Borders.singleLine("Plan")));
+
+            Terminal terminal = new Terminal(orchestrator.getCommandManager());
+            codePanel = terminal.getTerminalPanel();
+            codeViewPanel.addComponent(codePanel);
+
+        } catch (MissingApiKeyException e) {
+            contentPanel.removeAllComponents();
+            contentPanel.addComponent(new Label("Error starting Code TUI: " + e.getMessage()));
+            return;
+        }
+        contentPanel.removeAllComponents();
+        contentPanel.addComponent(codeViewPanel);
+        statusBar.setText("Project: " + currentProject.name + " | Mode: Code");
     }
 
     private void showMcrTUI() {

@@ -1,4 +1,4 @@
-package dumb.code.commands.mcr;
+package dumb.hack.commands.mcr;
 
 import dumb.code.MessageHandler;
 import dumb.mcr.QueryResult;

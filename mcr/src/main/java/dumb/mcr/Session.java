@@ -4,7 +4,7 @@ import dumb.lm.LMClient;
 import dumb.lm.LMResponse;
 import dumb.mcr.step.PrologStep;
 import dumb.mcr.step.StepResult;
-import dumb.mcr.tools.Tool;
+import dumb.common.tools.Tool;
 import dumb.mcr.tools.ToolProvider;
 import dumb.prolog.Parser;
 import dumb.prolog.Solver;

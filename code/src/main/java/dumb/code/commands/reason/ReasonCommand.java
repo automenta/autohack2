@@ -1,7 +1,7 @@
 package dumb.code.commands.reason;
 
 import dumb.code.CommandManager;
-import dumb.code.LMManager;
+import dumb.lm.LMManager;
 import dumb.code.commands.Command;
 import dumb.code.help.HelpService;
 import dumb.code.tui.events.*;

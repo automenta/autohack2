@@ -25,6 +25,13 @@ public class LMClient implements ILMClient {
         this.model = createModel(provider, modelName, apiKey);
     }
 
+    public LMClient(ChatModel model) {
+        this.provider = "mock";
+        this.modelName = "mock";
+        this.apiKey = "mock";
+        this.model = model;
+    }
+
     public void configureModel(String prompt, String response) {
         if (model instanceof dumb.lm.mock.MockChatModel) {
             ((dumb.lm.mock.MockChatModel) model).addCannedResponse(prompt, response);

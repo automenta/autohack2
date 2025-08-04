@@ -1,6 +1,7 @@
-package dumb.code.help;
+package dumb.hack.help;
 
 import dumb.code.MessageHandler;
+import dumb.code.help.TutorialManager;
 import dumb.code.project.ProjectTemplate;
 import dumb.mcr.MCR;
 import dumb.mcr.QueryResult;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-class TutorialManagerTest {
+class TutorialManagerImplTest {
 
     @Mock
     private MCR mcr;
@@ -58,7 +59,7 @@ class TutorialManagerTest {
         template.setTutorial(List.of(goal));
 
         // Initialize the manager
-        tutorialManager = new TutorialManager(template, mcr, messageHandler);
+        tutorialManager = new TutorialManagerImpl(template, mcr, messageHandler);
     }
 
     @Test

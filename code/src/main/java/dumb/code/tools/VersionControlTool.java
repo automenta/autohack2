@@ -1,6 +1,6 @@
 package dumb.code.tools;
 
-import dumb.mcr.tools.Tool;
+import dumb.common.tools.Tool;
 import dumb.code.tools.vcs.Backend;
 import dumb.code.tools.vcs.FileBackend;
 import dumb.code.tools.vcs.GitBackend;

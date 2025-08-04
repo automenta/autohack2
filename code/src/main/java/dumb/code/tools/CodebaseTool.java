@@ -1,7 +1,5 @@
 package dumb.code.tools;
 
-import dumb.mcr.tools.Tool;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;

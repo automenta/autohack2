@@ -1,4 +1,4 @@
-package dumb.mcr.tools;
+package dumb.common.tools;
 
 import java.util.Map;
 

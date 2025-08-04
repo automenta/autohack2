@@ -1,6 +1,7 @@
-package dumb.code;
+package dumb.hack;
 
-import dumb.code.agent.AgentOrchestrator;
+import dumb.hack.agent.AgentOrchestrator;
+import dumb.lm.LMManager;
 import dumb.code.tools.FileSystemTool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

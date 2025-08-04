@@ -3,7 +3,7 @@ package dumb.code.commands.query;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
-import dumb.code.LMManager;
+import dumb.lm.LMManager;
 import dumb.code.MessageHandler;
 import dumb.code.commands.Command;
 import dumb.code.tools.CodebaseTool;

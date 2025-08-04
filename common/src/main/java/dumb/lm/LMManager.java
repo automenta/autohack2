@@ -1,24 +1,14 @@
-package dumb.code;
-
-import dumb.lm.ILMClient;
-import dumb.lm.LMClient;
-import dumb.lm.LMResponse;
-import dumb.mcr.MCR;
-import dumb.mcr.Session;
+package dumb.lm;
 
 public class LMManager {
     private final ILMClient lmClient;
-    private final MCR mcr;
-    private final Session session;
 
     public LMManager(String provider, String model, String apiKey) {
         this.lmClient = new LMClient(provider, model, apiKey);
-        this.mcr = new MCR((LMClient) this.lmClient);
-        this.session = mcr.createSession();
     }
 
-    public Session getSession() {
-        return session;
+    public LMManager(ILMClient lmClient) {
+        this.lmClient = lmClient;
     }
 
     public ILMClient getLmClient() {
