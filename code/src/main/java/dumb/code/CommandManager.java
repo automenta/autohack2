@@ -85,9 +85,9 @@ public class CommandManager {
         registerCommand("unrecord", new UnrecordCommand(messageHandler));
 
         // Stubs for future commands
-        registerCommand("refactor", new RefactorCommand(messageHandler));
-        registerCommand("debug", new DebugCommand(messageHandler));
-        registerCommand("doc", new DocCommand(messageHandler));
+        registerCommand("refactor", new RefactorCommand(lmManager, messageHandler));
+        registerCommand("debug", new DebugCommand(lmManager, messageHandler));
+        registerCommand("doc", new DocCommand(lmManager, messageHandler));
     }
 
     public void registerCommand(String name, Command command) {
