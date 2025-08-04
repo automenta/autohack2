@@ -5,16 +5,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ProjectManager {
     private List<Project> projects;
@@ -97,7 +95,46 @@ public class ProjectManager {
         File pom = new File(project.path, "pom.xml");
         if (!pom.exists()) {
             issues.add("pom.xml not found.");
+            return issues;
         }
+
+        try {
+            String os = System.getProperty("os.name").toLowerCase();
+            ProcessBuilder pb;
+            if (os.contains("win")) {
+                pb = new ProcessBuilder("cmd.exe", "/c", "mvn", "clean", "install");
+            } else {
+                pb = new ProcessBuilder("mvn", "clean", "install");
+            }
+            pb.directory(new File(project.path));
+            pb.redirectErrorStream(true);
+
+            Process process = pb.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("[ERROR]")) {
+                        issues.add(line);
+                    }
+                }
+            }
+
+            boolean finished = process.waitFor(5, TimeUnit.MINUTES);
+            if (!finished) {
+                issues.add("Health check timed out after 5 minutes.");
+                process.destroy();
+            } else if (process.exitValue() != 0) {
+                if (issues.isEmpty()) { // If no specific error lines were found, add a generic one.
+                    issues.add("Maven build failed with exit code " + process.exitValue());
+                }
+            }
+
+        } catch (IOException | InterruptedException e) {
+            issues.add("Error running health check: " + e.getMessage());
+            Thread.currentThread().interrupt();
+        }
+
         return issues;
     }
 
