@@ -35,4 +35,8 @@ public class LMOptions {
         String envVarName = provider.toUpperCase() + "_API_KEY";
         return System.getenv(envVarName);
     }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
 }

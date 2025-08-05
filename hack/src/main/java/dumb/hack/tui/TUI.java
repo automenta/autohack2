@@ -24,6 +24,9 @@ public class TUI {
     private Code code;
     private MCR mcr;
 
+    // UI Components
+    private UnifiedPanel unifiedPanel;
+
     public TUI(App app) {
         this.app = app;
         this.state = new TUIState();
@@ -32,42 +35,131 @@ public class TUI {
     public void start() throws IOException {
         DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
         Screen screen = null;
-        UnifiedPanel unifiedPanel = null; // Declare here for the finally block
         try {
             screen = terminalFactory.createScreen();
             screen.startScreen();
+            MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
 
-            // Initialize shared resources
-            try {
-                ProviderFactory factory = new ProviderFactory(app.getLmOptions());
-                ChatModel model = factory.create();
-                LMClient lmClient = new LMClient(model);
-                this.mcr = new MCR(lmClient);
-                this.code = new Code(null, null, new dumb.code.LMManager(lmClient));
-            } catch (MissingApiKeyException e) {
-                System.err.println("Error: " + e.getMessage());
-                // In a future step, we'll show a proper dialog.
-                return;
+            // Loop to handle API key entry and service initialization
+            while (true) {
+                try {
+                    initializeServices();
+                    break; // Success, exit the loop
+                } catch (MissingApiKeyException e) {
+                    String apiKey = showApiKeyDialog(gui);
+                    if (apiKey != null && !apiKey.trim().isEmpty()) {
+                        app.getLmOptions().setApiKey(apiKey);
+                    } else {
+                        // User canceled or entered empty key, so we exit
+                        return;
+                    }
+                }
             }
 
-
-            BasicWindow window = new BasicWindow("AutoHack - Unified TUI");
+            final BasicWindow window = new BasicWindow("AutoHack - Unified TUI");
             window.setHints(Collections.singletonList(Window.Hint.FULL_SCREEN));
 
-            // Create and set the main UnifiedPanel
-            unifiedPanel = new UnifiedPanel(this.code, this.mcr);
-            window.setComponent(unifiedPanel);
+            // This is the main content panel that will hold everything
+            final Panel mainContent = new Panel(new LinearLayout(Direction.VERTICAL));
 
-            MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
+            // Create and set the main UnifiedPanel
+            this.unifiedPanel = new UnifiedPanel(this.code, this.mcr);
+            // The unified panel should take up most of the space
+            mainContent.addComponent(this.unifiedPanel);
+
+
+            // Create a settings panel for the button
+            Panel settingsPanel = new Panel();
+            settingsPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+
+            Button settingsButton = new Button("Settings", () -> {
+                String newApiKey = showApiKeyDialog(gui);
+                if (newApiKey != null && !newApiKey.trim().isEmpty()) {
+                    // 1. Clean up old resources
+                    shutdownServices();
+                    mainContent.removeComponent(this.unifiedPanel);
+
+                    // 2. Update config and re-create services
+                    app.getLmOptions().setApiKey(newApiKey);
+                    try {
+                        initializeServices();
+                    } catch (MissingApiKeyException ex) {
+                        // This shouldn't happen if they just provided a key, but good to handle it.
+                        try {
+                            com.googlecode.lanterna.gui2.dialogs.MessageDialog.showMessageDialog(gui, "Error", "Failed to initialize with the new API key.");
+                        } catch(Exception e) {
+                            // ignore, can't show dialog
+                        }
+                        return; // Exit the lambda
+                    }
+
+                    // 3. Re-create the UI panel with the new services
+                    this.unifiedPanel = new UnifiedPanel(this.code, this.mcr);
+                    mainContent.addComponent(0, this.unifiedPanel);
+                }
+            });
+            settingsPanel.addComponent(settingsButton);
+            mainContent.addComponent(settingsPanel);
+
+
+            window.setComponent(mainContent);
+
             gui.addWindowAndWait(window);
 
         } finally {
             if (screen != null) {
                 screen.stopScreen();
             }
-            if (unifiedPanel != null) {
-                unifiedPanel.close(); // Clean up resources
-            }
+            shutdownServices();
         }
+    }
+
+    /**
+     * Initializes the core services of the application (MCR, Code).
+     * This method can be called to re-initialize services, for example, after an API key change.
+     * @throws MissingApiKeyException if the API key is not configured.
+     */
+    private void initializeServices() throws MissingApiKeyException {
+        ProviderFactory factory = new ProviderFactory(app.getLmOptions());
+        ChatModel model = factory.create();
+        LMClient lmClient = new LMClient(model);
+        this.mcr = new MCR(lmClient);
+        this.code = new Code(null, null, new dumb.code.LMManager(lmClient));
+    }
+
+    /**
+     * Shuts down the services and cleans up resources used by the UI panels.
+     */
+    private void shutdownServices() {
+        if (this.unifiedPanel != null) {
+            this.unifiedPanel.close();
+        }
+    }
+
+    private String showApiKeyDialog(MultiWindowTextGUI gui) {
+        final BasicWindow dialogWindow = new BasicWindow("API Key Required");
+        dialogWindow.setHints(java.util.Arrays.asList(Window.Hint.MODAL));
+
+        final Panel panel = new Panel(new LinearLayout(Direction.VERTICAL));
+        panel.addComponent(new Label("Please enter your API key:"));
+
+        final TextBox apiKeyBox = new TextBox();
+        apiKeyBox.setMask('*');
+        panel.addComponent(apiKeyBox);
+
+        final String[] resultHolder = new String[1];
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        buttonPanel.addComponent(new Button("Submit", () -> {
+            resultHolder[0] = apiKeyBox.getText();
+            dialogWindow.close();
+        }));
+        buttonPanel.addComponent(new Button("Cancel", dialogWindow::close));
+        panel.addComponent(buttonPanel);
+
+        dialogWindow.setComponent(panel);
+        gui.addWindowAndWait(dialogWindow);
+
+        return resultHolder[0];
     }
 }
