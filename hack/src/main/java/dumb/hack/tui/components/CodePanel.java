@@ -1,21 +1,21 @@
 package dumb.hack.tui.components;
 
 import com.googlecode.lanterna.gui2.*;
-import dumb.code.Code;
+import dumb.hack.HackController;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CodePanel extends Panel {
 
-    private final Code code;
+    private final HackController controller;
     private final TextBox inputBox;
     private final Label outputBox;
     private final ExecutorService executor;
 
-    public CodePanel(Code code) {
+    public CodePanel(HackController controller) {
         super(new LinearLayout(Direction.VERTICAL));
-        this.code = code;
+        this.controller = controller;
         this.executor = Executors.newSingleThreadExecutor();
 
         this.outputBox = new Label("Welcome to the Code view!");
@@ -28,7 +28,7 @@ public class CodePanel extends Panel {
         this.addComponent(outputBox.withBorder(Borders.singleLine("Output")));
         this.addComponent(inputPanel.withBorder(Borders.singleLine("Input")));
 
-        setupMessageHandler();
+        controller.getModel().setCodeOutputListener(outputBox::setText);
     }
 
     private void handleSubmit() {
@@ -36,22 +36,12 @@ public class CodePanel extends Panel {
         if (input != null && !input.trim().isEmpty()) {
             // Run the command on a background thread
             executor.submit(() -> {
-                code.commandManager.processInput(input);
+                controller.processCodeInput(input);
             });
             inputBox.setText("");
         }
     }
 
-    private void setupMessageHandler() {
-        // The message handler will be called from the command manager thread.
-        // We need to update the UI on the UI thread.
-        this.code.getMessageHandler().setListener(message -> {
-            // For now, we'll just update the text directly.
-            // In a real application, we would need to schedule this on the UI thread.
-            // Lanterna is thread-safe, so this should be fine.
-            outputBox.setText(message);
-        });
-    }
 
     // It's good practice to shut down the executor when the panel is no longer needed.
     public void close() {

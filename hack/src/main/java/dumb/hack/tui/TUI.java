@@ -3,23 +3,16 @@ package dumb.hack.tui;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
-import dev.langchain4j.model.chat.ChatModel;
-import dumb.code.Code;
-import dumb.hack.App;
-import dumb.hack.provider.MissingApiKeyException;
-import dumb.hack.provider.ProviderFactory;
+import dumb.hack.HackController;
 import dumb.hack.tui.components.CodePanel;
 import dumb.hack.tui.components.McrPanel;
-import dumb.lm.LMClient;
-import dumb.mcr.MCR;
-import dumb.mcr.Session;
 
 import java.io.IOException;
 import java.util.Collections;
 
 public class TUI {
 
-    private final App app;
+    private final HackController controller;
     private final TUIState state;
     private Panel contentPanel;
     private Label statusBar;
@@ -29,8 +22,8 @@ public class TUI {
     private McrPanel mcrPanel;
 
 
-    public TUI(App app) {
-        this.app = app;
+    public TUI(HackController controller) {
+        this.controller = controller;
         this.state = new TUIState();
     }
 
@@ -82,16 +75,7 @@ public class TUI {
     private void showCodePanel() {
         contentPanel.removeAllComponents();
         if (codePanel == null) {
-            try {
-                ProviderFactory factory = new ProviderFactory(app.getLmOptions());
-                ChatModel model = factory.create();
-                LMClient lmClient = new LMClient(model);
-                Code code = new Code(null, null, new dumb.code.LMManager(lmClient));
-                codePanel = new CodePanel(code);
-            } catch (MissingApiKeyException e) {
-                contentPanel.addComponent(new Label("Error starting Code TUI: " + e.getMessage()));
-                return;
-            }
+            codePanel = new CodePanel(controller);
         }
         contentPanel.addComponent(codePanel);
         statusBar.setText("Mode: Code");
@@ -100,17 +84,7 @@ public class TUI {
     private void showMcrPanel() {
         contentPanel.removeAllComponents();
         if (mcrPanel == null) {
-            try {
-                ProviderFactory factory = new ProviderFactory(app.getLmOptions());
-                ChatModel model = factory.create();
-                LMClient lmClient = new LMClient(model);
-                MCR mcr = new MCR(lmClient);
-                Session session = mcr.createSession();
-                mcrPanel = new McrPanel(session);
-            } catch (MissingApiKeyException e) {
-                contentPanel.addComponent(new Label("Error starting MCR TUI: " + e.getMessage()));
-                return;
-            }
+            mcrPanel = new McrPanel(controller);
         }
         contentPanel.addComponent(mcrPanel);
         statusBar.setText("Mode: MCR");

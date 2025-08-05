@@ -2,23 +2,22 @@ package dumb.hack.tui.components;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
-import dumb.mcr.QueryResult;
-import dumb.mcr.Result;
-import dumb.mcr.Session;
+import dumb.hack.HackController;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class McrPanel extends Panel {
 
-    private final Session session;
+    private final HackController controller;
     private final Panel knowledgeBasePanel;
     private final Panel resultsPanel;
     private final ExecutorService executor;
 
-    public McrPanel(Session session) {
+    public McrPanel(HackController controller) {
         super(new LinearLayout(Direction.HORIZONTAL));
-        this.session = session;
+        this.controller = controller;
         this.executor = Executors.newSingleThreadExecutor();
 
         // Left panel for query and results
@@ -37,9 +36,7 @@ public class McrPanel extends Panel {
                 return;
             }
             // Run the query on a background thread
-            executor.submit(() -> {
-                executeQuery(query);
-            });
+            executor.submit(() -> controller.executeMcrQuery(query));
         });
         leftPanel.addComponent(submitButton);
         this.addComponent(leftPanel);
@@ -48,51 +45,22 @@ public class McrPanel extends Panel {
         knowledgeBasePanel = new Panel(new LinearLayout(Direction.VERTICAL));
         this.addComponent(knowledgeBasePanel.withBorder(Borders.singleLine("Knowledge Base")));
 
-        updateKnowledgeBasePanel();
+        // Set up listeners to update the UI when the model changes
+        controller.getModel().setMcrResultsListener(this::updateResultsPanel);
+        controller.getModel().setKnowledgeBaseListener(this::updateKnowledgeBasePanel);
     }
 
-    private void executeQuery(String query) {
-        // Clear previous results
-        // Note: this needs to be done on the UI thread.
-        // Lanterna is thread-safe, so we can call it directly.
+    private void updateResultsPanel(List<String> results) {
         resultsPanel.removeAllComponents();
-
-        String trimmedQuery = query.trim();
-
-        if (trimmedQuery.startsWith("assertProlog(")) {
-            String clause = trimmedQuery.substring("assertProlog(".length(), trimmedQuery.length() - 1);
-            Result result = session.assertProlog(clause);
-            resultsPanel.addComponent(new Label(result.message()));
-            updateKnowledgeBasePanel();
-        } else if (trimmedQuery.startsWith("retractProlog(")) {
-            String clause = trimmedQuery.substring("retractProlog(".length(), trimmedQuery.length() - 1);
-            Result result = session.retractProlog(clause);
-            resultsPanel.addComponent(new Label(result.message()));
-            updateKnowledgeBasePanel();
-        } else {
-            QueryResult result = session.nquery(query);
-            resultsPanel.addComponent(new Label("Original Query: " + result.originalQuery()));
-            if (result.success()) {
-                resultsPanel.addComponent(new Label("Success!"));
-                if (result.bindings() != null && !result.bindings().isEmpty()) {
-                    resultsPanel.addComponent(new Label("Solutions:"));
-                    result.getBindings().forEach(solution -> resultsPanel.addComponent(new Label("  " + solution)));
-                } else {
-                    resultsPanel.addComponent(new Label("Query was successful, but returned no solutions."));
-                }
-            } else {
-                resultsPanel.addComponent(new Label("MCR query failed."));
-            }
+        for (String result : results) {
+            resultsPanel.addComponent(new Label(result));
         }
     }
 
-
-    private void updateKnowledgeBasePanel() {
-        // This needs to be done on the UI thread.
-        // Lanterna is thread-safe.
+    private void updateKnowledgeBasePanel(List<String> kb) {
         knowledgeBasePanel.removeAllComponents();
-        for (dumb.prolog.Clause clause : session.getKnowledgeGraph().getClauses()) {
-            knowledgeBasePanel.addComponent(new Label(clause.toString()));
+        for (String clause : kb) {
+            knowledgeBasePanel.addComponent(new Label(clause));
         }
     }
 
