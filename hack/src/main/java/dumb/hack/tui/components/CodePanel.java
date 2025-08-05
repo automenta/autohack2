@@ -53,6 +53,16 @@ public class CodePanel extends Panel {
         });
     }
 
+    /**
+     * Programmatically sets the text of the input box.
+     * This can be called from other components to pass data to this panel.
+     * This method is thread-safe as Lanterna's TextBox is thread-safe.
+     * @param text The text to set in the input box.
+     */
+    public void setInputText(String text) {
+        inputBox.setText(text);
+    }
+
     // It's good practice to shut down the executor when the panel is no longer needed.
     public void close() {
         executor.shutdown();
