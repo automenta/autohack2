@@ -5,7 +5,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import dev.langchain4j.model.chat.ChatModel;
 import dumb.code.Code;
-import dumb.code.CodeUI;
+import dumb.hack.ui.CodeUI;
 import dumb.hack.App;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;

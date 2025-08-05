@@ -1,20 +1,28 @@
 package dumb.code;
 
-import dumb.code.tui.Terminal;
+import java.util.function.Consumer;
 
-public record MessageHandler(Code code) {
+public class MessageHandler {
+    private Consumer<String> listener;
+
+    public void setListener(Consumer<String> listener) {
+        this.listener = listener;
+    }
 
     public void onMessage(String message) {
-        addMessage("system", message);
+        if (listener != null) {
+            listener.accept(message);
+        } else {
+            // Fallback for when no UI is attached
+            System.out.println("system: " + message);
+        }
     }
 
     public void addMessage(String sender, String message) {
-        Terminal terminal = code.getTerminal();
-        if (terminal != null) {
-            terminal.addMessage(sender + ": " + message);
+        if (listener != null) {
+            listener.accept(sender + ": " + message);
         } else {
             System.out.println(sender + ": " + message);
         }
     }
-
 }

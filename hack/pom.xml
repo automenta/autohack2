@@ -40,6 +40,8 @@
             <artifactId>javaparser-symbol-solver-core</artifactId>
             <version>3.25.10</version>
         </dependency>
+        <!-- These are inherited transitively from the 'code' module -->
+        <!--
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-mcp</artifactId>
@@ -58,8 +60,14 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
         </dependency>
+        -->
 
-        <!-- Mockito for mocking dependencies in tests -->
+        <!-- JUnit and Mockito for mocking dependencies in tests. Test dependencies are not transitive. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -72,11 +80,13 @@
         </dependency>
 
         <!-- Add java-diff-utils for diff and patch -->
+        <!-- Transitive from 'code' module
         <dependency>
             <groupId>io.github.java-diff-utils</groupId>
             <artifactId>java-diff-utils</artifactId>
             <version>4.16</version>
         </dependency>
+        -->
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>

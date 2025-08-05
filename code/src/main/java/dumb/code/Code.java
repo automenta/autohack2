@@ -1,7 +1,6 @@
 package dumb.code;
 
 import dev.langchain4j.service.tool.ToolProvider;
-import dumb.code.tui.Terminal;
 import dumb.code.util.IProcessRunner;
 import dumb.code.util.ProcessRunner;
 import dumb.code.versioning.Backend;
@@ -15,7 +14,6 @@ public class Code {
     public final BackendManager backendManager;
     public final IFileManager fileManager;
     public final LMManager lmManager;
-    public final UIManager uiManager;
     public final CommandManager commandManager;
     public final CodebaseManager codebaseManager;
     public final FileSystem files;
@@ -23,7 +21,6 @@ public class Code {
     public final IProcessRunner processRunner;
     private final Backend backend;
     private String diff;
-    private Terminal terminal;
 
     public Code(String backendType, String provider, String model, String apiKey) {
         this(backendType, null, new LMManager(provider, model, apiKey));
@@ -31,7 +28,7 @@ public class Code {
 
     public Code(String backendType, IFileManager fileManager, LMManager lmManager) {
         this.fileManager = (fileManager != null) ? fileManager : new FileManager();
-        this.messageHandler = new MessageHandler(this);
+        this.messageHandler = new MessageHandler();
         this.backendManager = new BackendManager(this, this.fileManager);
         this.processRunner = new ProcessRunner();
 
@@ -43,7 +40,6 @@ public class Code {
         this.backend = backendManager.getBackend();
 
         this.lmManager = lmManager;
-        this.uiManager = new UIManager(this);
         this.codebaseManager = new CodebaseManager(this);
         this.files = new FileSystem();
         this.commandManager = new CommandManager(this);
@@ -72,14 +68,6 @@ public class Code {
 
     public void setDiff(String diff) {
         this.diff = diff;
-    }
-
-    public Terminal getTerminal() {
-        return terminal;
-    }
-
-    public void setTerminal(Terminal terminal) {
-        this.terminal = terminal;
     }
 
 }
