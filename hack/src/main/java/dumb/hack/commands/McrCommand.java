@@ -18,9 +18,6 @@ public class McrCommand implements Callable<Integer> {
     @CommandLine.Parameters(index = "0", description = "The natural language query to send to the MCR.", arity = "0..1")
     private String query;
 
-    @CommandLine.Option(names = {"--tui"}, description = "Run the MCR in interactive TUI mode.")
-    private boolean tuiMode;
-
     @CommandLine.Option(names = {"--server"}, description = "Run the MCR in server mode.")
     private boolean serverMode;
 
@@ -29,13 +26,8 @@ public class McrCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        if (tuiMode && serverMode) {
-            System.err.println("Error: --tui and --server options cannot be used together.");
-            return 1;
-        }
-
-        if (query == null && !tuiMode && !serverMode) {
-            System.err.println("Error: A query is required unless in --tui or --server mode.");
+        if (query == null && !serverMode) {
+            System.err.println("Error: A query is required unless in --server mode.");
             return 1;
         }
 
@@ -59,14 +51,7 @@ public class McrCommand implements Callable<Integer> {
         session.assertProlog("has_wings(X) :- bird(X).");
         session.addRelationship("tweety", "likes", "seeds");
 
-        if (tuiMode) {
-            McrTUI mcrTUI = new McrTUI(session);
-            com.googlecode.lanterna.screen.TerminalScreen screen = new com.googlecode.lanterna.terminal.DefaultTerminalFactory().createScreen();
-            screen.startScreen();
-            com.googlecode.lanterna.gui2.BasicWindow window = new com.googlecode.lanterna.gui2.BasicWindow("MCR TUI");
-            window.setComponent(mcrTUI.createPanel());
-            new com.googlecode.lanterna.gui2.MultiWindowTextGUI(screen).addWindowAndWait(window);
-        } else if (serverMode) {
+        if (serverMode) {
             new McrServer(session).start();
         } else {
             System.out.println("Querying MCR with: '" + query + "'");

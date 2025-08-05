@@ -5,33 +5,33 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import dev.langchain4j.model.chat.ChatModel;
 import dumb.code.Code;
-import dumb.hack.ui.CodeUI;
 import dumb.hack.App;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
+import dumb.hack.tui.components.CodePanel;
+import dumb.hack.tui.components.McrPanel;
 import dumb.lm.LMClient;
 import dumb.mcr.MCR;
-import dumb.mcr.McrTUI;
 import dumb.mcr.Session;
 
 import java.io.IOException;
 import java.util.Collections;
 
-public class HackTUI {
+public class TUI {
 
     private final App app;
+    private final TUIState state;
     private Panel contentPanel;
     private Label statusBar;
 
-    // Cache for the UI components
-    private CodeUI codeUI;
-    private McrTUI mcrTUI;
-    private Panel codePanel;
-    private Panel mcrPanel;
+    // Panels
+    private CodePanel codePanel;
+    private McrPanel mcrPanel;
 
 
-    public HackTUI(App app) {
+    public TUI(App app) {
         this.app = app;
+        this.state = new TUIState();
     }
 
     public void start() throws IOException {
@@ -44,19 +44,22 @@ public class HackTUI {
             BasicWindow window = new BasicWindow("Hack");
             window.setHints(Collections.singletonList(Window.Hint.FULL_SCREEN));
 
-            Panel mainPanel = new Panel(new LinearLayout(Direction.VERTICAL));
+            Panel mainPanel = new Panel(new BorderLayout());
 
-            Panel topPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
-            topPanel.addComponent(new Button("Code", this::showCodeTUI));
-            topPanel.addComponent(new Button("MCR", this::showMcrTUI));
-            topPanel.addComponent(new Button("Exit", window::close));
-            mainPanel.addComponent(topPanel.withBorder(Borders.singleLine()));
+            // Navigation
+            Panel navigationPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+            navigationPanel.addComponent(new Button("Code", this::showCodePanel));
+            navigationPanel.addComponent(new Button("MCR", this::showMcrPanel));
+            navigationPanel.addComponent(new Button("Exit", window::close));
+            mainPanel.addComponent(navigationPanel.withBorder(Borders.singleLine()), BorderLayout.Location.TOP);
 
+            // Content
             contentPanel = new Panel();
-            mainPanel.addComponent(contentPanel.withBorder(Borders.singleLine("Content")));
+            mainPanel.addComponent(contentPanel.withBorder(Borders.singleLine("Content")), BorderLayout.Location.CENTER);
 
-            statusBar = new Label("Ready");
-            mainPanel.addComponent(statusBar.withBorder(Borders.singleLine()));
+            // Status bar
+            statusBar = new Label("Status: Ready");
+            mainPanel.addComponent(statusBar.withBorder(Borders.singleLine()), BorderLayout.Location.BOTTOM);
 
             window.setComponent(mainPanel);
 
@@ -67,19 +70,24 @@ public class HackTUI {
             if (screen != null) {
                 screen.stopScreen();
             }
+            if (codePanel != null) {
+                codePanel.close();
+            }
+            if (mcrPanel != null) {
+                mcrPanel.close();
+            }
         }
     }
 
-    private void showCodeTUI() {
+    private void showCodePanel() {
         contentPanel.removeAllComponents();
-        if (codeUI == null) {
+        if (codePanel == null) {
             try {
                 ProviderFactory factory = new ProviderFactory(app.getLmOptions());
                 ChatModel model = factory.create();
                 LMClient lmClient = new LMClient(model);
                 Code code = new Code(null, null, new dumb.code.LMManager(lmClient));
-                codeUI = new CodeUI(code);
-                codePanel = codeUI.createPanel();
+                codePanel = new CodePanel(code);
             } catch (MissingApiKeyException e) {
                 contentPanel.addComponent(new Label("Error starting Code TUI: " + e.getMessage()));
                 return;
@@ -89,18 +97,16 @@ public class HackTUI {
         statusBar.setText("Mode: Code");
     }
 
-    private void showMcrTUI() {
+    private void showMcrPanel() {
         contentPanel.removeAllComponents();
-        if (mcrTUI == null) {
+        if (mcrPanel == null) {
             try {
                 ProviderFactory factory = new ProviderFactory(app.getLmOptions());
                 ChatModel model = factory.create();
                 LMClient lmClient = new LMClient(model);
                 MCR mcr = new MCR(lmClient);
                 Session session = mcr.createSession();
-
-                mcrTUI = new McrTUI(session);
-                mcrPanel = mcrTUI.createPanel();
+                mcrPanel = new McrPanel(session);
             } catch (MissingApiKeyException e) {
                 contentPanel.addComponent(new Label("Error starting MCR TUI: " + e.getMessage()));
                 return;

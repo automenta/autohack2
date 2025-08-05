@@ -2,7 +2,7 @@ package dumb.hack;
 
 import dumb.hack.commands.CodeCommand;
 import dumb.hack.commands.McrCommand;
-import dumb.hack.tui.HackTUI;
+import dumb.hack.tui.TUI;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class App {
     public static void main(String[] args) throws IOException {
         App app = new App();
         if (args.length == 0) {
-            new HackTUI(app).start();
+            new TUI(app).start();
         } else {
             int exitCode = new CommandLine(app).execute(args);
             System.exit(exitCode);
