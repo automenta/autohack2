@@ -8,7 +8,7 @@ import dumb.code.Code;
 import dumb.hack.App;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
-import dumb.hack.tui.components.UnifiedPanel;
+import dumb.hack.tui.components.NewUnifiedPanel;
 import dumb.lm.LMClient;
 import dumb.mcr.MCR;
 
@@ -25,7 +25,7 @@ public class TUI {
     private MCR mcr;
 
     // UI Components
-    private UnifiedPanel unifiedPanel;
+    private NewUnifiedPanel newUnifiedPanel;
 
     public TUI(App app) {
         this.app = app;
@@ -63,9 +63,9 @@ public class TUI {
             final Panel mainContent = new Panel(new LinearLayout(Direction.VERTICAL));
 
             // Create and set the main UnifiedPanel
-            this.unifiedPanel = new UnifiedPanel(this.code, this.mcr);
+            this.newUnifiedPanel = new NewUnifiedPanel(this.code, this.mcr, gui);
             // The unified panel should take up most of the space
-            mainContent.addComponent(this.unifiedPanel);
+            mainContent.addComponent(this.newUnifiedPanel);
 
 
             // Create a settings panel for the button
@@ -77,7 +77,7 @@ public class TUI {
                 if (newApiKey != null && !newApiKey.trim().isEmpty()) {
                     // 1. Clean up old resources
                     shutdownServices();
-                    mainContent.removeComponent(this.unifiedPanel);
+                    mainContent.removeComponent(this.newUnifiedPanel);
 
                     // 2. Update config and re-create services
                     app.getLmOptions().setApiKey(newApiKey);
@@ -94,8 +94,8 @@ public class TUI {
                     }
 
                     // 3. Re-create the UI panel with the new services
-                    this.unifiedPanel = new UnifiedPanel(this.code, this.mcr);
-                    mainContent.addComponent(0, this.unifiedPanel);
+                    this.newUnifiedPanel = new NewUnifiedPanel(this.code, this.mcr, gui);
+                    mainContent.addComponent(0, this.newUnifiedPanel);
                 }
             });
             settingsPanel.addComponent(settingsButton);
@@ -131,8 +131,8 @@ public class TUI {
      * Shuts down the services and cleans up resources used by the UI panels.
      */
     private void shutdownServices() {
-        if (this.unifiedPanel != null) {
-            this.unifiedPanel.close();
+        if (this.newUnifiedPanel != null) {
+            this.newUnifiedPanel.close();
         }
     }
 
