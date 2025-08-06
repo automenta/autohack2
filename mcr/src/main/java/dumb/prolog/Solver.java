@@ -2,8 +2,8 @@ package dumb.prolog;
 
 import dumb.mcr.exceptions.ToolExecutionException;
 import dumb.mcr.step.ToolStep;
-import dumb.mcr.tools.Tool;
-import dumb.mcr.tools.ToolProvider;
+import dumb.common.tools.Tool;
+import dumb.common.tools.ToolProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;

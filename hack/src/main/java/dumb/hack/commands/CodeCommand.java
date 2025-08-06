@@ -1,7 +1,7 @@
 package dumb.hack.commands;
 
 import dev.langchain4j.model.chat.ChatModel;
-import dumb.code.*;
+import dumb.tools.*;
 import dumb.hack.App;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
@@ -62,23 +62,23 @@ public class CodeCommand implements Callable<Integer> {
         }
     }
 
-    private record CodeServices(Code code, ReasonCommand reasonCommand) {}
+    private record CodeServices(ToolContext code, ReasonCommand reasonCommand) {}
 
     private CodeServices setup(ChatModel model, boolean interactive) {
         LMClient lmClient = new LMClient(model);
         LMManager lmManager = new LMManager(lmClient);
-        Code code = new Code(backend, null, lmManager);
+        ToolContext code = new ToolContext(backend, null, lmManager);
 
         CommandManager commandManager = code.commandManager;
-        CodebaseManager codebaseManager = code.getCodebaseManager();
+        Workspace workspace = code.getWorkspace();
         MessageHandler messageHandler = code.getMessageHandler();
 
-        CodeToolProvider toolProvider = new CodeToolProvider(code.fileManager, codebaseManager);
+        CodeToolProvider toolProvider = new CodeToolProvider(code.fileManager, workspace);
 
         MCR mcr = new MCR(lmClient);
         Session mcrSession = mcr.createSession(toolProvider);
 
-        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, code.fileManager, interactive);
+        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, workspace, messageHandler, code.fileManager, interactive);
         commandManager.registerCommand("/reason", reasonCommand);
 
         return new CodeServices(code, reasonCommand);

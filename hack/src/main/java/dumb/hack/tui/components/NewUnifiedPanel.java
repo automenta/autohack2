@@ -2,14 +2,14 @@ package dumb.hack.tui.components;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
-import dumb.code.Code;
+import dumb.tools.ToolContext;
 import dumb.mcr.MCR;
 import dumb.mcr.QueryResult;
 import dumb.mcr.Session;
 
 public class NewUnifiedPanel extends Panel {
 
-    private final Code code;
+    private final ToolContext code;
     private final MCR mcr;
     private final Session mcrSession;
     private final MultiWindowTextGUI gui;
@@ -18,7 +18,7 @@ public class NewUnifiedPanel extends Panel {
     private final Panel conversationPanel;
     private final TextBox inputBox;
 
-    public NewUnifiedPanel(Code code, MCR mcr, MultiWindowTextGUI gui) {
+    public NewUnifiedPanel(ToolContext code, MCR mcr, MultiWindowTextGUI gui) {
         super(new LinearLayout(Direction.VERTICAL));
         this.code = code;
         this.mcr = mcr;
@@ -37,7 +37,7 @@ public class NewUnifiedPanel extends Panel {
         this.addComponent(conversationPanel.withBorder(Borders.singleLine("Conversation")));
         this.addComponent(inputPanel);
 
-        setupCodeMessageHandler();
+        setupToolContextMessageHandler();
     }
 
     private void handleInput() {
@@ -51,13 +51,13 @@ public class NewUnifiedPanel extends Panel {
         inputBox.setText("");
 
         if (input.startsWith("/")) {
-            handleCodeCommand(input.substring(1));
+            handleToolContextCommand(input.substring(1));
         } else {
             handleMcrQuery(input);
         }
     }
 
-    private void handleCodeCommand(String command) {
+    private void handleToolContextCommand(String command) {
         code.commandManager.processInput(command);
     }
 
@@ -88,7 +88,7 @@ public class NewUnifiedPanel extends Panel {
                 Panel solutionPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
                 solutionPanel.addComponent(new Label("  - " + solution.toString()));
                 solutionPanel.addComponent(new Button("Run", () -> {
-                    handleCodeCommand(solution.toString());
+                    handleToolContextCommand(solution.toString());
                 }));
                 conversationPanel.addComponent(solutionPanel);
             });
@@ -97,7 +97,7 @@ public class NewUnifiedPanel extends Panel {
         }
     }
 
-    private void setupCodeMessageHandler() {
+    private void setupToolContextMessageHandler() {
         // The message handler will be called from the command manager thread.
         // We need to update the UI on the UI thread.
         // Lanterna is thread-safe, so this should be fine.

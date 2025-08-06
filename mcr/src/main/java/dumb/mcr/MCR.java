@@ -1,7 +1,7 @@
 package dumb.mcr;
 
 import dumb.lm.LMClient;
-import dumb.mcr.tools.ToolProvider;
+import dumb.common.tools.ToolProvider;
 
 public class MCR {
 

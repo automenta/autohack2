@@ -4,7 +4,7 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import dev.langchain4j.model.chat.ChatModel;
-import dumb.code.Code;
+import dumb.tools.ToolContext;
 import dumb.hack.App;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
@@ -21,7 +21,7 @@ public class TUI {
     private final TUIState state;
 
     // Shared resources
-    private Code code;
+    private ToolContext code;
     private MCR mcr;
 
     // UI Components
@@ -115,7 +115,7 @@ public class TUI {
     }
 
     /**
-     * Initializes the core services of the application (MCR, Code).
+     * Initializes the core services of the application (MCR, ToolContext).
      * This method can be called to re-initialize services, for example, after an API key change.
      * @throws MissingApiKeyException if the API key is not configured.
      */
@@ -124,7 +124,7 @@ public class TUI {
         ChatModel model = factory.create();
         LMClient lmClient = new LMClient(model);
         this.mcr = new MCR(lmClient);
-        this.code = new Code(null, null, new dumb.code.LMManager(lmClient));
+        this.code = new ToolContext(null, null, new dumb.tools.LMManager(lmClient));
     }
 
     /**

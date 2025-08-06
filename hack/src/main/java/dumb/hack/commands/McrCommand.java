@@ -4,8 +4,11 @@ import dev.langchain4j.model.chat.ChatModel;
 import dumb.hack.App;
 import dumb.hack.provider.MissingApiKeyException;
 import dumb.hack.provider.ProviderFactory;
+import dumb.hack.tools.CodeToolProvider;
 import dumb.lm.LMClient;
 import dumb.mcr.*;
+import dumb.tools.ToolContext;
+import dumb.tools.Workspace;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -41,15 +44,17 @@ public class McrCommand implements Callable<Integer> {
         }
 
         LMClient lmClient = new LMClient(model);
-        MCR mcr = new MCR(lmClient);
-        Session session = mcr.createSession();
+        ToolContext toolContext = new ToolContext(null, null, new dumb.tools.LMManager(lmClient));
+        Workspace workspace = toolContext.getWorkspace();
+        workspace.loadWorkspace(".");
 
-        // For this example, we'll assert some basic knowledge.
-        // In a real application, this would be more sophisticated.
-        session.assertProlog("is_a(tweety, canary).");
-        session.assertProlog("bird(X) :- is_a(X, canary).");
-        session.assertProlog("has_wings(X) :- bird(X).");
-        session.addRelationship("tweety", "likes", "seeds");
+        MCR mcr = new MCR(lmClient);
+        CodeToolProvider toolProvider = new CodeToolProvider(toolContext.fileManager, workspace);
+        Session session = mcr.createSession(toolProvider);
+
+        for (String file : workspace.getFiles()) {
+            session.assertProlog("file(\"" + file + "\").");
+        }
 
         if (serverMode) {
             new McrServer(session).start();

@@ -2,7 +2,7 @@ package dumb.mcr;
 
 import dumb.mcr.exceptions.PrologParseException;
 import dumb.mcr.exceptions.ToolExecutionException;
-import dumb.mcr.tools.ToolProvider;
+import dumb.common.tools.ToolProvider;
 import dumb.prolog.Parser;
 import dumb.prolog.Solver;
 import org.junit.jupiter.api.Test;

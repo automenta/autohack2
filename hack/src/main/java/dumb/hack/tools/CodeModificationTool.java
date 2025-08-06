@@ -1,12 +1,12 @@
 package dumb.hack.tools;
 
-import dumb.code.CodebaseManager;
-import dumb.code.IFileManager;
-import dumb.mcr.tools.Tool;
+import dumb.tools.Workspace;
+import dumb.tools.IFileManager;
+import dumb.common.tools.Tool;
 
 import java.util.Map;
 
-public record CodeModificationTool(IFileManager fileManager, CodebaseManager codebaseManager) implements Tool {
+public record CodeModificationTool(IFileManager fileManager, Workspace workspace) implements Tool {
 
     @Override
     public String name() {
@@ -28,7 +28,7 @@ public record CodeModificationTool(IFileManager fileManager, CodebaseManager cod
 
         try {
             fileManager.writeFile(filePath, newContent);
-            codebaseManager.trackFile(filePath).join(); // Ensure the change is tracked
+            workspace.trackFile(filePath).join(); // Ensure the change is tracked
             return "Successfully modified file: " + filePath;
         } catch (java.io.IOException e) {
             return "Error modifying file " + filePath + ": " + e.getMessage();

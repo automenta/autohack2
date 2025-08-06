@@ -1,8 +1,8 @@
 package dumb.hack.commands;
 
-import dumb.code.CodebaseManager;
-import dumb.code.MessageHandler;
-import dumb.code.versioning.Backend;
+import dumb.tools.Workspace;
+import dumb.tools.MessageHandler;
+import dumb.tools.versioning.Backend;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
 import org.junit.jupiter.api.Test;
@@ -16,9 +16,9 @@ public class ReasonCommandTest {
     @Test
     public void testExecute() {
         // Arrange
-        CodebaseManager codebaseManager = mock(CodebaseManager.class);
+        Workspace workspace = mock(Workspace.class);
         Backend backend = mock(Backend.class);
-        when(codebaseManager.getVersioningBackend()).thenReturn(backend);
+        when(workspace.getVersioningBackend()).thenReturn(backend);
         when(backend.status()).thenReturn(CompletableFuture.completedFuture("M. newfile.txt"));
 
         Session mcrSession = mock(Session.class);
@@ -29,7 +29,7 @@ public class ReasonCommandTest {
 
         MessageHandler messageHandler = mock(MessageHandler.class);
 
-        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, null, true);
+        ReasonCommand reasonCommand = new ReasonCommand(mcrSession, workspace, messageHandler, null, true);
 
         // Act
         reasonCommand.execute(new String[]{"test"});

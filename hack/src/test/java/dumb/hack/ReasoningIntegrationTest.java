@@ -1,6 +1,6 @@
 package dumb.hack;
 
-import dumb.code.*;
+import dumb.tools.*;
 import dumb.hack.commands.ReasonCommand;
 import dumb.hack.tools.CodeModificationTool;
 import dumb.mcr.ReasoningResult;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 public class ReasoningIntegrationTest {
 
     private IFileManager fileManager;
-    private CodebaseManager codebaseManager;
+    private Workspace workspace;
     private ReasonCommand reasonCommand;
     private Session mcrSession;
 
@@ -30,14 +30,14 @@ public class ReasoningIntegrationTest {
         fileManager = new InMemoryFileManager();
         fileManager.writeFile("test.java", "public class Test {}");
 
-        var code = new Code("file", fileManager, null);
-        codebaseManager = code.getCodebaseManager();
-        codebaseManager.trackFile("test.java").join();
+        var code = new ToolContext("file", fileManager, null);
+        workspace = code.getWorkspace();
+        workspace.trackFile("test.java").join();
 
         mcrSession = Mockito.mock(Session.class);
         MessageHandler messageHandler = Mockito.mock(MessageHandler.class);
 
-        reasonCommand = new ReasonCommand(mcrSession, codebaseManager, messageHandler, fileManager, false);
+        reasonCommand = new ReasonCommand(mcrSession, workspace, messageHandler, fileManager, false);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class ReasoningIntegrationTest {
         var args = new String[]{"Refactor", "the", "Test.java", "file", "to", "add", "a", "comment"};
 
         // Manually call the tool to simulate MCR's internal execution
-        var tool = new CodeModificationTool(fileManager, codebaseManager);
+        var tool = new CodeModificationTool(fileManager, workspace);
         tool.run(Map.of("FilePath", "test.java", "NewContent", newContent));
 
         // Mock the reasoning result

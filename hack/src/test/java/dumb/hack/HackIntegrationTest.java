@@ -1,10 +1,10 @@
 //package dumb.hack;
 //
-//import dumb.code.CodebaseManager;
-//import dumb.code.CommandManager;
-//import dumb.code.Code;
-//import dumb.code.FileManager;
-//import dumb.code.MessageHandler;
+//import dumb.tools.ToolContextbaseManager;
+//import dumb.tools.CommandManager;
+//import dumb.tools.ToolContext;
+//import dumb.tools.FileManager;
+//import dumb.tools.MessageHandler;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
 //
@@ -19,10 +19,10 @@
 //
 //public class HackIntegrationTest {
 //
-//    private Code code;
+//    private ToolContext code;
 //    private CommandManager commandManager;
 //    private MessageHandler messageHandler;
-//    private CodebaseManager codebaseManager;
+//    private ToolContextbaseManager codebaseManager;
 //    private FileManager fileManager;
 //    private Path tempDir;
 //
@@ -38,14 +38,14 @@
 //
 //        // Initialize the application context with mocks
 //        String[] args = {"--backend=file"}; // Use file backend for simplicity
-//        code = new Code(args, null, messageHandler);
+//        code = new ToolContext(args, null, messageHandler);
 //
 //        commandManager = code.commandManager;
-//        codebaseManager = code.getCodebaseManager();
+//        codebaseManager = code.getToolContextbaseManager();
 //        fileManager = code.fileManager;
 //
 //        // Load an empty codebase
-//        codebaseManager.loadCodebase(tempDir.toString()).join();
+//        codebaseManager.loadToolContextbase(tempDir.toString()).join();
 //    }
 //
 //    @Test

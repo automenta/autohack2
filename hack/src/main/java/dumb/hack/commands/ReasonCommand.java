@@ -1,9 +1,9 @@
 package dumb.hack.commands;
 
-import dumb.code.CodebaseManager;
-import dumb.code.IFileManager;
-import dumb.code.MessageHandler;
-import dumb.code.commands.Command;
+import dumb.tools.Workspace;
+import dumb.tools.IFileManager;
+import dumb.tools.MessageHandler;
+import dumb.tools.commands.Command;
 import dumb.hack.util.CodeParser;
 import dumb.mcr.ReasoningResult;
 import dumb.mcr.Session;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public record ReasonCommand(
         Session mcrSession,
-        CodebaseManager codebaseManager,
+        Workspace workspace,
         MessageHandler messageHandler,
         IFileManager fileManager,
         boolean interactive
@@ -76,9 +76,9 @@ public record ReasonCommand(
 
     private void addCodebaseContext() {
         CodeParser codeParser = new CodeParser();
-        java.util.List<String> files = codebaseManager.getFiles();
+        java.util.List<String> files = workspace.getFiles();
         for (String file : files) {
-            String content = codebaseManager.getFileContent(file);
+            String content = workspace.getFileContent(file);
             if (content != null) {
                 java.nio.file.Path filePath = java.nio.file.Paths.get(fileManager.getRootDir(), file);
                 java.util.List<String> facts = codeParser.parse(filePath, content);
@@ -91,7 +91,7 @@ public record ReasonCommand(
         }
 
         try {
-            String status = codebaseManager.getVersioningBackend().status().get();
+            String status = workspace.getVersioningBackend().status().get();
             if (status != null && !status.isBlank()) {
                 mcrSession.assertProlog("git_status(\"" + status + "\").");
             }
